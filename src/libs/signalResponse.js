@@ -1,25 +1,16 @@
 
-function signalResponse(engine){
+function signalResponse(engine,callback){
 
     // 频道
     if(engine.channel){
         engine.channel.onMessageChannelReceive = (account, uid, msg) => {
-            console.log(account);
-            console.log(uid);
-            console.log(msg);
-            return {
-                account:account,
-                uid:uid,
-                msg:msg
+            if(callback){
+                callback(msg);
             }
         }
     }
 
-
-
-    return {
-        onMessageChannelReceive:engine.channel.onMessageChannelReceive
-    }
+    
 }
 
 

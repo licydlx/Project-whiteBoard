@@ -46,7 +46,7 @@ const sketchpad = function () {
 
     canvas.on("mouse:move", function (options) {
         if (moveCount % 2 && !doDrawing) {
-            //减少绘制频率
+            // 减少绘制频率
             return;
         }
         moveCount++;
@@ -70,19 +70,19 @@ const sketchpad = function () {
 
     canvas.on("selection:created", function (e) {
         if (e.target._objects) {
-            //多选删除
+            // 多选删除
             var etCount = e.target._objects.length;
             for (var etindex = 0; etindex < etCount; etindex++) {
                 canvas.remove(e.target._objects[etindex]);
             }
         } else {
-            //单选删除
+            // 单选删除
             canvas.remove(e.target);
         }
-        canvas.discardActiveObject(); //清楚选中框
+        canvas.discardActiveObject();   // 清楚选中框
     });
 
-    //坐标转换
+    // 坐标转换
     var transformMouse = function (mouseX, mouseY) {
         return { x: mouseX / window.zoom, y: mouseY / window.zoom };
     }
@@ -96,7 +96,8 @@ const sketchpad = function () {
                 el = null;
                 break;
             }
-            el = el.parentNode;//返回當前元素的父节点
+            // 返回當前元素的父节点
+            el = el.parentNode;
         }
 
         if (el) {
@@ -105,7 +106,7 @@ const sketchpad = function () {
             canvas.isDrawingMode = false;
 
             if (textbox) {
-                //退出文本编辑状态
+                // 退出文本编辑状态
                 textbox.exitEditing();
                 textbox = null;
             }
