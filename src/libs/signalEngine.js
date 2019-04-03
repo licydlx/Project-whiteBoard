@@ -18,7 +18,7 @@ export default  function (data,callback) {
 
     // 登录
     session = signal.login(GLB.account, GLB.token);
-    session.onLoginSuccess = () => {
+    session.onLoginSuccess = (uid) => {
         console.log('登录成功！');
 
         // 加入频道
@@ -31,7 +31,8 @@ export default  function (data,callback) {
                 session: session,
                 channel: channel
             };
-     
+            
+            console.log(engine);
             if (callback) {
                 callback(engine)
             }

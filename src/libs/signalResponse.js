@@ -5,6 +5,7 @@ function signalResponse(engine,callback){
     if(engine.channel){
         engine.channel.onMessageChannelReceive = (account, uid, msg) => {
             if(callback){
+                msg.account = account;
                 callback(msg);
             }
         }

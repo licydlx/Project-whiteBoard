@@ -1,4 +1,17 @@
 
+class sketchpad {
+
+    constructor() {
+      // ...
+
+    }
+
+    toString() {
+
+    }
+
+}
+
 const sketchpad = function () {
 
     // 实例化画板区
@@ -268,12 +281,12 @@ const sketchpad = function () {
         arrowY = toY + topY;
         path += " M " + arrowX + " " + arrowY;
         path += " L " + toX + " " + toY;
-        arrowX = toX + botX;
+        arrowX = toX + botX;  
         arrowY = toY + botY;
         path += " L " + arrowX + " " + arrowY;
         return path;
     }
-
+ 
 }
 
 export default sketchpad;
