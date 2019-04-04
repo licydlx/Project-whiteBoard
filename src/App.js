@@ -12,7 +12,7 @@ class App extends Component {
         super();
 
         this.state = {
-            isShow: false
+            isShow: true
         }
 
         // 新用户注册，加入频道
@@ -53,46 +53,14 @@ class App extends Component {
                         this[data.method](null, true);
                     }
                     
-                    if (data.type === 'sketchpad' && window.sketchpad) {
-                       console.log(data);
-                       // console.log(window.sketchpad);
-                        
+                    if (data.type === 'sketchpad' && this.sketchpad) {
                         let options = data.pars;
-                        console.log(typeof options);
-                        console.log(options);
 
-                        if(data.method === 'mouseDown'){
-                            let xy = window.sketchpad.__proto__.transformMouse(options.e.offsetX, options.e.offsetY);
-                            window.sketchpad.__proto__.mouseFrom.x = xy.x;
-                            window.sketchpad.__proto__.mouseFrom.y = xy.y;
-                            window.sketchpad.__proto__.doDrawing = true;
+                        if(data.method === 'pathCreated'){
+                            this.sketchpad[data.method](options);
                         }
 
-                        if(data.method === 'mouseMove'){
-                            if (window.sketchpad.__proto__.moveCount % 2 && !window.sketchpad.__proto__.doDrawing) {
-                                // 减少绘制频率
-                                return;
-                            }
-                            window.sketchpad.__proto__.moveCount++;
-                            let xy = window.sketchpad.__proto__.transformMouse(options.e.offsetX, options.e.offsetY);
-                            window.sketchpad.__proto__.mouseTo.x = xy.x;
-                            window.sketchpad.__proto__.mouseTo.y = xy.y;
-                            window.sketchpad.__proto__.drawing();
-                        }
-
-                        if(data.method === 'mouseUp'){
-                            let xy = window.sketchpad.__proto__.transformMouse(options.e.offsetX, options.e.offsetY);
-                            window.sketchpad.__proto__.mouseTo.x = xy.x;
-                            window.sketchpad.__proto__.mouseTo.y = xy.y;
-                    
-                            window.sketchpad.__proto__.drawing();
-                    
-                            window.sketchpad.__proto__.drawingObject = null;
-                            window.sketchpad.__proto__.moveCount = 1;
-                            window.sketchpad.__proto__.doDrawing = false;
-                        }
                     }
-
 
                     if(data.type === 'test'){
                         console.log(data);
@@ -100,6 +68,7 @@ class App extends Component {
                         window.sketchpad['__proto__'][data.method](data.pars);
                         console.log(window.sketchpad)
                     }
+
                 }
                 break;
 
@@ -153,14 +122,30 @@ class App extends Component {
         // 获取课件iframeDom
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
 
-        window.sketchpad = new sketchpadEngine(function (options,method) {
-            //that.broadcastMessage('whiteboard', 'sketchpad', method, options)
 
-            that.broadcastMessage('whiteboard', 'test', method, options);
-        });
-        // this.sketchpad['__proto__']['mouseDown']();
-       // console.log(window.sketchpad);
-        
+        let data = {
+            drawType:'line',
+            mouseFrom:{
+                x:0,
+                y:0
+            },
+            mouseTo:{
+                x:30,
+                y:0   
+            },
+            color:'red',
+            drawWidth:'2'
+        }
+
+        this.sketchpad = new sketchpadEngine(function (options,method) {
+            //that.broadcastMessage('whiteboard', 'sketchpad', method, options)
+            //that.broadcastMessage('whiteboard', 'test', method, options);
+        }.bind(this));
+
+        // setTimeout(function(){
+        //     this.sketchpad.drawing(data)
+        // }.bind(this),1000);
+
     }
 
     componentWillUnmount() {

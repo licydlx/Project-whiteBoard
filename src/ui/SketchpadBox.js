@@ -8,7 +8,7 @@ class SketchpadBox extends React.Component {
     render() {
         let style = {
             display: `${this.props.state ? 'block' : 'none'}`,
-            background:'gray'
+            background:'#b49436'
         };
 
         return <div id="sketchpadBox" className="sketchpadBox" style={style}>

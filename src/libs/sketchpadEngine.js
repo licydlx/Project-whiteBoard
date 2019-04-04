@@ -27,8 +27,8 @@
 //         for (let key in config){
 //             this.__proto__[key] = config[key];
 //         }
-    
- 
+
+
 //         // 实例化画板区
 //         this.__proto__.canvas = new fabric.Canvas("sketchpad", {
 //             isDrawingMode: true,
@@ -77,9 +77,9 @@
 //             let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
 //             this.__proto__.mouseTo.x = xy.x;
 //             this.__proto__.mouseTo.y = xy.y;
-    
+
 //             this.drawing();
-    
+
 //             this.__proto__.drawingObject = null;
 //             this.__proto__.moveCount = 1;
 //             this.__proto__.doDrawing = false;
@@ -108,81 +108,72 @@
 //         // tools.addEventListener('click', this.chooseTools.bind(this), false);
 //     }
 
-    // mouseDown(options) {
-    //     console.log('mouseDown');
-    //     console.log(this);
-    //     //return;
-    //     // let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-    //     // this.mouseFrom.x = xy.x;
-    //     // this.mouseFrom.y = xy.y;
-    //     // this.doDrawing = true;
-    // };
 
-    // mouseMove(options) {
-    //     console.log('mouseMove');
-    //     console.log(this);
-    //     this.drawWidth = 1;
+// mouseMove(options) {
+//     console.log('mouseMove');
+//     console.log(this);
+//     this.drawWidth = 1;
 
-    //     console.log(this.__proto__.drawWidth);
-    //     // if (this.moveCount % 2 && !this.doDrawing) {
-    //     //     // 减少绘制频率
-    //     //     return;
-    //     // }
-    //     // this.moveCount++;
-    //     // let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-    //     // this.mouseTo.x = xy.x;
-    //     // this.mouseTo.y = xy.y;
-    //     // this.drawing();
-    // };
+//     console.log(this.__proto__.drawWidth);
+//     // if (this.moveCount % 2 && !this.doDrawing) {
+//     //     // 减少绘制频率
+//     //     return;
+//     // }
+//     // this.moveCount++;
+//     // let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
+//     // this.mouseTo.x = xy.x;
+//     // this.mouseTo.y = xy.y;
+//     // this.drawing();
+// };
 
-    // mouseUp(options) {
-    //     console.log('mouseUp');
-    //     console.log(this);
-    //     let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-    //     this.mouseTo.x = xy.x;
-    //     this.mouseTo.y = xy.y;
+// mouseUp(options) {
+//     console.log('mouseUp');
+//     console.log(this);
+//     let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
+//     this.mouseTo.x = xy.x;
+//     this.mouseTo.y = xy.y;
 
-    //     this.drawing();
+//     this.drawing();
 
-    //     this.drawingObject = null;
-    //     this.moveCount = 1;
-    //     this.doDrawing = false;
-    // };
+//     this.drawingObject = null;
+//     this.moveCount = 1;
+//     this.doDrawing = false;
+// };
 
-    // chooseTools(event) {
-    //     let el = event.target;
+// chooseTools(event) {
+//     let el = event.target;
 
-    //     while (el.tagName !== 'LI') {
-    //         if (el === tools) {
-    //             el = null;
-    //             break;
-    //         }
-    //         // 返回當前元素的父节点
-    //         el = el.parentNode;
-    //     }
+//     while (el.tagName !== 'LI') {
+//         if (el === tools) {
+//             el = null;
+//             break;
+//         }
+//         // 返回當前元素的父节点
+//         el = el.parentNode;
+//     }
 
-    //     if (el) {
-    //         this._proto_.drawType = el.getAttribute('data-type');
-    //         this.canvas.isDrawingMode = false;
-    //         if (this._proto_.textbox) {
-    //             // 退出文本编辑状态
-    //             this._proto_.textbox.exitEditing();
-    //             this._proto_.textbox = null;
-    //         }
-    //         if (this._proto_.drawType == "pen") {
-    //             this.canvas.isDrawingMode = true;
-    //         } else if (this.drawType == "remove") {
-    //             this.canvas.selection = true;
-    //             this.canvas.skipTargetFind = false;
-    //             this.canvas.selectable = true;
-    //         } else {
-    //             // 画板元素不能被选中
-    //             this.canvas.skipTargetFind = true;
-    //             // 画板不显示选中
-    //             this.canvas.selection = false;
-    //         }
-    //     }
-    // }
+//     if (el) {
+//         this._proto_.drawType = el.getAttribute('data-type');
+//         this.canvas.isDrawingMode = false;
+//         if (this._proto_.textbox) {
+//             // 退出文本编辑状态
+//             this._proto_.textbox.exitEditing();
+//             this._proto_.textbox = null;
+//         }
+//         if (this._proto_.drawType == "pen") {
+//             this.canvas.isDrawingMode = true;
+//         } else if (this.drawType == "remove") {
+//             this.canvas.selection = true;
+//             this.canvas.skipTargetFind = false;
+//             this.canvas.selectable = true;
+//         } else {
+//             // 画板元素不能被选中
+//             this.canvas.skipTargetFind = true;
+//             // 画板不显示选中
+//             this.canvas.selection = false;
+//         }
+//     }
+// }
 
 //     // 坐标转换
 //     transformMouse(mouseX, mouseY) {
@@ -340,31 +331,151 @@
 
 
 class sketchpadEngine {
-
     constructor(callback) {
-        this.callback = callback;
 
-        if(!this.__proto__.name){
-            this.__proto__.name = '李冲';
-         }
+        this.drawConfig = {
+            drawType: 'line',
+            mouseFrom: {},
+            mouseTo: {},
+            color: 'red',
+            drawWidth: '2'
+        }
 
-        let tools = document.getElementById('tools');
-        let test = document.getElementById('test');
-        
-        tools.addEventListener("click", function(){
-            test.innerHTML = this.__proto__.name;
+        let doDrawing = false;
+        let moveCount = 1;
 
-            if(callback){
-                callback(this.__proto__.name,'getName');
+        let canvas = new fabric.Canvas("sketchpad", {
+            isDrawingMode: false
+        });
+
+        this.canvas = canvas;
+
+        //初次设置画板
+        this.setZoom(this.canvas);
+
+        //监听窗体变化
+        window.onresize = function () {
+            this.setZoom(this.canvas);
+        };
+
+        // 画布与触点坐标修正
+        window.zoom = window.zoom ? window.zoom : 1;
+
+        //绑定画板事件
+        canvas.on("mouse:down", function (e) {
+            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
+            this.drawConfig.mouseFrom.x = ve2.x;
+            this.drawConfig.mouseFrom.y = ve2.y;
+
+            console.log(this.drawConfig)
+            doDrawing = true;
+        }.bind(this));
+
+        canvas.on("mouse:move", function (e) {
+            if (moveCount % 2 && !doDrawing) {
+                // 减少绘制频率
+                return;
             }
-        }.bind(this), false);
+            moveCount++;
+            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
+            this.drawConfig.mouseTo.x = ve2.x;
+            this.drawConfig.mouseTo.y = ve2.y;
+
+            //this.drawing(this.drawConfig);
+        }.bind(this));
+
+        canvas.on("path:created", function (e) {
+            let drawPaths = e.path.path.toString().split(',').join(' ');
+            let drawObj = {
+                path: drawPaths,
+                pathConfig: {
+                    fill: e.path.fill,
+                    stroke: e.path.stroke,
+                    strokeWidth: e.path.strokeWidth,
+                    strokeDashArray: e.path.strokeDashArray,
+                    strokeLineCap: e.path.strokeLineCap,
+                    strokeLineJoin: e.path.strokeLineJoin,
+                    strokeMiterLimit: e.path.strokeMiterLimit
+                }
+            }
+            if (callback) callback(JSON.stringify(drawObj), 'pathCreated');
+        }.bind(this));
+
+        canvas.on("mouse:up", function (e) {
+            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
+            this.drawConfig.mouseTo.x = ve2.x;
+            this.drawConfig.mouseTo.y = ve2.y;
+
+            this.drawing(this.drawConfig);
+
+            doDrawing = false;
+            moveCount = 1;
+            doDrawing = false;
+        }.bind(this));
 
     }
 
-    getName(name){
-        console.log(this);
-        let test = document.getElementById('test');
-        test.innerHTML = name;
+    //设置缩放
+    setZoom(canvas) {
+        let config = {
+            height: 1080, //默认画板高、宽
+            width: 1920,
+            canvasParentId: "sketchpadBox"
+        };
+        let canvasDiv = document.getElementById(config.canvasParentId);
+        console.log(canvasDiv);
+
+        let zoom = 1;
+        let eleHeight = canvasDiv.height(),
+            eleWidth = canvasDiv.width(),
+            cHeight = canvas.height,
+            cWidth = canvas.width;
+        let height = eleHeight > cHeight ? eleHeight : cHeight;
+        let width = eleWidth > cWidth ? eleWidth : cWidth;
+        if (width > height) {
+            //横版
+            width = eleWidth;
+            height = eleHeight;
+            zoom = width / config.width;
+        } else {
+            //竖版
+            height = height * eleHeight / configheight * 0.8;
+            zoom = height / config.height;
+        }
+        canvas.setZoom(zoom);
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+
+        window.zoom = zoom;
+        canvas.renderAll();
+    }
+
+    // 坐标转换
+    transformMouse(mouseX, mouseY) {
+        return { x: mouseX / window.zoom, y: mouseY / window.zoom };
+    }
+
+    // 自由绘制
+    pathCreated(data) {
+        let path = new fabric.Path(data.path, data.pathConfig);
+        this.canvas.add(path);
+    }
+
+    // 绘制
+    drawing(pars) {
+        let curDrawing = null;
+        switch (pars.drawType) {
+            case "line":
+                console.log('直线');
+                // 直线
+                curDrawing = new fabric.Line([pars.mouseFrom.x, pars.mouseFrom.y, pars.mouseTo.x, pars.mouseTo.y], {
+                    stroke: pars.color,
+                    strokeWidth: pars.drawWidth
+                });
+                break;
+        }
+        console.log(this.canvas);
+        this.canvas.add(curDrawing);
     }
 }
 
