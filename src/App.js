@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import fabric from 'fabric';
-import sketchpadEngine from './libs/sketchpadEngine';
-
 import SketchpadBox from './ui/SketchpadBox';
+// import ToolBox from './ui/ToolBox';
+
+// import sketchpadEngine from './libs/sketchpadEngine';
+//import sketchpad from './libs/sketchpad';
+import sketchpadEngine from './libs/sketchpadEngine';
 
 import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
@@ -12,9 +15,52 @@ class App extends Component {
         super();
 
         this.state = {
-            isShow: true
+            isShow: true,
+            sub: 0
         }
 
+        this.tools = [
+            {
+                'data-type': 'pen',
+                'className': 'icon-pen-select',
+                'data-default': 'icon-pen-black',
+                'state': false
+            },
+            {
+                'data-type': 'arrow',
+                'className': 'icon-arrow-black',
+                'data-default': 'icon-arrow-black',
+                'state': false
+            },
+            {
+                'data-type': 'line',
+                'className': 'icon-line-black',
+                'data-default': 'icon-line-black',
+                'state': false
+            },
+            {
+                'data-type': 'ellipse',
+                'className': 'icon-ellipse-black',
+                'data-default': 'icon-ellipse-black',
+                'state': false
+            }, {
+                'data-type': 'rectangle',
+                'className': 'icon-rectangle-black',
+                'data-default': 'icon-rectangle-black',
+                'state': false
+            },
+            {
+                'data-type': 'text',
+                'className': 'icon-text-black',
+                'data-default': 'icon-text-black',
+                'state': false
+            }, {
+                'data-type': 'remove',
+                'className': 'icon-remove-black',
+                'data-default': 'icon-remove-black',
+                'state': false
+            }
+        ]
         // 新用户注册，加入频道
         let account = Math.floor(Math.random() * 100);
 
@@ -33,10 +79,8 @@ class App extends Component {
 
     // 白板监听message
     monitorParentMessage(e) {
-        console.log('白板收到message:');
         if (window === window.parent) return;
         if (typeof e.data !== 'string') return;
-        console.log('白板执行message分发！');
         let data = JSON.parse(e.data);
         this.distributeInformation(data);
     }
@@ -52,26 +96,34 @@ class App extends Component {
                     if (data.type === 'sketchpadState') {
                         this[data.method](null, true);
                     }
-                    
+
                     if (data.type === 'sketchpad' && this.sketchpad) {
                         let options = data.pars;
 
-                        if(data.method === 'pathCreated'){
+                        // 自由绘制
+                        if (data.method === 'pathCreated') {
                             this.sketchpad[data.method](options);
                         }
 
-                    }
+                        if (data.method === 'drawing') {
+                            if (data.event === 'mouseDown') {
+                                this.sketchpad.doDrawing = true;
+                            }
 
-                    if(data.type === 'test'){
-                        console.log(data);
-                        console.log(window.sketchpad)
-                        window.sketchpad['__proto__'][data.method](data.pars);
-                        console.log(window.sketchpad)
-                    }
+                            if (data.event === 'mouseUp') {
+                                this.sketchpad.drawingObject = null;
+                                this.sketchpad.doDrawing = false;
+                                this.sketchpad.moveCount = 1;
+                                this.sketchpad.doDrawing = false;
+                            }
 
+                            if (options) {
+                                this.sketchpad[data.method](options);
+                            }
+                        }
+                    }
                 }
                 break;
-
             // 课件
             case 'courseware':
                 // 白板向子级窗口传递message
@@ -84,7 +136,6 @@ class App extends Component {
     showOrHide(e, bcm) {
         if (e) e.preventDefault();
         this.state.isShow ? this.setState({ isShow: false }) : this.setState({ isShow: true })
-
         // 
         if (!bcm) this.broadcastMessage('whiteboard', 'sketchpadState', 'showOrHide', null);
     }
@@ -103,49 +154,29 @@ class App extends Component {
     }
 
     // 广播message
-    broadcastMessage(belong, type, method, pars) {
+    broadcastMessage(belong, type, method, pars, event) {
         let data = {
             belong: belong,
             type: type,
             method: method,
-            pars: pars
+            pars: pars,
+            event: event
         }
         this.engine.channel.messageChannelSend(data);
     }
 
     componentDidMount() {
         let that = this;
-
         // 监听父级message
         window.addEventListener("message", this.monitorParentMessage.bind(this), false);
-
         // 获取课件iframeDom
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
 
+        this.sketchpad = new sketchpadEngine(function (method, options, event) {
+            that.broadcastMessage('whiteboard', 'sketchpad', method, options, event)
+        });
 
-        let data = {
-            drawType:'line',
-            mouseFrom:{
-                x:0,
-                y:0
-            },
-            mouseTo:{
-                x:30,
-                y:0   
-            },
-            color:'red',
-            drawWidth:'2'
-        }
-
-        this.sketchpad = new sketchpadEngine(function (options,method) {
-            //that.broadcastMessage('whiteboard', 'sketchpad', method, options)
-            //that.broadcastMessage('whiteboard', 'test', method, options);
-        }.bind(this));
-
-        // setTimeout(function(){
-        //     this.sketchpad.drawing(data)
-        // }.bind(this),1000);
-
+        console.log(this.sketchpad);
     }
 
     componentWillUnmount() {
@@ -153,15 +184,39 @@ class App extends Component {
         window.removeEventListener("message", this.monitorParentMessage.bind(this));
     }
 
-    render() {
-        return (<div>
+    handleClick(sub, e) {
+        e.preventDefault();
 
+        let newTools = this.tools.map(function (value, index) {
+            if (sub === index) {
+                value.state = true;
+            } else {
+                value.state = false;
+            }
+        })
+
+        this.setState({ tools: newTools });
+    }
+
+    render() {
+
+        let sub = this.state.sub;
+        this.tools[sub]['state'] = true;
+
+        console.log(this.tools);
+        
+        const items = this.tools.map((value, index) =>
+            <li data-type={value['data-type']} key={index} className={value['state'] ? 'active' : ''} onClick={this.handleClick.bind(this, index)}>
+                <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i>
+            </li>
+        );
+
+        return (<div>
             <div id="coursewareBox">
                 <iframe id="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" width="960px" height="540px" className={"width: 100%; height: 100%; border: none; padding: 0px; margin: 0px;"} src="https://www.kunqu.tech/page1/">
                     <p>Your browser does not support iframes.</p>
                 </iframe>
             </div>
-
             <div>
                 <button onClick={this.jumpPage.bind(this, 1)}>上一页</button>
                 <button onClick={this.jumpPage.bind(this, 2)}>下一页</button>
@@ -174,39 +229,8 @@ class App extends Component {
             </div>
 
             <div id="sketchpadTools" className="sketchpadTools">
-                <ul id="tools" className="tools">
-                    <li id="toolsPencil" data-type="pen" className="active">
-                        <i className="icon-tools icon-pen-select" data-default='icon-tools icon-pen-black'></i>
-                    </li>
-                    <li data-type="arrow">
-                        <i className="icon-tools icon-arrow-black" data-default='icon-tools icon-arrow-black'></i>
-                    </li>
-                    <li data-type="line">
-                        <i className="icon-tools icon-line-black" data-default='icon-tools icon-line-black'></i>
-                    </li>
-                    <li data-type="dottedline">
-                        <i className="icon-tools icon-dottedline-black" data-default='icon-tools icon-dottedline-black'></i>
-                    </li>
-                    <li data-type="circle">
-                        <i className="icon-tools icon-circle-black" data-default='icon-tools icon-circle-black'></i>
-                    </li>
-                    <li data-type="ellipse">
-                        <i className="icon-tools icon-ellipse-black" data-default='icon-tools icon-ellipse-black'></i>
-                    </li>
-                    <li data-type="rectangle">
-                        <i className="icon-tools icon-rectangle-black" data-default='icon-tools icon-rectangle-black'></i>
-                    </li>
-                    <li data-type="text">
-                        <i className="icon-tools icon-text-black" data-default='icon-tools icon-text-black'></i>
-                    </li>
-                    <li data-type="remove">
-                        <i className="icon-tools icon-remove-black" data-default='icon-tools icon-remove-black'></i>
-                    </li>
-                </ul>
+                <ul id="tools" className="tools">{items}</ul>
             </div>
-
-            <div id="test"></div>
-
         </div>
         );
     }

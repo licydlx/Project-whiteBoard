@@ -1,16 +1,3 @@
-class sketchpad {
-
-    constructor() {
-      // ...
-
-    }
-
-    toString() {
-
-    }
-
-}
-
 const sketchpad = function () {
 
     // 实例化画板区
@@ -256,6 +243,9 @@ const sketchpad = function () {
 
         if (canvasObject) {
             canvas.add(canvasObject);
+
+            console.log(canvas);
+
             drawingObject = canvasObject;
         }
     }

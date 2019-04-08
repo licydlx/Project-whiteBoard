@@ -1,20 +1,14 @@
 
-function signalResponse(engine,callback){
-
+function signalResponse(engine, callback) {
     // 频道
-    if(engine.channel){
+    if (engine.channel) {
         engine.channel.onMessageChannelReceive = (account, uid, msg) => {
-            if(callback){
+            if (callback) {
                 msg.account = account;
                 callback(msg);
             }
         }
     }
-
-    
 }
-
-
-
 
 export default signalResponse
