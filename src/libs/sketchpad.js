@@ -74,6 +74,7 @@ const sketchpad = function () {
             for (var etindex = 0; etindex < etCount; etindex++) {
                 canvas.remove(e.target._objects[etindex]);
             }
+            
         } else {
             // 单选删除
             canvas.remove(e.target);
@@ -121,7 +122,6 @@ const sketchpad = function () {
                 // 画板不显示选中
                 canvas.selection = false;
             }
-
         }
     }
 

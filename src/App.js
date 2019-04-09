@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import fabric from 'fabric';
+import GLB from './configs/GLB';
+
 import SketchpadBox from './ui/SketchpadBox';
 // import ToolBox from './ui/ToolBox';
 
@@ -13,12 +15,17 @@ import signalResponse from './libs/signalResponse';
 class App extends Component {
     constructor() {
         super();
-
         this.state = {
             isShow: true,
-            sub: 0
+            sub: 0,
+            account: '',
+            channel: '',
+            showBrush:false,
+            showCourseware:{
+                value:true,
+                link:''
+            }
         }
-
         this.tools = [
             {
                 'data-type': 'pen',
@@ -61,20 +68,42 @@ class App extends Component {
                 'state': false
             }
         ]
-        // 新用户注册，加入频道
-        let account = Math.floor(Math.random() * 100);
 
+        let account = Math.floor(Math.random() * 100);
         let data = {
             account: account
         }
-
         signalEngine(data, function (engine) {
             this.engine = engine;
 
+            this.setState({
+                account: GLB.account,
+                channel: GLB.channel
+            })
             // 接入声网信令sdk对应的回调 
             signalResponse(this.engine, this.distributeInformation.bind(this));
         }.bind(this));
+    }
 
+    // 新用户注册，加入频道
+    loginChannel(data) {
+        let config = {
+            role: data.role,
+            account: data.uid,
+            channel: data.channel,
+            canDraw: data.canDraw
+        }
+        signalEngine(config, function (engine) {
+            this.engine = engine;
+
+            this.setState({
+                account: GLB.account,
+                channel: GLB.channel
+            })
+            
+            // 接入声网信令sdk对应的回调 
+            signalResponse(this.engine, this.distributeInformation.bind(this));
+        }.bind(this));
     }
 
     // 白板监听message
@@ -87,48 +116,85 @@ class App extends Component {
 
     // 白板分发message
     distributeInformation(data) {
-        switch (data.belong) {
-            // 白板
-            case 'whiteboard':
-                // 过滤向自己广播的消息
-                if (data.account && data.account !== this.engine.session.account) {
-                    // 画板通信操作
-                    if (data.type === 'sketchpadState') {
-                        this[data.method](null, true);
-                    }
+        if (data.uid && data.channel) {
+            // 请求用户及房间信息
+            console.log('请求用户及房间信息');
+            console.log(data);
+            this.loginChannel(data);
+        }
+        if (data.sigType) {
+            switch (data.sigType) {
+                /***白板操作****/
+                case 'showBrush':
+                    console.log('白板操作');
+                    console.log(data);
 
-                    if (data.type === 'sketchpad' && this.sketchpad) {
-                        let options = data.pars;
+                    break;
+                /****展示课件*****/
+                case 'showCourseware':
+                    console.log('展示课件');
+                    console.log(data);
+                    break;
+            }
+        }6
 
-                        // 自由绘制
-                        if (data.method === 'pathCreated') {
-                            this.sketchpad[data.method](options);
+        if (data.belong) {
+            switch (data.belong) {
+                // 白板
+                case 'whiteboard':
+                    // 过滤向自己广播的消息
+                    if (data.account && data.account !== this.engine.session.account) {
+                        // 画板通信操作
+                        if (data.type === 'sketchpadState') this[data.method](null, true);
+                        // 画笔切换
+                        if (data.type === 'sketchpadModal') {
+                            let sub = parseInt(data.pars);
+                            this[data.method](sub);
                         }
 
-                        if (data.method === 'drawing') {
-                            if (data.event === 'mouseDown') {
-                                this.sketchpad.doDrawing = true;
+                        // 画板绘画操作
+                        if (data.type === 'sketchpad' && this.sketchpad) {
+                            let options = data.pars;
+                            // 自由绘制
+                            if (data.method === 'pathCreated') this.sketchpad[data.method](options);
+
+                            if (data.method === 'removeBlock') {
+                                let unRemovedSub = JSON.parse(options);
+                                let total = this.sketchpad.canvas._objects;
+                                this.sketchpad.canvas._objects = [];
+                                if (unRemovedSub.length == 0) {
+                                    this.sketchpad.canvas.add();
+                                }
+                                for (let x = 0; x < unRemovedSub.length; x++) {
+                                    this.sketchpad.canvas.add(total[parseInt(unRemovedSub[x])]);
+                                }
                             }
 
-                            if (data.event === 'mouseUp') {
-                                this.sketchpad.drawingObject = null;
-                                this.sketchpad.doDrawing = false;
-                                this.sketchpad.moveCount = 1;
-                                this.sketchpad.doDrawing = false;
-                            }
+                            if (data.method === 'drawing') {
+                                if (data.event === 'mouseDown') {
+                                    this.sketchpad.doDrawing = true;
+                                }
 
-                            if (options) {
-                                this.sketchpad[data.method](options);
+                                if (data.event === 'mouseUp') {
+                                    this.sketchpad.drawingObject = null;
+                                    this.sketchpad.doDrawing = false;
+                                    this.sketchpad.moveCount = 1;
+                                    this.sketchpad.doDrawing = false;
+                                }
+
+                                if (options) {
+                                    this.sketchpad[data.method](options);
+                                }
                             }
                         }
                     }
-                }
-                break;
-            // 课件
-            case 'courseware':
-                // 白板向子级窗口传递message
-                this.coursewareIframe.postMessage(JSON.stringify(data), '*');
-                break;
+                    break;
+                // 课件
+                case 'courseware':
+                    // 白板向子级窗口传递message
+                    this.coursewareIframe.postMessage(JSON.stringify(data), '*');
+                    break;
+            }
         }
     }
 
@@ -165,51 +231,90 @@ class App extends Component {
         this.engine.channel.messageChannelSend(data);
     }
 
+    // 组件已经被渲染到页面中后触发：此时页面中有了真正的DOM的元素，可以进行DOM相关的操作
     componentDidMount() {
         let that = this;
         // 监听父级message
         window.addEventListener("message", this.monitorParentMessage.bind(this), false);
         // 获取课件iframeDom
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
-
+        // 画板实例化
         this.sketchpad = new sketchpadEngine(function (method, options, event) {
             that.broadcastMessage('whiteboard', 'sketchpad', method, options, event)
         });
 
-        console.log(this.sketchpad);
+        // 申请登录及加入频道
+        if (window !== window.parent) {
+            window.parent.postMessage('readyForChannel', '*');
+        }
     }
 
     componentWillUnmount() {
         // 移除监听
         window.removeEventListener("message", this.monitorParentMessage.bind(this));
+        
+        // 推出频道 
+        this.engine.session.logout();
     }
 
     handleClick(sub, e) {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
+        if (this.sketchpad.textbox) {
+            // 退出文本编辑状态
+            this.sketchpad.textbox.exitEditing();
+            this.sketchpad.textbox = null;
+        }
 
         let newTools = this.tools.map(function (value, index) {
             if (sub === index) {
                 value.state = true;
+                let type = value['data-type'];
+                this.sketchpad.drawType = type;
+                this.sketchpad.canvas.isDrawingMode = false;
+
+                if (type == 'remove') {
+                    this.sketchpad.canvas.selection = true;
+                    this.sketchpad.canvas.skipTargetFind = false;
+                    this.sketchpad.canvas.selectable = true;
+                } else if (type == 'pen') {
+                    this.sketchpad.canvas.isDrawingMode = true;
+                } else {
+                    // 画板元素不能被选中
+                    this.sketchpad.canvas.skipTargetFind = true;
+                    // 画板不显示选中
+                    this.sketchpad.canvas.selection = false;
+                }
             } else {
                 value.state = false;
             }
-        })
+        }.bind(this));
 
         this.setState({ tools: newTools });
+
+        if (e) this.broadcastMessage('whiteboard', 'sketchpadModal', 'handleClick', sub)
     }
 
     render() {
-
         let sub = this.state.sub;
         this.tools[sub]['state'] = true;
-
-        console.log(this.tools);
-        
         const items = this.tools.map((value, index) =>
             <li data-type={value['data-type']} key={index} className={value['state'] ? 'active' : ''} onClick={this.handleClick.bind(this, index)}>
                 <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i>
             </li>
         );
+
+        let c1 = {
+            position: 'absolute', bottom: '20px', left: '20px','zIndex':'3'
+        }
+
+        let c2 = {
+            position: 'absolute', bottom: '50px', left: '20px','zIndex':'3'
+        }
+
+        let c3 = {
+            position: 'absolute', top: '30px', left: '20px','zIndex':'3'
+        }
 
         return (<div>
             <div id="coursewareBox">
@@ -217,19 +322,23 @@ class App extends Component {
                     <p>Your browser does not support iframes.</p>
                 </iframe>
             </div>
-            <div>
+            <SketchpadBox state={this.state.isShow} />
+            <div id="sketchpadTools" className="sketchpadTools">
+                <ul id="tools" className="tools">{items}</ul>
+            </div>
+
+            <div style={c1}>
                 <button onClick={this.jumpPage.bind(this, 1)}>上一页</button>
                 <button onClick={this.jumpPage.bind(this, 2)}>下一页</button>
             </div>
-
-            <SketchpadBox state={this.state.isShow} />
-
-            <div>
+            <div style={c2}>
                 <button onClick={this.showOrHide.bind(this)}>显示或隐藏</button>
             </div>
-
-            <div id="sketchpadTools" className="sketchpadTools">
-                <ul id="tools" className="tools">{items}</ul>
+            <div style={c3}>
+                <label>账号：</label>
+                <p>{this.state.account}</p>
+                <label>频道：</label>
+                <p>{this.state.channel}</p>
             </div>
         </div>
         );

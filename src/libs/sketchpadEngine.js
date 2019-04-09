@@ -5,7 +5,7 @@ class sketchpadEngine {
         this.mouseFrom = {};
         this.mouseTo = {};
         // 绘制类型
-        this.drawType = 'ellipse';
+        this.drawType = '';
         // 笔触宽度
         this.drawWidth = 2;
         // 画笔颜色
@@ -20,7 +20,7 @@ class sketchpadEngine {
         this.textbox = null;
 
         this.canvas = new fabric.Canvas("sketchpad", {
-            isDrawingMode: false,
+            isDrawingMode: true,
             skipTargetFind: true,
             selectable: false,
             selection: false
@@ -38,8 +38,7 @@ class sketchpadEngine {
             this.mouseFrom.y = ve2.y;
 
             this.doDrawing = true;
-            //this.drawing();
-
+            // this.drawing();
             // let data = this.dataFiltering();
             // if (callback) callback('drawing', JSON.stringify(data), 'mouseDown');
         }.bind(this));
@@ -78,7 +77,7 @@ class sketchpadEngine {
         }.bind(this));
 
         this.canvas.on("mouse:up", function (e) {
-            console.log('mouse:up');
+            //console.log('mouse:up');
             let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
             this.mouseTo.x = ve2.x;
             this.mouseTo.y = ve2.y;
@@ -93,17 +92,63 @@ class sketchpadEngine {
         }.bind(this));
 
         this.canvas.on("object:added", function (e) {
-            console.log('object:added');
+            //console.log('object:added');
             // console.log(e);
         }.bind(this));
 
         this.canvas.on("object:modified", function (e) {
-            console.log('object:modified');
-            let text = e.target.text;
-            let data = this.dataFiltering();
-            data.text = text;
-            if (callback) callback('drawing', JSON.stringify(data));
+            //console.log('object:modified');
+            if (this.drawType === 'text') {
+                let text = e.target.text;
+                let data = this.dataFiltering();
+                data.text = text;
+                if (callback) callback('drawing', JSON.stringify(data));
+            }
+
         }.bind(this));
+
+        this.canvas.on("selection:created", function (e) {
+            let newTotal = [];
+            if (e.target._objects) {
+                for (let x = 0; x < this.canvas._objects.length; x++) {
+                    let found = e.target._objects.find(function (element) {
+                        return element == this.canvas._objects[x];
+                    }.bind(this));
+                    if (!found) newTotal.push(x)
+                }
+            } else {
+                for (let x = 0; x < this.canvas._objects.length; x++) {
+                    if(this.canvas._objects[x] !== e.target){
+                        newTotal.push(x)
+                    }
+                }
+            }
+            this.removeBlock(e);
+            if (callback) callback('removeBlock', JSON.stringify(newTotal));
+        }.bind(this));
+
+        // this.canvas.on("selection:cleared", function (e) {
+        //     console.log('cleared');
+        // }.bind(this));
+
+        // this.canvas.on("object:removed", function (e) {
+        //     console.log('object:removed');
+        // }.bind(this));
+    }
+
+    removeBlock(e) {
+        if (e.target._objects) {
+            //多选删除
+            let etCount = e.target._objects.length;
+            for (let etindex = 0; etindex < etCount; etindex++) {
+                this.canvas.remove(e.target._objects[etindex]);
+            }
+        } else {
+            //单选删除
+            this.canvas.remove(e.target);
+        }
+        //清楚选中框
+        this.canvas.discardActiveObject();
     }
 
     // 传输数据过滤
@@ -159,6 +204,7 @@ class sketchpadEngine {
                     fill: "rgba(255,255,255,0)",
                     strokeWidth: pars.drawWidth
                 });
+                break;
             case "text":
                 // 文本
                 let text = "";
@@ -245,6 +291,7 @@ class sketchpadEngine {
             case "remove":
                 break;
         }
+
 
         if (curDrawing) {
             this.canvas.add(curDrawing);

@@ -7,9 +7,11 @@ export default function (data, callback) {
     }
 
     if (data) {
-        if (data.account) GLB.account = data.account;
+        if (data.role) GLB.role = data.role;
+        if (data.account) GLB.account = data.account + '123';
         if (data.token) GLB.token = data.token;
-        if (data.roomID) GLB.roomID = data.roomID;
+        if (data.channel) GLB.channel = data.channel;
+        if (data.canDraw) GLB.canDraw = data.canDraw;
     }
 
     const signal = Signal(GLB.appId);
@@ -19,8 +21,9 @@ export default function (data, callback) {
     session = signal.login(GLB.account, GLB.token);
     session.onLoginSuccess = (uid) => {
         // 加入频道
-        channel = session.channelJoin(GLB.roomID);
+        channel = session.channelJoin(GLB.channel);
         channel.onChannelJoined = () => {
+            console.log('加入频道成功');
             let engine = {
                 signal: signal,
                 session: session,
