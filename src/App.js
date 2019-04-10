@@ -12,19 +12,21 @@ import sketchpadEngine from './libs/sketchpadEngine';
 import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
 
+import messageEngine from './libs/messageEngine';
+
+
 class App extends Component {
     constructor() {
         super();
         this.state = {
-            isShow: true,
             sub: 0,
             account: '',
             channel: '',
-            showBrush:false,
-            showCourseware:{
-                value:true,
-                link:''
-            }
+
+            isShow: true,
+            showBrush: true,
+            showCourseware: true,
+            coursewareLink: ''
         }
         this.tools = [
             {
@@ -71,18 +73,12 @@ class App extends Component {
 
         let account = Math.floor(Math.random() * 100);
         let data = {
-            account: account
+            role: 0,
+            uid: account,
+            channel: 1,
+            canDraw: true
         }
-        signalEngine(data, function (engine) {
-            this.engine = engine;
-
-            this.setState({
-                account: GLB.account,
-                channel: GLB.channel
-            })
-            // 接入声网信令sdk对应的回调 
-            signalResponse(this.engine, this.distributeInformation.bind(this));
-        }.bind(this));
+        this.loginChannel(data);
     }
 
     // 新用户注册，加入频道
@@ -93,169 +89,226 @@ class App extends Component {
             channel: data.channel,
             canDraw: data.canDraw
         }
+
         signalEngine(config, function (engine) {
             this.engine = engine;
 
             this.setState({
                 account: GLB.account,
-                channel: GLB.channel
+                channel: GLB.channel,
+                showBrush: GLB.canDraw
             })
-            
+
+            GLB.logined = true;
             // 接入声网信令sdk对应的回调 
             signalResponse(this.engine, this.distributeInformation.bind(this));
         }.bind(this));
     }
 
-    // 白板监听message
-    monitorParentMessage(e) {
-        if (window === window.parent) return;
-        if (typeof e.data !== 'string') return;
-        let data = JSON.parse(e.data);
-        this.distributeInformation(data);
-    }
-
-    // 白板分发message
-    distributeInformation(data) {
-        if (data.uid && data.channel) {
-            // 请求用户及房间信息
-            console.log('请求用户及房间信息');
+    componentDidMount() {
+        this.message = new messageEngine(function (data) {
             console.log(data);
-            this.loginChannel(data);
-        }
-        if (data.sigType) {
-            switch (data.sigType) {
-                /***白板操作****/
-                case 'showBrush':
-                    console.log('白板操作');
-                    console.log(data);
+        }.bind(this));
 
-                    break;
-                /****展示课件*****/
-                case 'showCourseware':
-                    console.log('展示课件');
-                    console.log(data);
-                    break;
-            }
-        }6
+        this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
 
-        if (data.belong) {
-            switch (data.belong) {
-                // 白板
-                case 'whiteboard':
-                    // 过滤向自己广播的消息
-                    if (data.account && data.account !== this.engine.session.account) {
-                        // 画板通信操作
-                        if (data.type === 'sketchpadState') this[data.method](null, true);
-                        // 画笔切换
-                        if (data.type === 'sketchpadModal') {
-                            let sub = parseInt(data.pars);
-                            this[data.method](sub);
-                        }
-
-                        // 画板绘画操作
-                        if (data.type === 'sketchpad' && this.sketchpad) {
-                            let options = data.pars;
-                            // 自由绘制
-                            if (data.method === 'pathCreated') this.sketchpad[data.method](options);
-
-                            if (data.method === 'removeBlock') {
-                                let unRemovedSub = JSON.parse(options);
-                                let total = this.sketchpad.canvas._objects;
-                                this.sketchpad.canvas._objects = [];
-                                if (unRemovedSub.length == 0) {
-                                    this.sketchpad.canvas.add();
-                                }
-                                for (let x = 0; x < unRemovedSub.length; x++) {
-                                    this.sketchpad.canvas.add(total[parseInt(unRemovedSub[x])]);
-                                }
-                            }
-
-                            if (data.method === 'drawing') {
-                                if (data.event === 'mouseDown') {
-                                    this.sketchpad.doDrawing = true;
-                                }
-
-                                if (data.event === 'mouseUp') {
-                                    this.sketchpad.drawingObject = null;
-                                    this.sketchpad.doDrawing = false;
-                                    this.sketchpad.moveCount = 1;
-                                    this.sketchpad.doDrawing = false;
-                                }
-
-                                if (options) {
-                                    this.sketchpad[data.method](options);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                // 课件
-                case 'courseware':
-                    // 白板向子级窗口传递message
-                    this.coursewareIframe.postMessage(JSON.stringify(data), '*');
-                    break;
-            }
-        }
+        console.log(this.engine);
+        setTimeout(function(){
+            this.engine.channel.messageChannelSend('haha');
+        }.bind(this),2000)
+        
     }
-
-    // 显示或者隐藏
-    showOrHide(e, bcm) {
-        if (e) e.preventDefault();
-        this.state.isShow ? this.setState({ isShow: false }) : this.setState({ isShow: true })
-        // 
-        if (!bcm) this.broadcastMessage('whiteboard', 'sketchpadState', 'showOrHide', null);
+    
+    distributeInformation(data) {
+        console.log(data);
+        if(data){
+            this.jumpPage(2) 
+        }
     }
 
     // 白板跳到某页
     jumpPage(pageNum, e) {
-        e.preventDefault();
+        if(e) e.preventDefault();
         let data = {
             belong: 'courseware',
             type: 'agoraAdyJumpPage',
             pageNum: pageNum
         }
 
-        this.coursewareIframe.postMessage(JSON.stringify(data), '*');
-        this.engine.channel.messageChannelSend(data);
+        this.message.sendMessage('child',data,this.coursewareIframe);
+        //this.engine.channel.messageChannelSend(data);
     }
 
-    // 广播message
-    broadcastMessage(belong, type, method, pars, event) {
-        let data = {
-            belong: belong,
-            type: type,
-            method: method,
-            pars: pars,
-            event: event
-        }
-        this.engine.channel.messageChannelSend(data);
-    }
+    // // 白板监听message
+    // monitorParentMessage(e) {
+    //     if (window === window.parent) return;
+    //     if (typeof e.data !== 'string') return;
+    //     this.distributeInformation(e.data);
+    // }
 
-    // 组件已经被渲染到页面中后触发：此时页面中有了真正的DOM的元素，可以进行DOM相关的操作
-    componentDidMount() {
-        let that = this;
-        // 监听父级message
-        window.addEventListener("message", this.monitorParentMessage.bind(this), false);
-        // 获取课件iframeDom
-        this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
-        // 画板实例化
-        this.sketchpad = new sketchpadEngine(function (method, options, event) {
-            that.broadcastMessage('whiteboard', 'sketchpad', method, options, event)
-        });
+    // // 白板分发message
+    // distributeInformation(data) {
+    //     if (typeof data == 'string') data = JSON.parse(data);
 
-        // 申请登录及加入频道
-        if (window !== window.parent) {
-            window.parent.postMessage('readyForChannel', '*');
-        }
-    }
+    //     console.log('白板分发message');
+    //     console.log(typeof data);
+    //     console.log(data);
+    //     // 请求用户及房间信息
+    //     if (!GLB.logined) this.loginChannel(data);
+    //     console.log(data.sigType);
+    //     console.log(typeof data.sigType);
+    //     if (data.sigType) {
+    //         console.log('data.sigType');
+    //         switch (data.sigType) {
+    //             /***画板操作****/
+    //             case 'showBrush':
+    //                 console.log('画板操作');
+    //                 console.log(data);
+    //                 // 画板显示与隐藏（授权）
+    //                 let uid = data.sigUid + '123';
+    //                 if (GLB.account == uid && GLB.role == '2') {
+    //                     this.setState({
+    //                         showBrush: data.sigValue.value ? true : false
+    //                     })
+    //                 }
 
-    componentWillUnmount() {
-        // 移除监听
-        window.removeEventListener("message", this.monitorParentMessage.bind(this));
-        
-        // 推出频道 
-        this.engine.session.logout();
-    }
+    //                 break;
+    //             /****展示课件*****/
+    //             case 'showCourseware':
+    //                 console.log('展示课件');
+    //                 console.log(data);
+    //                 if (data.sigValue.value) {
+    //                     this.setState({
+    //                         showCourseware: true,
+    //                         coursewareLink: data.sigValue.link
+    //                     })
+    //                 } else {
+    //                     this.setState({
+    //                         showCourseware: false,
+    //                         coursewareLink: ''
+    //                     })
+    //                 }
+    //                 break;
+    //         }
+    //     }
+
+    //     if (data.belong) {
+    //         switch (data.belong) {
+    //             // 白板
+    //             case 'whiteboard':
+    //                 // 过滤向自己广播的消息
+    //                 if (data.account && data.account !== this.engine.session.account) {
+    //                     // 画板通信操作
+    //                     if (data.type === 'sketchpadState') this[data.method](null, true);
+    //                     // 画笔切换
+    //                     if (data.type === 'sketchpadModal') {
+    //                         let sub = parseInt(data.pars);
+    //                         this[data.method](sub);
+    //                     }
+    //                     // 画板绘画操作
+    //                     if (data.type === 'sketchpad' && this.sketchpad) {
+    //                         let options = JSON.parse(data.pars);
+    //                         // 自由绘制
+    //                         if (data.method === 'pathCreated') this.sketchpad[data.method](options);
+
+    //                         if (data.method === 'removeBlock') {
+    //                             let unRemovedSub = options;
+    //                             let total = this.sketchpad.canvas._objects;
+    //                             this.sketchpad.canvas._objects = [];
+    //                             if (unRemovedSub.length == 0) {
+    //                                 this.sketchpad.canvas.add();
+    //                             }
+    //                             for (let x = 0; x < unRemovedSub.length; x++) {
+    //                                 this.sketchpad.canvas.add(total[parseInt(unRemovedSub[x])]);
+    //                             }
+    //                         }
+
+    //                         if (data.method === 'drawing') {
+    //                             if (data.event === 'mouseDown') {
+    //                                 this.sketchpad.doDrawing = true;
+    //                             }
+
+    //                             if (data.event === 'mouseUp') {
+    //                                 this.sketchpad.drawingObject = null;
+    //                                 this.sketchpad.doDrawing = false;
+    //                                 this.sketchpad.moveCount = 1;
+    //                                 this.sketchpad.doDrawing = false;
+    //                             }
+
+    //                             if (options) {
+    //                                 this.sketchpad[data.method](options);
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //                 break;
+    //             // 课件
+    //             case 'courseware':
+    //                 // 白板向子级窗口传递message
+    //                 this.coursewareIframe.postMessage(JSON.stringify(data), '*');
+    //                 break;
+    //         }
+    //     }
+    // }
+
+    // // 显示或者隐藏
+    // showOrHide(e, bcm) {
+    //     if (e) e.preventDefault();
+    //     this.state.isShow ? this.setState({ isShow: false }) : this.setState({ isShow: true })
+    //     // 
+    //     if (!bcm) this.broadcastMessage('whiteboard', 'sketchpadState', 'showOrHide', null);
+    // }
+
+    // // 白板跳到某页
+    // jumpPage(pageNum, e) {
+    //     e.preventDefault();
+    //     let data = {
+    //         belong: 'courseware',
+    //         type: 'agoraAdyJumpPage',
+    //         pageNum: pageNum
+    //     }
+
+    //     this.coursewareIframe.postMessage(JSON.stringify(data), '*');
+    //     this.engine.channel.messageChannelSend(data);
+    // }
+
+    // // 广播message
+    // broadcastMessage(belong, type, method, pars, event) {
+    //     let data = {
+    //         belong: belong,
+    //         type: type,
+    //         method: method,
+    //         pars: pars,
+    //         event: event
+    //     }
+    //     this.engine.channel.messageChannelSend(JSON.stringify(data));
+    // }
+
+    // // 组件已经被渲染到页面中后触发：此时页面中有了真正的DOM的元素，可以进行DOM相关的操作
+    // componentDidMount() {
+    //     let that = this;
+    //     // 监听父级message
+    //     window.addEventListener("message", this.monitorParentMessage.bind(this), false);
+    //     // 获取课件iframeDom
+    //     this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
+    //     // 画板实例化
+    //     this.sketchpad = new sketchpadEngine(function (method, options, event) {
+    //         that.broadcastMessage('whiteboard', 'sketchpad', method, options, event)
+    //     });
+
+    //     // 申请登录及加入频道
+    //     if (window !== window.parent) {
+    //         window.parent.postMessage('readyForChannel', '*');
+    //     }
+    // }
+
+    // componentWillUnmount() {
+    //     // 移除监听
+    //     window.removeEventListener("message", this.monitorParentMessage.bind(this));
+
+    //     // 推出频道 
+    //     this.engine.session.logout();
+    // }
 
     handleClick(sub, e) {
         if (e) e.preventDefault();
@@ -305,35 +358,48 @@ class App extends Component {
         );
 
         let c1 = {
-            position: 'absolute', bottom: '20px', left: '20px','zIndex':'3'
+            position: 'absolute', bottom: '20px', left: '20px', 'zIndex': '3'
         }
 
         let c2 = {
-            position: 'absolute', bottom: '50px', left: '20px','zIndex':'3'
+            position: 'absolute', bottom: '50px', left: '20px', 'zIndex': '3'
         }
 
         let c3 = {
-            position: 'absolute', top: '30px', left: '20px','zIndex':'3'
+            position: 'absolute', top: '30px', left: '20px', 'zIndex': '3'
         }
 
-        return (<div>
-            <div id="coursewareBox">
-                <iframe id="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" width="960px" height="540px" className={"width: 100%; height: 100%; border: none; padding: 0px; margin: 0px;"} src="https://www.kunqu.tech/page1/">
+        let c4 = {
+            display: `${this.state.showBrush ? 'block' : 'none'}`
+        };
+
+        let c5 = {
+            display: `${this.state.showCourseware ? 'block' : 'none'}`
+        };
+
+        return (<div id="whiteboardBox" className="whiteboardBox">
+            <div id="coursewareBox" className="coursewareBox">
+                <iframe style={c5} id="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" width="960px" height="540px" className={"width: 100%; height: 100%; border: none; padding: 0px; margin: 0px;"} src="https://www.kunqu.tech/page1/">
                     <p>Your browser does not support iframes.</p>
                 </iframe>
             </div>
-            <SketchpadBox state={this.state.isShow} />
-            <div id="sketchpadTools" className="sketchpadTools">
-                <ul id="tools" className="tools">{items}</ul>
+
+            {/* <SketchpadBox state={this.state.isShow} />
+
+            <div style={c4}>
+                <div id="sketchpadTools" className="sketchpadTools">
+                    <ul id="tools" className="tools">{items}</ul>
+                </div>
+                <div style={c2}>
+                    <button onClick={this.showOrHide.bind(this)}>显示或隐藏</button>
+                </div>
             </div>
 
             <div style={c1}>
                 <button onClick={this.jumpPage.bind(this, 1)}>上一页</button>
                 <button onClick={this.jumpPage.bind(this, 2)}>下一页</button>
-            </div>
-            <div style={c2}>
-                <button onClick={this.showOrHide.bind(this)}>显示或隐藏</button>
-            </div>
+            </div> */}
+
             <div style={c3}>
                 <label>账号：</label>
                 <p>{this.state.account}</p>

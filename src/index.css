@@ -20,18 +20,18 @@
   z-index: 2;
 }
 
+.coursewareBox {
+  position: relative;
+  width:960px;
+  height:540px;
+  background-color: aquamarine;
+}
+
 .whiteboardBox {
   position: relative;
   width:960px;
   height:540px;
-}
-
-.whiteboardBox > .show {
-  display: block;
-}
-
-.whiteboardBox > .hide {
-  display: none;
+  border:2px solid #e34f51;
 }
 
 /*  */
