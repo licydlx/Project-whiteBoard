@@ -36,11 +36,11 @@ class sketchpadEngine {
             let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
             this.mouseFrom.x = ve2.x;
             this.mouseFrom.y = ve2.y;
-
             this.doDrawing = true;
+
             // this.drawing();
             // let data = this.dataFiltering();
-            // if (callback) callback('drawing', JSON.stringify(data), 'mouseDown');
+            if (callback) callback(null, 'mouseDown');
         }.bind(this));
 
         this.canvas.on("mouse:move", function (e) {
@@ -56,7 +56,7 @@ class sketchpadEngine {
             this.drawing();
 
             let data = this.dataFiltering();
-            if (callback) callback('drawing', JSON.stringify(data));
+            if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
         }.bind(this));
 
         this.canvas.on("path:created", function (e) {
@@ -73,7 +73,9 @@ class sketchpadEngine {
                     strokeMiterLimit: e.path.strokeMiterLimit
                 }
             }
-            if (callback) callback('pathCreated', JSON.stringify(drawObj));
+
+            let data = this.dataFiltering();
+            if (callback) callback('pathCreated',JSON.stringify(data), JSON.stringify(drawObj));
         }.bind(this));
 
         this.canvas.on("mouse:up", function (e) {
@@ -82,8 +84,8 @@ class sketchpadEngine {
             this.mouseTo.x = ve2.x;
             this.mouseTo.y = ve2.y;
 
-            let data = this.dataFiltering();
-            if (callback) callback('drawing', JSON.stringify(data), 'mouseUp');
+            //let data = this.dataFiltering();
+            if (callback) callback(null,'mouseUp');
             //this.drawing(this.drawConfig);
             this.drawingObject = null;
             this.doDrawing = false;
@@ -102,9 +104,8 @@ class sketchpadEngine {
                 let text = e.target.text;
                 let data = this.dataFiltering();
                 data.text = text;
-                if (callback) callback('drawing', JSON.stringify(data));
+                if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
             }
-
         }.bind(this));
 
         this.canvas.on("selection:created", function (e) {
@@ -124,7 +125,7 @@ class sketchpadEngine {
                 }
             }
             this.removeBlock(e);
-            if (callback) callback('removeBlock', JSON.stringify(newTotal));
+            if (callback) callback('removeBlock', JSON.stringify(newTotal),JSON.stringify(newTotal));
         }.bind(this));
 
         // this.canvas.on("selection:cleared", function (e) {
@@ -134,6 +135,13 @@ class sketchpadEngine {
         // this.canvas.on("object:removed", function (e) {
         //     console.log('object:removed');
         // }.bind(this));
+    }
+
+    mouseDown(context,pars){
+        let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
+        this.mouseFrom.x = ve2.x;
+        this.mouseFrom.y = ve2.y;
+        this.doDrawing = true;
     }
 
     removeBlock(e) {
@@ -170,14 +178,14 @@ class sketchpadEngine {
     }
 
     // 自由绘制
-    pathCreated(data) {
+    pathCreated(context,data) {
         if (typeof data === 'string') data = JSON.parse(data);
         let path = new fabric.Path(data.path, data.pathConfig);
         this.canvas.add(path);
     }
 
     // 绘制
-    drawing(pars) {
+    drawing(context,pars) {
         if (!pars) {
             pars = this;
         } else {
