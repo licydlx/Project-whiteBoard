@@ -1,37 +1,44 @@
 import React, { Component } from 'react';
 import fabric from 'fabric';
 import GLB from './configs/GLB';
-
+import CoursewareBox from './ui/CoursewareBox';
 import SketchpadBox from './ui/SketchpadBox';
 // import ToolBox from './ui/ToolBox';
-
 // import sketchpadEngine from './libs/sketchpadEngine';
 //import sketchpad from './libs/sketchpad';
 import sketchpadEngine from './libs/sketchpadEngine';
-
 import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
-
 import messageEngine from './libs/messageEngine';
-
 
 class App extends Component {
     constructor() {
         super();
+
+        // 用户身份，0：老师；1：助教；2：学生；3：旁听；4：隐身用户; 5:巡课
         this.state = {
+            currentPage:1,
             sub: 0,
+            role: 0,
             account: '',
             channel: '',
 
-            isShow: false,
+            showCourseware: {
+                value:true,
+                link:'https://www.kunqu.tech/page1/'
+            },
             showBrush: false,
-            showCourseware: true,
-            coursewareLink: '',
-
-            test1:'',
-            test2:''
+            showSketchpad: false,
+            showSwitchpage:false   
         }
+
         this.tools = [
+            {
+                'data-type': 'eye',
+                'className': 'icon-eye-select',
+                'data-default': 'icon-eye-black',
+                'state': false
+            },
             {
                 'data-type': 'pen',
                 'className': 'icon-pen-select',
@@ -74,14 +81,16 @@ class App extends Component {
             }
         ]
 
-        let account = Math.floor(Math.random() * 100);
-        let data = {
-            role: 0,
-            uid: account,
-            channel: 'test1',
-            canDraw: true
-        }
-        this.loginChannel(data);
+        // let account = Math.floor(Math.random() * 100);
+        // let data = {
+        //     role: 0,
+        //     uid: account,
+        //     channel: 'q2',
+        //     canDraw: true
+        // }
+        // this.loginChannel(data);
+
+        //"{"role":2,"uid":"111111","channel":"miaoCode12","canDraw":false}"
     }
 
     componentDidMount() {
@@ -89,8 +98,8 @@ class App extends Component {
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
         // message监听
         this.message = new messageEngine(this.listenPostMessage.bind(this));
-        
-        console.log(this.message);
+
+        // console.log(this.message);
         this.message.listen();
         // 画板实例化
         this.sketchpad = new sketchpadEngine(function (method, context, pars) {
@@ -100,54 +109,43 @@ class App extends Component {
         // DOM加载完毕，请求用户信息及登录
         this.message.sendMessage('father', 'readyForChannel', '*');
 
-        console.log('==============加载完成通知IOS===================');
-        if(window.webkit){
+        if (window.webkit) {
             window.webkit.messageHandlers.readyForChannel.postMessage('readyForChannel');
-
-            window.receiveResourceInfoFun = function(data){
-                console.log('==========receiveResourceInfoFun===============');
-                this.setState({
-                    test1: data
-                })
-
-                if(!GLB.logined){
-                    if(typeof data == 'string') data = JSON.parse(data);
+            window.receiveResourceInfoFun = function (data) {
+                if (!GLB.logined) {
+                    if (typeof data == 'string') data = JSON.parse(data);
                     this.loginChannel(data);
                 }
             }.bind(this);
         }
     }
 
-    componentWillUnmount() {
-        this.message.remove();
-        // 推出频道 
-        this.engine.session.logout();
+    componentWillMount () {
+        //页面刷新或关闭提示
+        window.onbeforeunload = function (event) {
+            this.engine.channel.channelLeave();
+        }.bind(this);
     }
 
-    // // 新用户注册，加入频道 来自IOS
-    // receiveResourceInfoFun(data){
-    //     console.log('==========receiveResourceInfoFun===============');
-    //     console.log(data);
-    //     if(!GLB.logined){
-    //         if(typeof data == 'string') data = JSON.parse(data);
-    //         this.loginChannel(data);
-    //     }
+    componentWillUnmount() {
+        this.message.remove();
+    }
 
-    // }
     // 新用户注册，加入频道
     loginChannel(data) {
-        
+        console.log('登陆中...');
         // 
         signalEngine(data, function (engine) {
             this.engine = engine;
+            GLB.logined = true;
 
             this.setState({
                 account: GLB.account,
                 channel: GLB.channel,
-                showBrush: GLB.canDraw
+                showBrush: GLB.canDraw,
+                showSwitchpage:GLB.role == 0 ? true : false
             })
 
-            GLB.logined = true;
             // 接入声网信令sdk对应的回调 
             signalResponse(this.engine, this.listenSignalMessage.bind(this));
         }.bind(this));
@@ -163,7 +161,7 @@ class App extends Component {
             context: context,
             pars: pars
         }
-        if(!this.engine) console.log('请先登录及加入频道！');
+        if (!this.engine) return console.log('请先登录及加入频道！');
         this.engine.channel.messageChannelSend(JSON.stringify(data));
     }
 
@@ -171,8 +169,6 @@ class App extends Component {
     listenSignalMessage(config) {
         if (typeof config !== 'string') return console.log('接受信令的消息应为string');
         let data = JSON.parse(config);
-
-        console.log(data);
         // 外壳与白板通信
         if (data.sigType) {
             switch (data.sigType) {
@@ -184,7 +180,8 @@ class App extends Component {
                     let uid = data.sigUid + '123';
                     if (GLB.account == uid && GLB.role == '2') {
                         this.setState({
-                            showBrush: data.sigValue.value ? true : false
+                            showBrush: data.sigValue.value ? true : false,
+                            showSwitchpage:data.sigValue.value ? true : false
                         })
                     }
                     break;
@@ -193,9 +190,12 @@ class App extends Component {
                     console.log('展示课件');
                     console.log(data);
                     this.setState({
-                        showCourseware: data.sigValue.value ? true : false,
-                        coursewareLink: data.sigValue.value ? data.sigValue.link : ''
+                        showCourseware:{
+                            value:data.sigValue.value ? true : false,
+                            link:data.sigValue.value ? data.sigValue.link : ''
+                        }
                     })
+
                     break;
             }
         }
@@ -241,9 +241,13 @@ class App extends Component {
 
                 // 白板与课件通信
                 case 'courseware':
-                    console.log('courseware');
+                    if(data.pars.type == 'jumpPage'){
+                        this.setState({
+                            currentPage:data.pars.handleData.pars
+                        })   
+                    }
                     // 白板向子级窗口传递message
-                    this.message.sendMessage('child', data.pars, this.coursewareIframe)
+                    this.message.sendMessage('child', JSON.stringify(data.pars), this.coursewareIframe)
                     break;
             }
         }
@@ -252,50 +256,59 @@ class App extends Component {
 
     // 接受postmessage消息
     listenPostMessage(e) {
-        console.log('接受postmessage消息')
-        console.log(e)
-        if (!GLB.logined && e == 'string') this.loginChannel(JSON.parse(e));
-        if (window === window.parent) return;
-        if (typeof e.data !== 'string') return;
-        if(!this.engine) console.log('请先登录及加入频道！');
-        let data = JSON.parse(e.data);
-        this.broadcastMessage('courseware', null, null, JSON.stringify(data));
+        if (!GLB.logined && typeof e.data == 'string' && e.data !== "") {
+            let data = JSON.parse(e.data);
+            if (data.uid && data.channel) this.loginChannel(JSON.parse(e.data));
+        } else {
+            //if (window === window.parent) return;
+            if (typeof e.data !== 'string') return;
+            if (!this.engine) return console.log('请先登录及加入频道！');
+            let data = JSON.parse(e.data);
+            this.broadcastMessage('courseware', null, null, data);
+        }
     };
 
     // 白板跳到某页
-    jumpPage(pageNum, e) {
+    jumpPage(changeNum, e) {
         if (e) e.preventDefault();
+        let pars = this.state.currentPage + parseInt(changeNum);
+        if(pars < 1) return;
+
+        this.setState({
+            currentPage:pars
+        })        
+
         let data = {
             belong: 'courseware',
-            type: 'agoraAdyJumpPage',
-            pageNum: pageNum
+            type: 'jumpPage',
+            handleData: {
+                method: 'swithScene',
+                pars: pars
+            }
         }
         this.message.sendMessage('child', data, this.coursewareIframe);
-        this.broadcastMessage('courseware', null, null, JSON.stringify(data));
-    }
-
-    // 显示或者隐藏
-    showOrHide(boolean, e) {
-        if (e) e.preventDefault();
-        this.setState({ isShow: this.state.isShow ? false : true })
-        if (e) this.broadcastMessage('whiteboard', 'showOrHide');
+        this.broadcastMessage('courseware', null, null, data);
     }
 
     handleClick(sub, e) {
         if (e) e.preventDefault();
-        if (typeof sub == 'string') sub = JSON.parse(sub);
+        if (typeof sub == 'string') sub = parseInt(sub);
+        if(this.tools[sub]['data-type'] == 'eye'){
+            this.showOrHide(null,true);
+            return;
+        }
         if (this.sketchpad.textbox) {
             // 退出文本编辑状态
             this.sketchpad.textbox.exitEditing();
             this.sketchpad.textbox = null;
         }
+
         let newTools = this.tools.map(function (value, index) {
             if (sub === index) {
                 value.state = true;
                 let type = value['data-type'];
                 this.sketchpad.drawType = type;
                 this.sketchpad.canvas.isDrawingMode = false;
-
                 if (type == 'remove') {
                     this.sketchpad.canvas.selection = true;
                     this.sketchpad.canvas.skipTargetFind = false;
@@ -316,59 +329,51 @@ class App extends Component {
         if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(sub));
     }
 
+    // 显示或者隐藏
+    showOrHide(boolean, e) {
+        this.setState({ showSketchpad: this.state.showSketchpad ? false : true })
+        if (e) this.broadcastMessage('whiteboard', 'showOrHide');
+    }
+
     render() {
         let sub = this.state.sub;
         this.tools[sub]['state'] = true;
-
-        const items = this.tools.map((value, index) =>
-            <li data-type={value['data-type']} key={index} className={value['state'] ? 'active' : ''} onClick={this.handleClick.bind(this, index)}>
+        const items = this.tools.map((value, index) => {
+            return <li data-type={value['data-type']} key={index} className={value['state'] ? 'active' : ''} onClick={this.handleClick.bind(this, index)}>
                 <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i>
             </li>
-        );
-
-        let c1 = {
-            position: 'absolute', bottom: '20px', left: '500px', 'zIndex': '3'
-        }
-
-        let c2 = {
-            position: 'absolute', bottom: '50px', left: '20px', 'zIndex': '3'
-        }
+        });
 
         let c3 = {
             position: 'absolute', top: '30px', left: '20px', 'zIndex': '3'
         }
 
-        let c4 = {
-            display: `${this.state.showBrush ? 'block' : 'none'}`
-        };
+        let showBrush = {
+            display:`${this.state.showBrush ? 'block' : 'none'}`
+        }
 
-        let c5 = {
-            display: `${this.state.showCourseware ? 'block' : 'none'}`
-        };
+        let showSwitchpage = {
+            display:`${this.state.showSwitchpage ? 'block' : 'none'}`,
+            position: 'absolute', 
+            left: '400px', 
+            bottom: '40px', 
+            'zIndex': '3'
+        }
 
         return (<div id="whiteboardBox" className="whiteboardBox">
-            <div id="coursewareBox" className="coursewareBox">
-                <iframe style={c5} id="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" width="960px" height="540px" className={"width: 100%; height: 100%; border: none; padding: 0px; margin: 0px;"} src="https://www.kunqu.tech/page1/">
-                    <p>Your browser does not support iframes.</p>
-                </iframe>
-            </div>
-            <SketchpadBox state={this.state.isShow} />
-            <div style={c4}>
-                <div id="sketchpadTools" className="sketchpadTools">
-                    <ul id="tools" className="tools">{items}</ul>
-                </div>
-                <div style={c2}>
-                    <button onClick={this.showOrHide.bind(this, false)}>显示或隐藏</button>
-                </div>
+            <CoursewareBox state={this.state.showCourseware} />
+            <SketchpadBox state={this.state.showSketchpad} />
+
+            <div id="sketchpadTools" className="sketchpadTools" style={showBrush}>
+                <ul id="tools" className="tools">{items}</ul>
             </div>
 
-            <div style={c1}>
-                <button onClick={this.jumpPage.bind(this, 1)}>上一页</button>
-                <button onClick={this.jumpPage.bind(this, 2)}>下一页</button>
+            <div style={showSwitchpage}>
+                <button onClick={this.jumpPage.bind(this, -1)}>上一页</button>
+                <button onClick={this.jumpPage.bind(this, 1)}>下一页</button>
             </div>
-        
+
             <div style={c3}>
-                <p>{this.state.test1}</p>
                 <label>账号：</label>
                 <p>{this.state.account}</p>
                 <label>频道：</label>

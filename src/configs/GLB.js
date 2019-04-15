@@ -5,7 +5,7 @@ let GLB = {
     token: '_no_need_token',
     channel: '1',
     canDraw: false,
-    logined:false
+    logined: false
 }
 
 export default GLB;

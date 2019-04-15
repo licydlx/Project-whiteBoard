@@ -8,7 +8,7 @@ export default function (data, callback) {
 
     if (data) {
         if (data.role) GLB.role = data.role;
-        if (data.account) GLB.account = data.account + '123';
+        if (data.uid) GLB.account = data.uid + '123';
         if (data.token) GLB.token = data.token;
         if (data.channel) GLB.channel = data.channel;
         if (data.canDraw) GLB.canDraw = data.canDraw;
@@ -33,6 +33,11 @@ export default function (data, callback) {
             if (callback) {
                 callback(engine)
             }
+        }
+
+        channel.onChannelUserList = (users) =>{
+            console.log('onChannelUserList');
+            console.log(users);
         }
     }
 }
