@@ -17,78 +17,84 @@ class App extends Component {
 
         // 用户身份，0：老师；1：助教；2：学生；3：旁听；4：隐身用户; 5:巡课
         this.state = {
-            currentPage:1,
+            style: {
+                left: '0',
+                bottom: '40px'
+            },
+            currentPage: 1,
             sub: 0,
             role: 0,
             account: '',
             channel: '',
 
             showCourseware: {
-                value:true,
-                link:'https://www.kunqu.tech/page1/'
+                value: true,
+                link: 'https://www.kunqu.tech/page1/'
             },
             showBrush: false,
             showSketchpad: false,
-            showSwitchpage:false   
+            showSwitchpage: false,
+            tools:[
+                {
+                    'data-type': 'eye',
+                    'state': false
+                },
+                {
+                    'data-type': 'pen',
+                    'state': false
+                },
+                {
+                    'data-type': 'arrow',
+                    'state': false
+                },
+                {
+                    'data-type': 'line',
+                    'state': false
+                },
+                {
+                    'data-type': 'ellipse',
+                    'state': false
+                }, {
+                    'data-type': 'rectangle',
+                    'state': false
+                },
+                {
+                    'data-type': 'text',
+                    'state': false
+                }, {
+                    'data-type': 'remove',
+                    'state': false
+                }
+            ]
         }
 
-        this.tools = [
-            {
-                'data-type': 'eye',
-                'className': 'icon-eye-select',
-                'data-default': 'icon-eye-black',
-                'state': false
-            },
-            {
-                'data-type': 'pen',
-                'className': 'icon-pen-select',
-                'data-default': 'icon-pen-black',
-                'state': false
-            },
-            {
-                'data-type': 'arrow',
-                'className': 'icon-arrow-black',
-                'data-default': 'icon-arrow-black',
-                'state': false
-            },
-            {
-                'data-type': 'line',
-                'className': 'icon-line-black',
-                'data-default': 'icon-line-black',
-                'state': false
-            },
-            {
-                'data-type': 'ellipse',
-                'className': 'icon-ellipse-black',
-                'data-default': 'icon-ellipse-black',
-                'state': false
-            }, {
-                'data-type': 'rectangle',
-                'className': 'icon-rectangle-black',
-                'data-default': 'icon-rectangle-black',
-                'state': false
-            },
-            {
-                'data-type': 'text',
-                'className': 'icon-text-black',
-                'data-default': 'icon-text-black',
-                'state': false
-            }, {
-                'data-type': 'remove',
-                'className': 'icon-remove-black',
-                'data-default': 'icon-remove-black',
-                'state': false
-            }
-        ]
+        this.offsetX = null;
+        this.offsetY = null;
+        // == 被我们拖的元素（按住鼠标）
+        // ondragstart - 用户开始拖动元素时触发
+        // ondrag - 元素正在拖动时触发
+        // ondragend - 用户完成元素拖动后触发
+        // == 释放拖拽元素时触发的事件（松开鼠标）
+        // ondragenter - 当被鼠标拖动的对象进入其容器范围内时触发此事件
+        // ondragover - 当某被拖动的对象在另一对象容器范围内拖动时触发此事件
+        // ondragleave - 当被鼠标拖动的对象离开其容器范围内时触发此事件
+        // ondrop - 在一个拖动过程中，释放鼠标键时触发此事件
+        this.handleDragStart = this.handleDragStart.bind(this);
+        this.handleDrag = this.handleDrag.bind(this);
+        this.handleDragOver = this.handleDragOver.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this);
+        this.handleDrop = this.handleDrop.bind(this);
+        this.handleDragEnter = this.handleDragEnter.bind(this);
+        this.handleDragLeave = this.handleDragLeave.bind(this);
 
-        // let account = Math.floor(Math.random() * 100);
-        // let data = {
-        //     role: 0,
-        //     uid: account,
-        //     channel: 'q2',
-        //     canDraw: true
-        // }
-        // this.loginChannel(data);
+        let account = Math.floor(Math.random() * 100);
+        let data = {
+            role: 0,
+            uid: account,
+            channel: 'q2',
+            canDraw: true
+        }
+        this.loginChannel(data);
 
         //"{"role":2,"uid":"111111","channel":"miaoCode12","canDraw":false}"
     }
@@ -118,9 +124,17 @@ class App extends Component {
                 }
             }.bind(this);
         }
+
+        Colorpicker.create({
+            bindClass: 'picker',
+            change: function (elem, hex) {
+                // console.log(elem,hex)
+                elem.style.backgroundColor = hex;
+            }
+        })
     }
 
-    componentWillMount () {
+    componentWillMount() {
         //页面刷新或关闭提示
         window.onbeforeunload = function (event) {
             this.engine.channel.channelLeave();
@@ -129,6 +143,53 @@ class App extends Component {
 
     componentWillUnmount() {
         this.message.remove();
+    }
+
+    handleDragStart(event) {
+        console.log('handleDragStart')
+        this.offsetX = event.pageX;
+        this.offsetY = event.pageY;
+    }
+
+    handleDrag(event) {
+        console.log('handleDrag')
+        // 阻止默认动作
+        event.preventDefault();
+    }
+
+    handleDragEnd(event) {
+        event.preventDefault();
+        console.log('handleDragEnd')
+        let x = event.pageX;
+        let y = event.pageY;
+        x -= this.offsetX;
+        y -= this.offsetY;
+        let ox = parseInt(this.state.style.left);
+        let oy = parseInt(this.state.style.bottom);
+
+        this.setState({
+            style: {
+                left: x + ox + 'px',
+                bottom: -y + oy + 'px'
+            }
+        });
+    }
+
+    handleDragEnter(event) {
+        event.preventDefault();
+    }
+
+    handleDragOver(event) {
+        // 阻止默认动作以启用drop
+        event.preventDefault();
+    }
+
+    handleDragLeave(event) {
+        event.preventDefault();
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
     }
 
     // 新用户注册，加入频道
@@ -143,7 +204,7 @@ class App extends Component {
                 account: GLB.account,
                 channel: GLB.channel,
                 showBrush: GLB.canDraw,
-                showSwitchpage:GLB.role == 0 ? true : false
+                showSwitchpage: GLB.role == 0 ? true : false
             })
 
             // 接入声网信令sdk对应的回调 
@@ -181,7 +242,7 @@ class App extends Component {
                     if (GLB.account == uid && GLB.role == '2') {
                         this.setState({
                             showBrush: data.sigValue.value ? true : false,
-                            showSwitchpage:data.sigValue.value ? true : false
+                            showSwitchpage: data.sigValue.value ? true : false
                         })
                     }
                     break;
@@ -190,9 +251,9 @@ class App extends Component {
                     console.log('展示课件');
                     console.log(data);
                     this.setState({
-                        showCourseware:{
-                            value:data.sigValue.value ? true : false,
-                            link:data.sigValue.value ? data.sigValue.link : ''
+                        showCourseware: {
+                            value: data.sigValue.value ? true : false,
+                            link: data.sigValue.value ? data.sigValue.link : ''
                         }
                     })
 
@@ -241,10 +302,10 @@ class App extends Component {
 
                 // 白板与课件通信
                 case 'courseware':
-                    if(data.pars.type == 'jumpPage'){
+                    if (data.pars.type == 'jumpPage') {
                         this.setState({
-                            currentPage:data.pars.handleData.pars
-                        })   
+                            currentPage: data.pars.handleData.pars
+                        })
                     }
                     // 白板向子级窗口传递message
                     this.message.sendMessage('child', JSON.stringify(data.pars), this.coursewareIframe)
@@ -272,11 +333,11 @@ class App extends Component {
     jumpPage(changeNum, e) {
         if (e) e.preventDefault();
         let pars = this.state.currentPage + parseInt(changeNum);
-        if(pars < 1) return;
+        if (pars < 1) return;
 
         this.setState({
-            currentPage:pars
-        })        
+            currentPage: pars
+        })
 
         let data = {
             belong: 'courseware',
@@ -293,8 +354,10 @@ class App extends Component {
     handleClick(sub, e) {
         if (e) e.preventDefault();
         if (typeof sub == 'string') sub = parseInt(sub);
-        if(this.tools[sub]['data-type'] == 'eye'){
-            this.showOrHide(null,true);
+        let toolsArr = this.state.tools;
+
+        if (toolsArr[sub]['data-type'] == 'eye') {
+            this.showOrHide(null, true);
             return;
         }
         if (this.sketchpad.textbox) {
@@ -303,7 +366,7 @@ class App extends Component {
             this.sketchpad.textbox = null;
         }
 
-        let newTools = this.tools.map(function (value, index) {
+        let newTools = toolsArr.map(function (value, index) {
             if (sub === index) {
                 value.state = true;
                 let type = value['data-type'];
@@ -325,6 +388,7 @@ class App extends Component {
                 value.state = false;
             }
         }.bind(this));
+
         this.setState({ tools: newTools });
         if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(sub));
     }
@@ -337,11 +401,14 @@ class App extends Component {
 
     render() {
         let sub = this.state.sub;
-        this.tools[sub]['state'] = true;
-        const items = this.tools.map((value, index) => {
-            return <li data-type={value['data-type']} key={index} className={value['state'] ? 'active' : ''} onClick={this.handleClick.bind(this, index)}>
-                <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i>
-            </li>
+        let toolsArr = this.state.tools;
+
+        toolsArr[sub]['state'] = true;
+        const items = toolsArr.map((value, index) => {
+            return <div data-type={value['data-type']} key={index} className={`toolFace ${value['state'] ? 'active' : ''}`} onClick={this.handleClick.bind(this, index)}>
+                {/* <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i> */}
+                
+            </div>
         });
 
         let c3 = {
@@ -349,14 +416,14 @@ class App extends Component {
         }
 
         let showBrush = {
-            display:`${this.state.showBrush ? 'block' : 'none'}`
+            display: `${this.state.showBrush ? 'flex' : 'none'}`
         }
 
         let showSwitchpage = {
-            display:`${this.state.showSwitchpage ? 'block' : 'none'}`,
-            position: 'absolute', 
-            left: '400px', 
-            bottom: '40px', 
+            display: `${this.state.showSwitchpage ? 'block' : 'none'}`,
+            position: 'absolute',
+            left: '400px',
+            bottom: '40px',
             'zIndex': '3'
         }
 
@@ -364,10 +431,13 @@ class App extends Component {
             <CoursewareBox state={this.state.showCourseware} />
             <SketchpadBox state={this.state.showSketchpad} />
 
-            <div id="sketchpadTools" className="sketchpadTools" style={showBrush}>
-                <ul id="tools" className="tools">{items}</ul>
-            </div>
+            {/* <div id="sketchpadTools" className="sketchpadTools" style={showBrush}>
+                <ul id="tools" className="tools"></ul>
+            </div> */}
 
+            <div draggable="true" className={`dragBox ${this.state.showBrush ? 'showBrush' : ''}`} style={this.state.style} onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd} onDrop={this.handleDrop} onDragEnter={this.handleDragEnter} onDragLeave={this.handleDragLeave}>
+                {items}
+            </div>
             <div style={showSwitchpage}>
                 <button onClick={this.jumpPage.bind(this, -1)}>上一页</button>
                 <button onClick={this.jumpPage.bind(this, 1)}>下一页</button>
@@ -379,6 +449,8 @@ class App extends Component {
                 <label>频道：</label>
                 <p>{this.state.channel}</p>
             </div>
+
+            <div className='picker'></div>
         </div>
         );
     }
