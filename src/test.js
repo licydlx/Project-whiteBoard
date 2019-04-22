@@ -4,81 +4,17 @@ class Test extends Component {
     constructor(props) {
         super(props);
 
+        console.log(this.props)
         this.state = {
-            tools: [
-                {
-                    type: 'toolsBox',
-                    expand: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/01double.png',
-                    attrStyle: null
-                },
-                {
-                    type: 'sketchpad',
-                    state: true,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png',
-                    attrStyle: null
-                },
-                {
-                    type: 'pen',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/03double.png',
-                    attrStyle: {
-                        height: '120px'
-                    },
-                    attr: ['penSize', 'penColor']
-                },
-                {
-                    type: 'text',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/04double.png',
-                    attrStyle: {
-                        height: '120px'
-                    },
-                    attr: ['textSize', 'penColor']
-                },
-                {
-                    type: 'graph',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/07double.png',
-                    attrStyle: {
-                        height: '150px'
-                    },
-                    attr: ['penShape', 'penSize', 'penColor']
-                },
-                {
-                    type: 'remove',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/06double.png',
-                    attrStyle: null
-                },
-                {
-                    type: 'empty',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/05double.png',
-                    attrStyle: null
-                },
-            ],
-            toolsCache: {
-                preIndex: 1,
-                preState: null
-            },
-            sketchpadConfig: {
-                penSize: 2,
-                textSize: 14,
-                penColor: '#fff',
-                penShape: 'line'
-            },
-
+            tools: this.props.tools,
+            toolsCache: this.props.toolsCache,
+            sketchpadConfig: this.props.sketchpadConfig,
             shapeImg: {
                 'line': 'https://res.miaocode.com/livePlatform/soundNetwork/images/pathdouble.png',
                 'ellipse': 'https://res.miaocode.com/livePlatform/soundNetwork/images/ovaldouble.png',
                 'rectangle': 'https://res.miaocode.com/livePlatform/soundNetwork/images/rectangledouble.png',
             },
-
-            position: {
-                top: '100px',
-                right: '60px'
-            },
+            position: this.props.position,
         }
 
         this.offsetX = null;
@@ -159,11 +95,13 @@ class Test extends Component {
         const index = e._dispatchInstances.index;
         const toolsArray = this.state.tools;
         //console.log(index);
-
+        let pars;
         if (index == 0) {
             toolsArray[0].expand = toolsArray[0].expand ? false : true;
 
-            this.handleClick(true,true);
+            pars =  {
+                type:'expand'
+            }
         } else {
             if (!toolsArray) return;
             const cacheIndex = this.state.toolsCache.preIndex;
@@ -180,7 +118,13 @@ class Test extends Component {
             }
             // 设置tools缓存值
             this.state.toolsCache.preIndex = index;
+
+            pars =  {
+                type:toolsArray[index].type,
+                preIndex:index
+            }    
         }
+        this.handleClick(pars,true);
         // 渲染
         // console.log(toolsArray);
         this.setState({ tools: toolsArray });
@@ -198,7 +142,7 @@ class Test extends Component {
         sketchpadConfig[name] = value;
         this.setState({ sketchpadConfig: sketchpadConfig });
 
-        this.handleClick(sketchpadConfig);
+        // this.handleClick(sketchpadConfig);
     }
 
     // 画笔粗细模板
@@ -247,8 +191,8 @@ class Test extends Component {
         if (attr) return attr.map((value) => this[`${value}Template`](value, index, skconfig));
     }
 
-    handleClick(sketchpadConfig){ // 此处使用箭头函数，避免bind绑定
-        this.props.handleClick(sketchpadConfig);
+    handleClick(pars){ // 此处使用箭头函数，避免bind绑定
+        this.props.handleClick(pars,true);
     }
 
     render() {

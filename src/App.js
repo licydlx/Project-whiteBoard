@@ -32,41 +32,106 @@ class App extends Component {
             showBrush: false,
             showSketchpad: false,
             showSwitchpage: false,
+            // tools:[
+            //     {
+            //         'data-type': 'eye',
+            //         'state': false
+            //     },
+            //     {
+            //         'data-type': 'pen',
+            //         'state': false
+            //     },
+            //     {
+            //         'data-type': 'arrow',
+            //         'state': false
+            //     },
+            //     {
+            //         'data-type': 'line',
+            //         'state': false
+            //     },
+            //     {
+            //         'data-type': 'ellipse',
+            //         'state': false
+            //     }, {
+            //         'data-type': 'rectangle',
+            //         'state': false
+            //     },
+            //     {
+            //         'data-type': 'text',
+            //         'state': false
+            //     }, {
+            //         'data-type': 'remove',
+            //         'state': false
+            //     }
+            // ]
             tools:[
                 {
-                    'data-type': 'eye',
-                    'state': false
+                    type: 'toolsBox',
+                    expand: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/01double.png',
+                    attrStyle: null
                 },
                 {
-                    'data-type': 'pen',
-                    'state': false
+                    type: 'sketchpad',
+                    state: true,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png',
+                    attrStyle: null
                 },
                 {
-                    'data-type': 'arrow',
-                    'state': false
+                    type: 'pen',
+                    state: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/03double.png',
+                    attrStyle: {
+                        height: '120px'
+                    },
+                    attr: ['penSize', 'penColor']
                 },
                 {
-                    'data-type': 'line',
-                    'state': false
+                    type: 'text',
+                    state: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/04double.png',
+                    attrStyle: {
+                        height: '120px'
+                    },
+                    attr: ['textSize', 'penColor']
                 },
                 {
-                    'data-type': 'ellipse',
-                    'state': false
-                }, {
-                    'data-type': 'rectangle',
-                    'state': false
+                    type: 'graph',
+                    state: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/07double.png',
+                    attrStyle: {
+                        height: '150px'
+                    },
+                    attr: ['penShape', 'penSize', 'penColor']
                 },
                 {
-                    'data-type': 'text',
-                    'state': false
-                }, {
-                    'data-type': 'remove',
-                    'state': false
-                }
-            ]
+                    type: 'remove',
+                    state: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/06double.png',
+                    attrStyle: null
+                },
+                {
+                    type: 'empty',
+                    state: false,
+                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/05double.png',
+                    attrStyle: null
+                },
+            ],
+            sketchpadConfig: {
+                penSize: 2,
+                textSize: 14,
+                penColor: '#fff',
+                penShape: 'line'
+            },
+            position: {
+                top: '100px',
+                right: '60px'
+            },
+            toolsCache: {
+                preIndex: 1,
+                preState: null
+            }
         }
-
-
 
         let account = Math.floor(Math.random() * 100);
         let data = {
@@ -193,6 +258,7 @@ class App extends Component {
             switch (data.belong) {
                 // 白板与白板通信
                 case 'whiteboard':
+                    console.log(data);
                     // 显示或者隐藏画布
                     // 画笔切换
                     this[data.method](data.pars);
@@ -281,11 +347,44 @@ class App extends Component {
         console.log(sub);
         console.log(e);
 
-        if (sub) {
-            this.showOrHide(null, true);
-            return;
+        if(!e){
+            let newTools = this.state.tools;
+            let newToolsCache = this.state.toolsCache;
+            switch (sub.type) {
+                case 'expand':
+                    newTools[0].expand = newTools[0].expand ? false : true;
+                    this.setState({ showSketchpad: false })
+                    break;
+
+                case 'pen':
+                    newTools[sub.preIndex].state = newTools[sub.preIndex].state ? false : true;
+                    newTools[this.state.toolsCache.preIndex].state = false; 
+                    this.state.toolsCache.preIndex = sub.preIndex;
+                    this.setState({ showSketchpad: true })
+                    break;
+                default:
+                    break;
+            }
+            this.setState({ tools: newTools,toolsCache:newToolsCache });
         }
-         if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(true));
+
+        // if (sub) {
+        //     this.showOrHide(null, true);
+        //     return;
+        // }
+        if (e) {
+            switch (sub.type) {
+                case 'expand':
+                    this.setState({ showSketchpad: false })
+                    break;
+                case 'pen':
+                    this.setState({ showSketchpad: true })
+                    break;
+                default:
+                    break;
+            }
+            this.broadcastMessage('whiteboard', 'handleClick', null, sub);
+        }
         // if (e) e.preventDefault();
         // if (typeof sub == 'string') sub = parseInt(sub);
         // let toolsArr = this.state.tools;
@@ -364,7 +463,7 @@ class App extends Component {
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.showCourseware} />
             <SketchpadBox state={this.state.showSketchpad} />
-            <Test handleClick={this.handleClick} />
+            <Test handleClick={this.handleClick.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} />
             {/* <div id="sketchpadTools" className="sketchpadTools" style={showBrush}>
                 <ul id="tools" className="tools"></ul>
             </div> */}
