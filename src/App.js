@@ -3,6 +3,8 @@ import fabric from 'fabric';
 import GLB from './configs/GLB';
 import CoursewareBox from './ui/CoursewareBox';
 import SketchpadBox from './ui/SketchpadBox';
+
+import Test from './Test';
 // import ToolBox from './ui/ToolBox';
 // import sketchpadEngine from './libs/sketchpadEngine';
 //import sketchpad from './libs/sketchpad';
@@ -17,10 +19,6 @@ class App extends Component {
 
         // 用户身份，0：老师；1：助教；2：学生；3：旁听；4：隐身用户; 5:巡课
         this.state = {
-            style: {
-                left: '0',
-                bottom: '40px'
-            },
             currentPage: 1,
             sub: 0,
             role: 0,
@@ -68,24 +66,7 @@ class App extends Component {
             ]
         }
 
-        this.offsetX = null;
-        this.offsetY = null;
-        // == 被我们拖的元素（按住鼠标）
-        // ondragstart - 用户开始拖动元素时触发
-        // ondrag - 元素正在拖动时触发
-        // ondragend - 用户完成元素拖动后触发
-        // == 释放拖拽元素时触发的事件（松开鼠标）
-        // ondragenter - 当被鼠标拖动的对象进入其容器范围内时触发此事件
-        // ondragover - 当某被拖动的对象在另一对象容器范围内拖动时触发此事件
-        // ondragleave - 当被鼠标拖动的对象离开其容器范围内时触发此事件
-        // ondrop - 在一个拖动过程中，释放鼠标键时触发此事件
-        this.handleDragStart = this.handleDragStart.bind(this);
-        this.handleDrag = this.handleDrag.bind(this);
-        this.handleDragOver = this.handleDragOver.bind(this);
-        this.handleDragEnd = this.handleDragEnd.bind(this);
-        this.handleDrop = this.handleDrop.bind(this);
-        this.handleDragEnter = this.handleDragEnter.bind(this);
-        this.handleDragLeave = this.handleDragLeave.bind(this);
+
 
         let account = Math.floor(Math.random() * 100);
         let data = {
@@ -124,14 +105,6 @@ class App extends Component {
                 }
             }.bind(this);
         }
-
-        Colorpicker.create({
-            bindClass: 'picker',
-            change: function (elem, hex) {
-                // console.log(elem,hex)
-                elem.style.backgroundColor = hex;
-            }
-        })
     }
 
     componentWillMount() {
@@ -143,53 +116,6 @@ class App extends Component {
 
     componentWillUnmount() {
         this.message.remove();
-    }
-
-    handleDragStart(event) {
-        console.log('handleDragStart')
-        this.offsetX = event.pageX;
-        this.offsetY = event.pageY;
-    }
-
-    handleDrag(event) {
-        console.log('handleDrag')
-        // 阻止默认动作
-        event.preventDefault();
-    }
-
-    handleDragEnd(event) {
-        event.preventDefault();
-        console.log('handleDragEnd')
-        let x = event.pageX;
-        let y = event.pageY;
-        x -= this.offsetX;
-        y -= this.offsetY;
-        let ox = parseInt(this.state.style.left);
-        let oy = parseInt(this.state.style.bottom);
-
-        this.setState({
-            style: {
-                left: x + ox + 'px',
-                bottom: -y + oy + 'px'
-            }
-        });
-    }
-
-    handleDragEnter(event) {
-        event.preventDefault();
-    }
-
-    handleDragOver(event) {
-        // 阻止默认动作以启用drop
-        event.preventDefault();
-    }
-
-    handleDragLeave(event) {
-        event.preventDefault();
-    }
-
-    handleDrop(event) {
-        event.preventDefault();
     }
 
     // 新用户注册，加入频道
@@ -352,45 +278,54 @@ class App extends Component {
     }
 
     handleClick(sub, e) {
-        if (e) e.preventDefault();
-        if (typeof sub == 'string') sub = parseInt(sub);
-        let toolsArr = this.state.tools;
+        console.log(sub);
+        console.log(e);
 
-        if (toolsArr[sub]['data-type'] == 'eye') {
+        if (sub) {
             this.showOrHide(null, true);
             return;
         }
-        if (this.sketchpad.textbox) {
-            // 退出文本编辑状态
-            this.sketchpad.textbox.exitEditing();
-            this.sketchpad.textbox = null;
-        }
+         if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(true));
+        // if (e) e.preventDefault();
+        // if (typeof sub == 'string') sub = parseInt(sub);
+        // let toolsArr = this.state.tools;
 
-        let newTools = toolsArr.map(function (value, index) {
-            if (sub === index) {
-                value.state = true;
-                let type = value['data-type'];
-                this.sketchpad.drawType = type;
-                this.sketchpad.canvas.isDrawingMode = false;
-                if (type == 'remove') {
-                    this.sketchpad.canvas.selection = true;
-                    this.sketchpad.canvas.skipTargetFind = false;
-                    this.sketchpad.canvas.selectable = true;
-                } else if (type == 'pen') {
-                    this.sketchpad.canvas.isDrawingMode = true;
-                } else {
-                    // 画板元素不能被选中
-                    this.sketchpad.canvas.skipTargetFind = true;
-                    // 画板不显示选中
-                    this.sketchpad.canvas.selection = false;
-                }
-            } else {
-                value.state = false;
-            }
-        }.bind(this));
+        // if (toolsArr[sub]['data-type'] == 'eye') {
+        //     this.showOrHide(null, true);
+        //     return;
+        // }
 
-        this.setState({ tools: newTools });
-        if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(sub));
+        // if (this.sketchpad.textbox) {
+        //     // 退出文本编辑状态
+        //     this.sketchpad.textbox.exitEditing();
+        //     this.sketchpad.textbox = null;
+        // }
+
+        // let newTools = toolsArr.map(function (value, index) {
+        //     if (sub === index) {
+        //         value.state = true;
+        //         let type = value['data-type'];
+        //         this.sketchpad.drawType = type;
+        //         this.sketchpad.canvas.isDrawingMode = false;
+        //         if (type == 'remove') {
+        //             this.sketchpad.canvas.selection = true;
+        //             this.sketchpad.canvas.skipTargetFind = false;
+        //             this.sketchpad.canvas.selectable = true;
+        //         } else if (type == 'pen') {
+        //             this.sketchpad.canvas.isDrawingMode = true;
+        //         } else {
+        //             // 画板元素不能被选中
+        //             this.sketchpad.canvas.skipTargetFind = true;
+        //             // 画板不显示选中
+        //             this.sketchpad.canvas.selection = false;
+        //         }
+        //     } else {
+        //         value.state = false;
+        //     }
+        // }.bind(this));
+
+        // this.setState({ tools: newTools });
+        // if (e) this.broadcastMessage('whiteboard', 'handleClick', null, JSON.stringify(sub));
     }
 
     // 显示或者隐藏
@@ -402,18 +337,13 @@ class App extends Component {
     render() {
         let sub = this.state.sub;
         let toolsArr = this.state.tools;
-
         toolsArr[sub]['state'] = true;
+
         const items = toolsArr.map((value, index) => {
             return <div data-type={value['data-type']} key={index} className={`toolFace ${value['state'] ? 'active' : ''}`} onClick={this.handleClick.bind(this, index)}>
                 {/* <i className={`icon-tools ${value['className']}`} data-default={`icon-tools ${value['data-default']}`}></i> */}
-                
             </div>
         });
-
-        let c3 = {
-            position: 'absolute', top: '30px', left: '20px', 'zIndex': '3'
-        }
 
         let showBrush = {
             display: `${this.state.showBrush ? 'flex' : 'none'}`
@@ -427,17 +357,21 @@ class App extends Component {
             'zIndex': '3'
         }
 
+        let c3 = {
+            position: 'absolute', top: '30px', left: '20px', 'zIndex': '3'
+        }
+
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.showCourseware} />
             <SketchpadBox state={this.state.showSketchpad} />
-
+            <Test handleClick={this.handleClick} />
             {/* <div id="sketchpadTools" className="sketchpadTools" style={showBrush}>
                 <ul id="tools" className="tools"></ul>
             </div> */}
 
-            <div draggable="true" className={`dragBox ${this.state.showBrush ? 'showBrush' : ''}`} style={this.state.style} onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd} onDrop={this.handleDrop} onDragEnter={this.handleDragEnter} onDragLeave={this.handleDragLeave}>
+            {/* <div draggable="true" className={`dragBox ${this.state.showBrush ? 'showBrush' : ''}`} style={this.state.style} onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd} onDrop={this.handleDrop} onDragEnter={this.handleDragEnter} onDragLeave={this.handleDragLeave}>
                 {items}
-            </div>
+            </div> */}
             <div style={showSwitchpage}>
                 <button onClick={this.jumpPage.bind(this, -1)}>上一页</button>
                 <button onClick={this.jumpPage.bind(this, 1)}>下一页</button>
@@ -449,8 +383,6 @@ class App extends Component {
                 <label>频道：</label>
                 <p>{this.state.channel}</p>
             </div>
-
-            <div className='picker'></div>
         </div>
         );
     }
