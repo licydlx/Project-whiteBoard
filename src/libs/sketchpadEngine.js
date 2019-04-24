@@ -8,8 +8,10 @@ class sketchpadEngine {
         this.drawType = '';
         // 笔触宽度
         this.drawWidth = 2;
+
+        this.textSize = 14;
         // 画笔颜色
-        this.color = "#E34F51";
+        this.color = "#fff";
         // 当前绘制对象
         this.drawingObject = null;
         // 绘制移动计数器
@@ -144,6 +146,10 @@ class sketchpadEngine {
         this.doDrawing = true;
     }
 
+    removeAll(){
+        this.canvas.clear()   
+    }
+
     removeBlock(e) {
         if (e.target._objects) {
             //多选删除
@@ -158,7 +164,6 @@ class sketchpadEngine {
         //清楚选中框
         this.canvas.discardActiveObject();
     }
-
     // 传输数据过滤
     dataFiltering() {
         let obj = {}
@@ -184,6 +189,13 @@ class sketchpadEngine {
         this.canvas.add(path);
     }
 
+    changeConfig(pars){
+        console.log('changeConfig');
+        console.log(pars);
+        if(Object.is(pars.type,'color')) this.canvas.freeDrawingBrush.color = pars.value;
+        if(Object.is(pars.type,'drawWidth')) this.canvas.freeDrawingBrush.width = pars.value;
+        this[pars.type] = pars.value;
+    }
     // 绘制
     drawing(context,pars) {
         if (!pars) {
@@ -221,7 +233,7 @@ class sketchpadEngine {
                     left: pars.mouseFrom.x - 10,
                     top: pars.mouseFrom.y - 10,
                     width: 150,
-                    fontSize: 26,
+                    fontSize: pars.textSize,
                     borderColor: "#2c2c2c",
                     fill: pars.color,
                     hasControls: false

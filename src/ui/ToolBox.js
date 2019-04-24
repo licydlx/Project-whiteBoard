@@ -47,9 +47,6 @@ class ToolBox extends React.Component {
             }
         ]
     }
-
-
-
     render() {
         let sub = this.props.state;
         this.tools[sub]['state'] = true;

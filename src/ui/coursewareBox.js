@@ -1,17 +1,20 @@
 import React from 'react';
 
 class CoursewareBox extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
     }
-
     render() {
         let style = {
-            display: `${this.props.state.value ? 'block' : 'none'}`
+            display: `${this.props.state.value ? 'block' : 'none'}`,
+            padding:'0',
+            border:'none',
+            width:'100%',
+            height:'100%'
         };
         // "https://www.kunqu.tech/page1/"
-        return <div id="coursewareBox" className="coursewareBox" >
-            <iframe id="coursewareIframe" style={style} title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" width="960px" height="540px" className={"width: 100%; height: 100%; border: none; padding: 0px; margin: 0px;"} src={this.props.state.link}>
+        return <div id="coursewareBox" className="coursewareBox" style={{width:'100%',height:'100%'}}>
+            <iframe id="coursewareIframe" style={style} title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" src={this.props.state.link}>
                 <p>Your browser does not support iframes.</p>
             </iframe>
         </div>

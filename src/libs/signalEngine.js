@@ -37,7 +37,6 @@ export default function (data, callback) {
 
         channel.onChannelUserList = (users) =>{
             console.log('onChannelUserList');
-            console.log(users);
         }
     }
 }

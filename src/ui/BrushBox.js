@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import './test.css';
-class Test extends Component {
+import './BrushBox.css';
+class BrushBox extends Component {
     constructor(props) {
         super(props);
-
-        console.log(this.props)
         this.state = {
+            showBrush:this.props.showBrush,
             tools: this.props.tools,
             toolsCache: this.props.toolsCache,
             sketchpadConfig: this.props.sketchpadConfig,
@@ -36,15 +35,13 @@ class Test extends Component {
         this.handleDragEnter = this.handleDragEnter.bind(this);
         this.handleDragLeave = this.handleDragLeave.bind(this);
     }
-
+  
     handleDragStart(event) {
-        console.log('handleDragStart')
         this.offsetX = event.pageX;
         this.offsetY = event.pageY;
     }
 
     handleDrag(event) {
-        console.log('handleDrag')
         // 阻止默认动作
         event.preventDefault();
     }
@@ -82,6 +79,19 @@ class Test extends Component {
         event.preventDefault();
     }
 
+    // 画板参数变化
+    sketchpadChange(pars){
+        this.props.sketchpadChange(pars,true);
+    }
+
+    childCallback(pars){
+        this.props.childCallback(pars);
+    }
+
+    broadcastMessage(belong, method, context, pars){ // 此处使用箭头函数，避免bind绑定
+        this.props.broadcastMessage(belong, method, context, pars);
+    }
+
     // 工具被选中
     toolChoosed(e) {
         e.preventDefault();
@@ -92,42 +102,42 @@ class Test extends Component {
         //         console.log(e[key]);
         //     }
         // }
+        const key = e._dispatchInstances.key;
         const index = e._dispatchInstances.index;
         const toolsArray = this.state.tools;
-        //console.log(index);
-        let pars;
-        if (index == 0) {
-            toolsArray[0].expand = toolsArray[0].expand ? false : true;
-
-            pars =  {
-                type:'expand'
-            }
-        } else {
-            if (!toolsArray) return;
-            const cacheIndex = this.state.toolsCache.preIndex;
-            toolsArray[index].state = true;
-
-            // 根据tools缓存值重置
-            if (cacheIndex !== null) {
-                let preIndex = parseInt(cacheIndex);
-                if (preIndex === index) {
-                    // toolsArray[index].state = toolsArray[index].state ? false : true;
-                } else {
-                    toolsArray[preIndex].state = false;
-                }
-            }
-            // 设置tools缓存值
-            this.state.toolsCache.preIndex = index;
-
-            pars =  {
-                type:toolsArray[index].type,
-                preIndex:index
-            }    
+        let newToolsArray;
+        switch (key) {
+            case 'toolsBox':
+                toolsArray[index].expand = toolsArray[index].expand ? false : true;
+                newToolsArray = toolsArray;
+                break;
+            case 'sketchpad':
+            case 'pen':
+            case 'text':
+            case 'graph':
+            case 'remove':
+            case 'empty':    
+                newToolsArray = toolsArray.map(function(m,n,arr){
+                    if(n == index){
+                        arr[n].state = arr[n].state ? false : true;
+                    } else {
+                        arr[n].state = false;
+                    }
+                    return m;
+                }) 
+                break;       
+            default:
+                break;
         }
-        this.handleClick(pars,true);
-        // 渲染
-        // console.log(toolsArray);
-        this.setState({ tools: toolsArray });
+        // 信令通信
+        let pars =  {
+            type:key,
+            index:index
+        }   
+
+        this.childCallback(pars);
+        this.broadcastMessage('whiteboard', 'handleClick', null, pars);
+        this.setState({ tools: newToolsArray });
     }
 
     // 改变画笔粗细
@@ -140,9 +150,12 @@ class Test extends Component {
         if (!value || value == '') return;
         let sketchpadConfig = this.state.sketchpadConfig;
         sketchpadConfig[name] = value;
+        let pars = {
+            type:name,
+            value:value
+        }
+        this.sketchpadChange(pars);
         this.setState({ sketchpadConfig: sketchpadConfig });
-
-        // this.handleClick(sketchpadConfig);
     }
 
     // 画笔粗细模板
@@ -191,10 +204,6 @@ class Test extends Component {
         if (attr) return attr.map((value) => this[`${value}Template`](value, index, skconfig));
     }
 
-    handleClick(pars){ // 此处使用箭头函数，避免bind绑定
-        this.props.handleClick(pars,true);
-    }
-
     render() {
         const expand = this.state.tools[0].expand;
         const toolsArray = expand ? this.state.tools : [this.state.tools[0]];
@@ -209,12 +218,12 @@ class Test extends Component {
                 </div>
             </div >
         })
-        // className={`dragBox ${this.state.showBrush ? 'showBrush' : ''}`} 
-        return (<div className={`drag`} style={{ height: `${toolsArray.length == 1 ? '48px' : '312px'}`,right:`${this.state.position.right}`,top:`${this.state.position.top}` }} draggable="true" onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd} onDrop={this.handleDrop} onDragEnter={this.handleDragEnter} onDragLeave={this.handleDragLeave}>
+
+        return (<div className='drag' style={{ height: `${toolsArray.length == 1 ? '48px' : '312px'}`,display:`${this.props.showBrush ? 'flex' : 'none'}`,right:`${this.state.position.right}`,top:`${this.state.position.top}` }} draggable="true" onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd} onDrop={this.handleDrop} onDragEnter={this.handleDragEnter} onDragLeave={this.handleDragLeave}>
             {itmes}
         </div>
         );
     }
 }
 
-export default Test;
+export default BrushBox;

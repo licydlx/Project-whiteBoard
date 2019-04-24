@@ -10,13 +10,13 @@ function signalResponse(engine, callback) {
         
         engine.channel.onChannelLeaved = (account,uid) => {
             console.log('onChannelLeaved');
-            console.log(account);
-            console.log(uid);
+            // console.log(account);
+            // console.log(uid);
         }
         engine.channel.onChannelUserLeaved = (account,uid) => {
             console.log('onChannelUserLeaved');
-            console.log(account);
-            console.log(uid);
+            // console.log(account);
+            // console.log(uid);
         }
     }
 
@@ -24,7 +24,7 @@ function signalResponse(engine, callback) {
     if(engine.session){
         engine.session.onLogout = (a) => {
             console.log('onLogout');
-            console.log(a);
+            // console.log(a);
            // callback(e);
         }
     }
