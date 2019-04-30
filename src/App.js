@@ -104,14 +104,14 @@ class App extends Component {
             }
         }
 
-        // let account = Math.floor(Math.random() * 100);
-        // let data = {
-        //     role: 0,
-        //     uid: account,
-        //     channel: 'q2',
-        //     canDraw: true
-        // }
-        // this.loginChannel(data);
+        let account = Math.floor(Math.random() * 100);
+        let data = {
+            role: 0,
+            uid: account,
+            channel: 'q2',
+            canDraw: true
+        }
+        this.loginChannel(data);
     }
 
     componentDidMount() {

@@ -11,11 +11,12 @@ class SwitchPage extends React.Component {
         super(props);
         this.state = {
             switchPage: props.switchPage,
-            position:{
-                right:'200px',
-                bottom:'50px'
+            position: {
+                right: '200px',
+                bottom: '50px'
             },
-            inputValue:null
+            inputValue: null,
+            fullScreen: false,
         }
 
         this.offsetX = null;
@@ -124,16 +125,16 @@ class SwitchPage extends React.Component {
         //     }
         // }
 
-        if(e.keyCode == 13){
+        if (e.keyCode == 13) {
             let value = this.state.inputValue;
             let totalPage = parseInt(this.state.switchPage.totalPage);
 
-            if(value > 0 && value - 1 < totalPage){
+            if (value > 0 && value - 1 < totalPage) {
                 let leftIcon = true;
                 let rightIcon = true;
                 if (value == 1) leftIcon = false;
                 if (value == totalPage) rightIcon = false;
-        
+
                 let state = {
                     towardsPage: value,
                     leftIcon: leftIcon,
@@ -141,32 +142,44 @@ class SwitchPage extends React.Component {
                     totalPage: totalPage,
                 }
                 this.props.jumpPage(state, true);
-
-               // this.state.inputValue= null;
+                // this.state.inputValue= null;
             }
         }
     }
 
-    handleChange(e){
+    handleChange(e) {
         this.setState({
-            inputValue:e.target.value
+            inputValue: e.target.value
+        })
+    }
+
+    fullScreen(e) {
+        let status = this.state.fullScreen;
+        let data = status ? 'miniWhiteboard' : 'maxWhiteboard';
+        if (window !== window.parent) window.parent.postMessage(data, '*');
+        if (window.webkit) window.webkit.messageHandlers[data].postMessage(data);
+        this.setState({
+            fullScreen: !status
         })
     }
 
     render() {
         if (this.props) this.state.switchPage = this.props.switchPage;
         let state = this.state.switchPage;
-        return <div className='switchBox' style={{display:`${this.props.showSwitchPage ? 'flex':'none'}`,right:`${this.state.position.right}`,bottom:`${this.state.position.bottom}`}}  draggable="true" onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd}>
+        return <div className='switchBox' style={{ display: `${this.props.showSwitchPage ? 'flex' : 'none'}`, right: `${this.state.position.right}`, bottom: `${this.state.position.bottom}` }} draggable="true" onDrag={this.handleDrag} onDragStart={this.handleDragStart} onDragOver={this.handleDragOver} onDragEnd={this.handleDragEnd}>
             <div>
-                <img className={`leftIcon ${state.leftIcon ? '' : 'disabled'}`} key='leftIcon' onClick={this.towardsPageFn.bind(this)} src='https://global.talk-cloud.net/static/h5_new_3.2.0.9/img/beyondDefault/main/default/left.png' />
+                <img className={`leftIcon ${state.leftIcon ? '' : 'disabled'}`} key='leftIcon' onClick={this.towardsPageFn.bind(this)} src='https://res.miaocode.com/livePlatform/soundNetwork/images/10double.png' />
             </div>
             <div>
                 {/* onKeyDown={(e)=>{this.handleKeydown(e);}} onChange={this.handleChange.bind(this)} */}
-                <input className='towardsPage' type='text' maxLength='2'  placeholder={state.towardsPage}  />
+                <input className='towardsPage' type='text' maxLength='2' placeholder={state.towardsPage} />
             </div>
             <div className='totalPage'>/{state.totalPage}</div>
             <div>
-                <img className={`rightIcon ${state.rightIcon ? '' : 'disabled'}`} key='rightIcon' onClick={this.towardsPageFn.bind(this)} src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAbCAMAAAB7jU7LAAAASFBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////neHiwAAAAF3RSTlMAAyIc3ePZjeiflhSsp9SahHQtKW5aUcqQkhoAAABhSURBVBjTjc7bCoAgFERRrTQvmdpt/v9PE4LjMSHabwvmYYTMUrAyFu6Exn7tHbh167HYfnkqFq3jy455UL2vShmAo9IC2pMiMI0k12kgzYD6LVOVinbS+ahOzcafa1LfDX3aBqw+XP/+AAAAAElFTkSuQmCC' />
+                <img className={`rightIcon ${state.rightIcon ? '' : 'disabled'}`} key='rightIcon' onClick={this.towardsPageFn.bind(this)} src='https://res.miaocode.com/livePlatform/soundNetwork/images/11double.png' />
+            </div>
+            <div>
+                <img onClick={this.fullScreen.bind(this)} src={`https://res.miaocode.com/livePlatform/soundNetwork/images/${this.state.fullScreen ? '09' : '08'}double.png`} />
             </div>
         </div>
     }
