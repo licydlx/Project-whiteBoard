@@ -1,3 +1,5 @@
+// 用户身份，0：老师；1：助教；2：学生；3：旁听；4：隐身用户; 5:巡课
+
 import React, { Component } from 'react';
 import fabric from 'fabric';
 import GLB from './configs/GLB';
@@ -11,14 +13,12 @@ import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
 import messageEngine from './libs/messageEngine';
 
+import localforage from 'localforage';
+
 class App extends Component {
     constructor() {
         super();
-        // 用户身份，0：老师；1：助教；2：学生；3：旁听；4：隐身用户; 5:巡课
         this.state = {
-            role: 0,
-            account: '',
-            channel: '',
             showCourseware: {
                 value: true,
                 link: 'https://www.kunqu.tech/page1/'
@@ -112,6 +112,12 @@ class App extends Component {
             canDraw: true
         }
         this.loginChannel(data);
+
+        localforage.setItem('key', 'value').then(this.doSomethingElse);
+    }
+    
+    doSomethingElse(){
+        console.log('ok')
     }
 
     componentDidMount() {
@@ -451,21 +457,11 @@ class App extends Component {
     }
 
     render() {
-        let basicInfo = {
-            position: 'absolute', top: '30px', left: '20px', 'zIndex': '4'
-        }
-
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.showCourseware} />
             <SketchpadBox state={this.state.showSketchpad} />
             <BrushBox showBrush={this.state.showBrush} sketchpadChange={this.sketchpadChange.bind(this)} childCallback={this.childCallback.bind(this)} broadcastMessage={this.broadcastMessage.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} />
             <SwitchPage showSwitchPage={this.state.showSwitchPage} switchPage={this.state.switchPage} jumpPage={this.jumpPage.bind(this)} />
-            <div style={basicInfo}>
-                <label>账号：</label>
-                <p>{this.state.account}</p>
-                <label>频道：</label>
-                <p>{this.state.channel}</p>
-            </div>
         </div>
         );
     }
