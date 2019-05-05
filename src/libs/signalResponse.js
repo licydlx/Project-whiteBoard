@@ -13,11 +13,13 @@ function signalResponse(engine, callback) {
             // console.log(account);
             // console.log(uid);
         }
+
         engine.channel.onChannelUserLeaved = (account,uid) => {
             console.log('onChannelUserLeaved');
             // console.log(account);
             // console.log(uid);
         }
+        
     }
 
     // 缓存

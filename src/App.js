@@ -3,106 +3,25 @@
 import React, { Component } from 'react';
 import fabric from 'fabric';
 import GLB from './configs/GLB';
+import localforage from 'localforage';
+
+import stateConfig from './stateConfig';
+
 import CoursewareBox from './ui/CoursewareBox';
 import SketchpadBox from './ui/SketchpadBox';
 import SwitchPage from './ui/SwitchPage';
 import BrushBox from './ui/BrushBox';
 
+import {findDimensions} from './libs/toolSet';
 import sketchpadEngine from './libs/sketchpadEngine';
 import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
 import messageEngine from './libs/messageEngine';
 
-import localforage from 'localforage';
-
 class App extends Component {
     constructor() {
         super();
-        this.state = {
-            showCourseware: {
-                value: true,
-                link: 'https://www.kunqu.tech/page1/'
-            },
-
-            showBrush: false,
-            showSketchpad: false,
-            showSwitchPage: false,
-
-            tools: [
-                {
-                    type: 'toolsBox',
-                    expand: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/01double.png',
-                    attrStyle: null,
-                    state: false,
-                },
-                {
-                    type: 'sketchpad',
-                    state: true,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png',
-                    attrStyle: null
-                },
-                {
-                    type: 'pen',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/03double.png',
-                    attrStyle: {
-                        height: '120px'
-                    },
-                    attr: ['penSize', 'penColor']
-                },
-                {
-                    type: 'text',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/04double.png',
-                    attrStyle: {
-                        height: '120px'
-                    },
-                    attr: ['textSize', 'penColor']
-                },
-                {
-                    type: 'graph',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/07double.png',
-                    attrStyle: {
-                        height: '150px'
-                    },
-                    attr: ['penShape', 'penColor']
-                },
-                {
-                    type: 'remove',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/06double.png',
-                    attrStyle: null
-                },
-                {
-                    type: 'empty',
-                    state: false,
-                    imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/05double.png',
-                    attrStyle: null
-                },
-            ],
-            sketchpadConfig: {
-                penSize: 2,
-                textSize: 14,
-                penColor: '#fff',
-                penShape: ''
-            },
-            position: {
-                top: '100px',
-                right: '60px'
-            },
-            toolsCache: {
-                preIndex: 1,
-                preState: null
-            },
-            switchPage: {
-                leftIcon: false,
-                rightIcon: true,
-                towardsPage: 1,
-                totalPage: 4,
-            }
-        }
+        this.state = stateConfig;
 
         let account = Math.floor(Math.random() * 100);
         let data = {
@@ -113,16 +32,27 @@ class App extends Component {
         }
         this.loginChannel(data);
 
-        localforage.setItem('key', 'value').then(this.doSomethingElse);
-    }
-    
-    doSomethingElse(){
-        console.log('ok')
+        // 配置不同的驱动优先级
+        localforage.config({
+            driver: [localforage.INDEXEDDB,
+            localforage.WEBSQL,
+            localforage.LOCALSTORAGE],
+            name: "courseCache",
+            description: '白板缓存机制'
+        });
+
+        // 时间戳
+        // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
+        // let key = + new Date();
+        // localforage.setItem(key, {
+        //     type:''
+        // });
+        // store.setItem('ydlx', [1, 2, 'three']).then(this.doSomethingElse);
     }
 
     componentDidMount() {
-        this.findDimensions();
-        window.onresize = this.findDimensions;
+        findDimensions();
+        window.onresize = findDimensions();
         // 课件iframe
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
         // message监听
@@ -144,44 +74,6 @@ class App extends Component {
                     this.loginChannel(data);
                 }
             }.bind(this);
-        }
-    }
-
-    // ====================
-    // 随意缩放导致画板出现bug，需重新实例化
-    // ====================
-
-    findDimensions() {
-        let winWidth = 0;
-        let winHeight = 0;
-        //函数：获取尺寸
-        //获取窗口宽度
-        if (window.innerWidth) {
-            winWidth = window.innerWidth;
-        } else if ((document.body) && (document.body.clientWidth)) {
-            winWidth = document.body.clientWidth;
-        }
-        //获取窗口高度
-        if (window.innerHeight) {
-            winHeight = window.innerHeight;
-        } else if ((document.body) && (document.body.clientHeight)) {
-            winHeight = document.body.clientHeight;
-        }
-
-        let whiteboardBox = document.getElementById('whiteboardBox');
-        let sketchpad = document.getElementById('sketchpad');
-        let rate = winWidth/winHeight;
-
-        if(rate > 16/9){
-            whiteboardBox.style.width = winHeight*16/9 + 'px';
-            whiteboardBox.style.height = winHeight + 'px';
-            sketchpad.width = winHeight*16/9;
-            sketchpad.height = winHeight;
-        } else {
-            whiteboardBox.style.width = winWidth + 'px';
-            whiteboardBox.style.height = winWidth*9/16 + 'px';
-            sketchpad.width = winWidth;
-            sketchpad.height = winWidth*9/16;
         }
     }
 
@@ -226,6 +118,8 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
+        let key = + new Date();
+        localforage.setItem(key + '', data);
         this.engine.channel.messageChannelSend(JSON.stringify(data));
     }
 
