@@ -1,6 +1,10 @@
 .switchBox {
   position: absolute;
-  display: flex;
+  margin: auto;
+  left: 0;
+  bottom: 20px;
+  right: 0;
+
   justify-content: flex-start;
   align-items: center;
   z-index: 4;

@@ -12,7 +12,7 @@ import SketchpadBox from './ui/SketchpadBox';
 import SwitchPage from './ui/SwitchPage';
 import BrushBox from './ui/BrushBox';
 
-import {findDimensions} from './libs/toolSet';
+import { findDimensions } from './libs/toolSet';
 import sketchpadEngine from './libs/sketchpadEngine';
 import signalEngine from './libs/signalEngine';
 import signalResponse from './libs/signalResponse';
@@ -23,6 +23,13 @@ class App extends Component {
         super();
         this.state = stateConfig;
 
+        // message监听
+        this.message = new messageEngine(this.listenPostMessage.bind(this));
+        this.message.listen();
+
+        //
+        // 默认账号登录
+        // 
         let account = Math.floor(Math.random() * 100);
         let data = {
             role: 0,
@@ -33,13 +40,13 @@ class App extends Component {
         this.loginChannel(data);
 
         // 配置不同的驱动优先级
-        localforage.config({
-            driver: [localforage.INDEXEDDB,
-            localforage.WEBSQL,
-            localforage.LOCALSTORAGE],
-            name: "courseCache",
-            description: '白板缓存机制'
-        });
+        // localforage.config({
+        //     driver: [localforage.INDEXEDDB,
+        //     localforage.WEBSQL,
+        //     localforage.LOCALSTORAGE],
+        //     name: "courseCache",
+        //     description: '白板缓存机制'
+        // });
 
         // 时间戳
         // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
@@ -51,21 +58,9 @@ class App extends Component {
     }
 
     componentDidMount() {
-        findDimensions();
-        window.onresize = findDimensions();
-        // 课件iframe
-        this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
-        // message监听
-        this.message = new messageEngine(this.listenPostMessage.bind(this));
-        // console.log(this.message);
-        this.message.listen();
-        // 画板实例化
-        this.sketchpad = new sketchpadEngine(function (method, context, pars) {
-            this.broadcastMessage('sketchpad', method, context, pars);
-        }.bind(this));
-
-        // DOM加载完毕，请求用户信息及登录
+        // DOM加载完毕，web请求用户信息及登录
         this.message.sendMessage('father', 'readyForChannel', '*');
+        // IOS请求用户信息及登录
         if (window.webkit) {
             window.webkit.messageHandlers.readyForChannel.postMessage('readyForChannel');
             window.receiveResourceInfoFun = function (data) {
@@ -75,33 +70,52 @@ class App extends Component {
                 }
             }.bind(this);
         }
+
+        // 屏幕尺寸自适应
+        findDimensions();
+        window.onresize = findDimensions();
+
+        // 课件iframe
+        this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
+
+        // 画板实例化
+        this.sketchpad = new sketchpadEngine(this.state.brush.sketchpad,function (method, context, pars) {
+            this.broadcastMessage('sketchpad', method, context, pars);
+        }.bind(this));
+
     }
 
     componentWillMount() {
-        //页面刷新或关闭提示
+        // 页面刷新或关闭提示
         window.onbeforeunload = function (event) {
             this.engine.channel.channelLeave();
         }.bind(this);
     }
 
     componentWillUnmount() {
+        // 移除监听
         this.message.remove();
     }
 
     // 新用户注册，加入频道
     loginChannel(data) {
-        console.log('登陆中...');
-        // 
+
         signalEngine(data, function (engine) {
             console.log('登陆成功...');
             this.engine = engine;
             GLB.logined = true;
             this.setState({
-                account: GLB.account,
-                channel: GLB.channel,
-                showBrush: GLB.canDraw,
-                showSwitchPage: GLB.role == 0 ? true : false
+                showBrush: GLB.canDraw
             })
+
+            if (GLB.role == 0) {
+                // let newSwitchPage = this.state.switchPage;
+                // newSwitchPage.show = true;
+                // this.setState({
+                //     switchPage: newSwitchPage
+                // }) 
+            }
+
             // 接入声网信令sdk对应的回调 
             signalResponse(this.engine, this.listenSignalMessage.bind(this));
         }.bind(this));
@@ -118,8 +132,8 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
-        let key = + new Date();
-        localforage.setItem(key + '', data);
+        // let key = + new Date();
+        // localforage.setItem(key + '', data);
         this.engine.channel.messageChannelSend(JSON.stringify(data));
     }
 
@@ -136,15 +150,17 @@ class App extends Component {
                     let uid = data.sigUid + '123';
                     if (GLB.account == uid && GLB.role == '2') {
                         this.setState({
-                            showBrush: data.sigValue.value ? true : false
+                            brush: {
+                                show: data.sigValue.value ? true : false
+                            }
                         })
                     }
                     break;
                 /****展示课件*****/
                 case 'showCourseware':
                     this.setState({
-                        showCourseware: {
-                            value: data.sigValue.value ? true : false,
+                        course: {
+                            show: data.sigValue.value ? true : false,
                             link: data.sigValue.value ? data.sigValue.link : ''
                         }
                     })
@@ -190,22 +206,20 @@ class App extends Component {
                 // 白板与课件通信
                 case 'courseware':
                     if (data.pars.type == 'jumpPage') this.jumpPage(data.pars.switchPage);
-
                     break;
             }
         }
     }
+
     // 接受postmessage消息
     listenPostMessage(e) {
-        if (!GLB.logined && typeof e.data == 'string' && e.data !== "") {
-            let data = JSON.parse(e.data);
-            if (data.uid && data.channel) this.loginChannel(data);
-        } else {
-            //if (window === window.parent) return;
-            if (typeof e.data !== 'string') return;
-            if (!this.engine) return console.log('请先登录及加入频道！');
-            let data = JSON.parse(e.data);
+        if (typeof e.data !== 'string' || e.data == '') return;
+        let data = JSON.parse(e.data);
+        // GLB.logined 是否已登录频道
+        if (GLB.logined) {
             this.broadcastMessage('courseware', null, null, data);
+        } else {
+            if (data.uid && data.channel) this.loginChannel(data);
         }
     };
 
@@ -232,38 +246,31 @@ class App extends Component {
         if (boolean) this.broadcastMessage('courseware', null, null, data);
     }
 
-    sketchpadChange(pars, boolean) {
-        let newConfig = this.state.sketchpadConfig;
-        newConfig[pars.type] = pars.value;
-        this.setState({ sketchpadConfig: newConfig });
+    sketchpadChoosedCallback(pars, boolean) {
+        const brush = Object.assign({}, this.state.brush, {sketchpad: pars});
+        this.setState({
+            brush: brush
+        });
 
-        let data = {};
-        switch (pars.type) {
-            case 'penShape':
-                data.type = 'drawType';
-                data.value = pars.value;
-                break;
-            case 'penSize':
-                data.type = 'drawWidth';
-                data.value = pars.value;
-                break;
-            case 'penColor':
-                data.type = 'color';
-                data.value = pars.value;
-                break;
-            case 'textSize':
-                data.type = 'textSize';
-                data.value = pars.value;
-                break;
-        }
-        this.sketchpad.changeConfig(data);
+        console.log('sketchpadChoosedCallback')
+        console.log(this.sketchpad);
+        this.sketchpad.color = 'red';
+        this.sketchpad.drawWidth = 8;
+        this.sketchpad.canvas.freeDrawingBrush.color = 'red';
+        this.sketchpad.canvas.freeDrawingBrush.width = 8;
+        // switch (pars.type) {
+        //     case 'pen':
+        //     this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
+        //     this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
 
-        if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChange', null, pars);
+        //     this.sketchpad.color = pars.penColor;
+        //     this.sketchpad.drawWidth = pars.penSize;
+        //     break;
+        // }
+        // if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChange', null, pars);
     }
 
-    childCallback(pars) {
-        let showState = null;
-
+    brushChoosedCallback(pars) {
         if (this.sketchpad.textbox) {
             // 退出文本编辑状态
             this.sketchpad.textbox.exitEditing();
@@ -271,31 +278,24 @@ class App extends Component {
         }
 
         switch (pars.type) {
-            case 'sketchpad':
-                showState = false;
-                break;
             case 'pen':
-                showState = true;
                 this.sketchpad.canvas.isDrawingMode = true;
                 this.sketchpad.drawType = ''
                 break;
             case 'text':
-                showState = true;
                 this.sketchpad.drawType = pars.type;
                 this.sketchpad.canvas.isDrawingMode = false;
                 this.sketchpad.canvas.skipTargetFind = true;
                 this.sketchpad.canvas.selection = false;
                 break;
             case 'graph':
-                showState = true;
                 this.sketchpad.drawWidth = 2;
-                this.sketchpad.drawType = this.state.sketchpadConfig.penShape;
+                this.sketchpad.drawType = pars.penShape;
                 this.sketchpad.canvas.isDrawingMode = false;
                 this.sketchpad.canvas.skipTargetFind = true;
                 this.sketchpad.canvas.selection = false;
                 break;
             case 'remove':
-                showState = true;
                 this.sketchpad.drawType = pars.type;
                 this.sketchpad.canvas.isDrawingMode = false;
                 this.sketchpad.canvas.selection = true;
@@ -303,59 +303,23 @@ class App extends Component {
                 this.sketchpad.canvas.selectable = true;
                 break;
             case 'empty':
-                showState = true;
-
                 this.sketchpad.removeAll()
                 break;
         }
-        if (showState !== null) this.setState({ showSketchpad: showState });
-    }
 
-    handleClick(pars) {
-        let toolsArray = this.state.tools;
-        let showState = false;
-        let index = pars.index;
-        let newToolsArray;
-
-        if (this.sketchpad.textbox) {
-            // 退出文本编辑状态
-            this.sketchpad.textbox.exitEditing();
-            this.sketchpad.textbox = null;
-        }
-
-        switch (pars.type) {
-            case 'toolsBox':
-                toolsArray[index].expand = toolsArray[index].expand ? false : true;
-                newToolsArray = toolsArray;
-                showState = this.state.showSketchpad;
-                break;
-            case 'sketchpad':
-            case 'pen':
-            case 'text':
-            case 'graph':
-            case 'remove':
-            case 'empty':
-                newToolsArray = toolsArray.map(function (m, n, arr) {
-                    if (n == index) {
-                        arr[n].state = arr[n].state ? false : true;
-                    } else {
-                        arr[n].state = false;
-                    }
-                    return m;
-                })
-
-                showState = Object.is(pars.type, 'sketchpad') ? false : true;
-                break;
-        }
-        this.setState({ showSketchpad: showState, tools: newToolsArray });
+        const brush = Object.assign({}, this.state.brush, {sketchpad: pars});
+        this.setState({
+            brush: brush
+        });
     }
 
     render() {
         return (<div id="whiteboardBox" className="whiteboardBox">
-            <CoursewareBox state={this.state.showCourseware} />
-            <SketchpadBox state={this.state.showSketchpad} />
-            <BrushBox showBrush={this.state.showBrush} sketchpadChange={this.sketchpadChange.bind(this)} childCallback={this.childCallback.bind(this)} broadcastMessage={this.broadcastMessage.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} />
-            <SwitchPage showSwitchPage={this.state.showSwitchPage} switchPage={this.state.switchPage} jumpPage={this.jumpPage.bind(this)} />
+            <CoursewareBox state={this.state.course} />
+            <SketchpadBox state={this.state.brush} />
+            {/* <BrushBox showBrush={this.state.showBrush} sketchpadChange={this.sketchpadChange.bind(this)} childCallback={this.childCallback.bind(this)} broadcastMessage={this.broadcastMessage.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} /> */}
+            <BrushBox state={this.state.brush} brushChoosedCallback={this.brushChoosedCallback.bind(this)} sketchpadChoosedCallback={this.sketchpadChoosedCallback.bind(this)} />
+            <SwitchPage state={this.state.switchPage} jumpPage={this.jumpPage.bind(this)} />
         </div>
         );
     }

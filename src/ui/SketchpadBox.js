@@ -6,13 +6,15 @@ class SketchpadBox extends React.Component {
     }
 
     render() {
+        this.state = this.props.state;
+        
         let style = {
-            display: `${this.props.state ? 'block' : 'none'}`
+            display: `${this.state.sketchpad.type !== 'sketchpad' ? 'block' : 'none'}`
         };
 
         let sketchpad = {
-            width:'100%',
-            height:'100%'
+            width: '100%',
+            height: '100%'
         }
 
         return <div id="sketchpadBox" className="sketchpadBox" style={style}>

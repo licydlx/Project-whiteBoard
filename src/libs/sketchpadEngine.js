@@ -1,17 +1,16 @@
 class sketchpadEngine {
-    constructor(callback) {
+    constructor(pars,callback) {
         this.callback = callback;
         // 绘图始终
         this.mouseFrom = {};
         this.mouseTo = {};
         // 绘制类型
-        this.drawType = '';
+        this.drawType = pars.penShape;
         // 笔触宽度
-        this.drawWidth = 2;
-
-        this.textSize = 14;
+        this.drawWidth = pars.penSize;
+        this.textSize = pars.textSize;
         // 画笔颜色
-        this.color = "#fff";
+        this.color = pars.penColor;
         // 当前绘制对象
         this.drawingObject = null;
         // 绘制移动计数器
@@ -190,12 +189,16 @@ class sketchpadEngine {
     }
 
     changeConfig(pars){
-        console.log('changeConfig');
-        console.log(pars);
-        if(Object.is(pars.type,'color')) this.canvas.freeDrawingBrush.color = pars.value;
-        if(Object.is(pars.type,'drawWidth')) this.canvas.freeDrawingBrush.width = pars.value;
-        this[pars.type] = pars.value;
+        if(Object.is(pars.type,'pen')) {
+            this.canvas.freeDrawingBrush.color = pars.penColor;
+            this.canvas.freeDrawingBrush.width = pars.penSize;
+        }
+        this.drawType = pars.penShape;
+        this.drawWidth = pars.penSize;
+        this.textSize = pars.textSize;
+        this.color = pars.penColor;
     }
+    
     // 绘制
     drawing(context,pars) {
         if (!pars) {

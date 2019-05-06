@@ -1,87 +1,50 @@
+/**
+ * course : 课件区
+ * 1.show : 是否显示
+ * 2.link : 课件URL
+ */
+
+/**
+ * switchPage : 切换栏目
+ * 1.show : 是否显示
+ * 2.leftIcon : 左键状态
+ * 3.rightIcon : 右键状态
+ * 4.currentPage : 当前页面
+ * 5.totalPage : 全部页面
+ * 6.fullScreen : 是否全屏
+ */
+
+/**
+* course : 课件区
+* 1.show : 是否显示
+* 2.link : 课件URL
+*/
+
 const stateConfig = {
-    showCourseware: {
-        value: true,
+    course: {
+        show: true,
         link: 'https://www.kunqu.tech/page1/'
     },
 
-    showBrush: false,
-    showSketchpad: false,
-    showSwitchPage: false,
-
-    tools: [
-        {
-            type: 'toolsBox',
-            expand: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/01double.png',
-            attrStyle: null,
-            state: false,
-        },
-        {
-            type: 'sketchpad',
-            state: true,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png',
-            attrStyle: null
-        },
-        {
-            type: 'pen',
-            state: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/03double.png',
-            attrStyle: {
-                height: '120px'
-            },
-            attr: ['penSize', 'penColor']
-        },
-        {
-            type: 'text',
-            state: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/04double.png',
-            attrStyle: {
-                height: '120px'
-            },
-            attr: ['textSize', 'penColor']
-        },
-        {
-            type: 'graph',
-            state: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/07double.png',
-            attrStyle: {
-                height: '150px'
-            },
-            attr: ['penShape', 'penColor']
-        },
-        {
-            type: 'remove',
-            state: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/06double.png',
-            attrStyle: null
-        },
-        {
-            type: 'empty',
-            state: false,
-            imgLink: 'https://res.miaocode.com/livePlatform/soundNetwork/images/05double.png',
-            attrStyle: null
-        },
-    ],
-    sketchpadConfig: {
-        penSize: 2,
-        textSize: 14,
-        penColor: '#fff',
-        penShape: ''
-    },
-    position: {
-        top: '100px',
-        right: '60px'
-    },
-    toolsCache: {
-        preIndex: 1,
-        preState: null
-    },
     switchPage: {
+        show: false,
         leftIcon: false,
         rightIcon: true,
-        towardsPage: 1,
+        currentPage: 1,
         totalPage: 4,
-    }
+        fullScreen: false
+    },
+
+    brush: {
+        show: true,
+        sketchpad:{
+            type:'sketchpad',
+            penSize: 2,
+            textSize: 14,
+            penColor: '#fff',
+            penShape: ''
+        }
+    },
 }
 
 export default stateConfig;
