@@ -15,9 +15,14 @@
  */
 
 /**
-* course : 课件区
+* brush : 画板区
 * 1.show : 是否显示
-* 2.link : 课件URL
+* 2.sketchpad :
+*        1.type : 工具类型
+*        2.penSize : 笔尺寸
+*        3.textSize : 文本尺寸
+*        4.penColor : 笔颜色 
+*        5.penShape : 画形状  
 */
 
 const stateConfig = {
@@ -36,7 +41,7 @@ const stateConfig = {
     },
 
     brush: {
-        show: true,
+        show: false,
         sketchpad:{
             type:'sketchpad',
             penSize: 2,

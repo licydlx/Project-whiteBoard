@@ -81,15 +81,10 @@ class BrushBox extends Component {
         //     }
         // }
         const key = e._dispatchInstances.key;
-        // const index = e._dispatchInstances.index;
-        // // 信令通信
-        // let pars =  {
-        //     type:key,
-        //     index:index
-        // }
-        const newSketchpad = Object.assign({}, this.state.sketchpad, {type: key});
-        this.props.brushChoosedCallback(newSketchpad);
-        // this.broadcastMessage('whiteboard', 'handleClick', null, pars);
+        // 深拷贝 
+        let newBrush = JSON.parse(JSON.stringify(this.state));
+        newBrush.sketchpad.type = key;
+        this.props.brushChoosedCallback(newBrush,true); 
     }
 
     // 改变画笔粗细
@@ -100,15 +95,10 @@ class BrushBox extends Component {
         e.stopPropagation();
         const value = e._dispatchInstances[0].key;
         if (!value || value == '') return;
-        const newSketchpad = Object.assign({}, this.state.sketchpad, {[name]: value});
-        this.props.sketchpadChoosedCallback(newSketchpad);
-
-        // let pars = {
-        //     type:name,
-        //     value:value
-        // }
-        // this.sketchpadChange(pars);
-        // this.setState({ sketchpadConfig: sketchpadConfig });
+        // 深拷贝 
+        let newBrush = JSON.parse(JSON.stringify(this.state));
+        newBrush.sketchpad[name] = value;
+        this.props.sketchpadChoosedCallback(newBrush,true);
     }
 
     // 画笔粗细模板
@@ -156,10 +146,8 @@ class BrushBox extends Component {
     toolAttrDom(attr, index) {
         if (attr) return attr.map((value) => this[`${value}Template`](value, index));
     }
-
     render() {
         this.state = this.props.state;
-
         const itmes = this.tools.map((value, index) => {
             return <div className='tool' key={value.type} data-type={value.type} onClick={this.brushChoosed.bind(this)}>
                 <div className={`${value.type == this.state.sketchpad.type ? 'active' : ''}`}>

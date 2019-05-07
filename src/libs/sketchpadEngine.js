@@ -85,6 +85,9 @@ class sketchpadEngine {
             this.mouseTo.x = ve2.x;
             this.mouseTo.y = ve2.y;
 
+            let c = this.canvas.toDatalessJSON();
+            console.log(c);
+
             //let data = this.dataFiltering();
             if (callback) callback(null,'mouseUp');
             //this.drawing(this.drawConfig);
@@ -203,6 +206,7 @@ class sketchpadEngine {
     drawing(context,pars) {
         if (!pars) {
             pars = this;
+            console.log(this);
         } else {
             if (typeof pars === 'string') pars = JSON.parse(pars);
         }

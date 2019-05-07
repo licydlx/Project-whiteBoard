@@ -3,13 +3,11 @@ import './SwitchPage.css';
 /**
  * @description:页面切换控制区模块 
  */
-
 class SwitchPage extends React.Component {
     constructor(props) {
         super(props);
         this.currentPage = null;
     }
-
     // 切页
     towardsPageFn(e) {
         // for (const key in e) {
@@ -30,7 +28,6 @@ class SwitchPage extends React.Component {
         }
         newSwithPage.leftIcon = newSwithPage.currentPage == 1 ? false : true;
         newSwithPage.rightIcon = newSwithPage.currentPage == newSwithPage.totalPage ? false : true;
-        this.setState(newSwithPage);
         this.props.jumpPage(newSwithPage, true);
     }
 
@@ -44,8 +41,6 @@ class SwitchPage extends React.Component {
                 newSwithPage.currentPage = value;
                 newSwithPage.leftIcon = newSwithPage.currentPage == 1 ? false : true;
                 newSwithPage.rightIcon = newSwithPage.currentPage == newSwithPage.totalPage ? false : true;
-
-                this.setState(newSwithPage);
                 this.props.jumpPage(newSwithPage, true);
             }
         }
@@ -58,19 +53,16 @@ class SwitchPage extends React.Component {
 
     // 全屏
     fullScreen(e) {
-        let newSwithPage = this.state;
+        let newSwithPage = Object.assign({}, this.state);
         let data = newSwithPage.fullScreen ? 'miniWhiteboard' : 'maxWhiteboard';
+        newSwithPage.fullScreen = !newSwithPage.fullScreen;
         if (window !== window.parent) window.parent.postMessage(data, '*');
         if (window.webkit) window.webkit.messageHandlers[data].postMessage(data);
-
-        this.setState({
-            fullScreen: !newSwithPage.fullScreen
-        })
+        this.props.fullScreen(newSwithPage, true);
     }
 
     render() {
         this.state = this.props.state;
-
         return <div className='switchBox' style={{ display: `${this.state.show ? 'flex' : 'none'}` }}>
             <div>
                 <img className={`leftIcon ${this.state.leftIcon ? '' : 'disabled'}`} key='leftIcon' onClick={this.towardsPageFn.bind(this)} src='https://res.miaocode.com/livePlatform/soundNetwork/images/10double.png' />
