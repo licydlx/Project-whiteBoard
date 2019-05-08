@@ -38,21 +38,16 @@ class App extends Component {
             canDraw: true
         }
         this.loginChannel(data);
+
+        this.localforage = localforage;
         // 配置不同的驱动优先级
-        // localforage.config({
-        //     driver: [localforage.INDEXEDDB,
-        //     localforage.WEBSQL,
-        //     localforage.LOCALSTORAGE],
-        //     name: "courseCache",
-        //     description: '白板缓存机制'
-        // });
-        // 时间戳
-        // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
-        // let key = + new Date();
-        // localforage.setItem(key, {
-        //     type:''
-        // });
-        // store.setItem('ydlx', [1, 2, 'three']).then(this.doSomethingElse);
+        this.localforage.config({
+            driver: [localforage.INDEXEDDB,
+            localforage.WEBSQL,
+            localforage.LOCALSTORAGE],
+            name: "courseCache",
+            description: '白板缓存机制'
+        });
     }
 
     componentDidMount() {
@@ -77,9 +72,6 @@ class App extends Component {
         this.sketchpad = new sketchpadEngine(this.state.brush.sketchpad, function (method, context, pars) {
             this.broadcastMessage('sketchpad', method, context, pars);
         }.bind(this));
-
-        console.log('this.sketchpad');
-        console.log(this.sketchpad);
     }
 
     componentWillMount() {
@@ -100,6 +92,7 @@ class App extends Component {
             console.log('登陆成功...');
             // 接入声网信令sdk对应的回调 
             signalResponse(engine, listenSignalMessage.bind(this));
+            
             this.engine = engine;
             GLB.logined = true;
             // 老师角色为0
@@ -107,6 +100,16 @@ class App extends Component {
                 const newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
                 this.setState({
                     brush: newBrush
+                }, () => {
+                    // 时间戳
+                    // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
+                    let key = + new Date();
+                    // 不同于 localStorage，你可以存储非字符串类型
+                    this.localforage.setItem(key + 'page1', { brush: newBrush }).then(function (value) {
+                        console.log(value);
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
                 })
             }
         }.bind(this));
@@ -123,9 +126,6 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
-        // let key = + new Date();
-        // localforage.setItem(key + '', data);
-        console.log(data);
         this.engine.channel.messageChannelSend(JSON.stringify(data));
     }
 
@@ -137,23 +137,36 @@ class App extends Component {
                 this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
                 this.sketchpad.color = pars.penColor;
                 this.sketchpad.drawWidth = pars.penSize;
-            break;
+                break;
             case 'text':
                 this.sketchpad.textSize = pars.textSize;
                 this.sketchpad.color = pars.penColor;
-            break;
+                break;
             case 'graph':
                 this.sketchpad.drawType = pars.penShape;
                 this.sketchpad.color = pars.penColor;
-            break;
+                break;
         }
         this.setState({
             brush: newBrush
+        }, () => {
+            // 时间戳
+            // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
+            let key = + new Date();
+            let pageNum = this.state.switchPage.currentPage;
+            // 不同于 localStorage，你可以存储非字符串类型
+            localforage.setItem(key + 'page' + pageNum, {
+                brush: newBrush
+            }).then(function (value) {
+
+            }).catch(function (err) {
+                console.log(err);
+            });
         });
         if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
     }
 
-    brushChoosedCallback(newBrush,boolean) {
+    brushChoosedCallback(newBrush, boolean) {
         let pars = newBrush.sketchpad;
         if (this.sketchpad.textbox) {
             // 退出文本编辑状态
@@ -207,7 +220,7 @@ class App extends Component {
         if (boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
     }
 
-    fullScreen(pars,boolean){
+    fullScreen(pars, boolean) {
         this.setState({
             switchPage: pars
         })
@@ -219,7 +232,7 @@ class App extends Component {
             <SketchpadBox state={this.state.brush} />
             {/* <BrushBox showBrush={this.state.showBrush} sketchpadChange={this.sketchpadChange.bind(this)} childCallback={this.childCallback.bind(this)} broadcastMessage={this.broadcastMessage.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} /> */}
             <BrushBox state={this.state.brush} brushChoosedCallback={this.brushChoosedCallback.bind(this)} sketchpadChoosedCallback={this.sketchpadChoosedCallback.bind(this)} />
-            <SwitchPage state={this.state.switchPage} jumpPage={this.jumpPage} fullScreen={this.fullScreen.bind(this)}/>
+            <SwitchPage state={this.state.switchPage} jumpPage={this.jumpPage} fullScreen={this.fullScreen.bind(this)} />
         </div>
         );
     }

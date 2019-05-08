@@ -1,5 +1,5 @@
 class sketchpadEngine {
-    constructor(pars,callback) {
+    constructor(pars, callback) {
         this.callback = callback;
         // 绘图始终
         this.mouseFrom = {};
@@ -76,7 +76,7 @@ class sketchpadEngine {
             }
 
             let data = this.dataFiltering();
-            if (callback) callback('pathCreated',JSON.stringify(data), JSON.stringify(drawObj));
+            if (callback) callback('pathCreated', JSON.stringify(data), JSON.stringify(drawObj));
         }.bind(this));
 
         this.canvas.on("mouse:up", function (e) {
@@ -89,7 +89,7 @@ class sketchpadEngine {
             console.log(c);
 
             //let data = this.dataFiltering();
-            if (callback) callback(null,'mouseUp');
+            if (callback) callback(null, 'mouseUp');
             //this.drawing(this.drawConfig);
             this.drawingObject = null;
             this.doDrawing = false;
@@ -123,13 +123,13 @@ class sketchpadEngine {
                 }
             } else {
                 for (let x = 0; x < this.canvas._objects.length; x++) {
-                    if(this.canvas._objects[x] !== e.target){
+                    if (this.canvas._objects[x] !== e.target) {
                         newTotal.push(x)
                     }
                 }
             }
             this.removeBlock(e);
-            if (callback) callback('removeBlock', JSON.stringify(newTotal),JSON.stringify(newTotal));
+            if (callback) callback('removeBlock', JSON.stringify(newTotal), JSON.stringify(newTotal));
         }.bind(this));
 
         // this.canvas.on("selection:cleared", function (e) {
@@ -141,15 +141,15 @@ class sketchpadEngine {
         // }.bind(this));
     }
 
-    mouseDown(context,pars){
+    mouseDown(context, pars) {
         let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
         this.mouseFrom.x = ve2.x;
         this.mouseFrom.y = ve2.y;
         this.doDrawing = true;
     }
 
-    removeAll(){
-        this.canvas.clear()   
+    removeAll() {
+        this.canvas.clear()
     }
 
     removeBlock(e) {
@@ -185,14 +185,14 @@ class sketchpadEngine {
     }
 
     // 自由绘制
-    pathCreated(context,data) {
+    pathCreated(context, data) {
         if (typeof data === 'string') data = JSON.parse(data);
         let path = new fabric.Path(data.path, data.pathConfig);
         this.canvas.add(path);
     }
 
-    changeConfig(pars){
-        if(Object.is(pars.type,'pen')) {
+    changeConfig(pars) {
+        if (Object.is(pars.type, 'pen')) {
             this.canvas.freeDrawingBrush.color = pars.penColor;
             this.canvas.freeDrawingBrush.width = pars.penSize;
         }
@@ -201,9 +201,9 @@ class sketchpadEngine {
         this.textSize = pars.textSize;
         this.color = pars.penColor;
     }
-    
+
     // 绘制
-    drawing(context,pars) {
+    drawing(context, pars) {
         if (!pars) {
             pars = this;
             console.log(this);
@@ -246,17 +246,6 @@ class sketchpadEngine {
                     hasControls: false
                 });
 
-                // console.log(this.textbox);
-                // this.textbox.on("added", function (e) {
-                //     console.log('added');
-                //     // console.log(e);
-                // }.bind(this));
-
-                // this.textbox.on("mousedown", function (e) {
-                //     console.log('mousedown');
-                //     // console.log(e);
-                // }.bind(this));
-
                 this.canvas.add(this.textbox);
                 this.textbox.enterEditing();
                 this.textbox.hiddenTextarea.focus();
@@ -296,12 +285,10 @@ class sketchpadEngine {
                     fill: "rgba(255, 255, 255, 0)"
                 });
                 break;
-
             case "ellipse":
                 // 椭圆
                 let left = pars.mouseFrom.x;
                 let top = pars.mouseFrom.y;
-                // let radius = Math.sqrt((mouseTo.x - left) * (mouseTo.x - left) + (mouseTo.y - top) * (mouseTo.y - top)) / 2;
                 curDrawing = new fabric.Ellipse({
                     left: left,
                     top: top,
@@ -314,12 +301,9 @@ class sketchpadEngine {
                     strokeWidth: pars.drawWidth
                 });
                 break;
-
             case "remove":
                 break;
         }
-
-
         if (curDrawing) {
             this.canvas.add(curDrawing);
             this.drawingObject = curDrawing;
@@ -352,5 +336,4 @@ class sketchpadEngine {
         return path;
     }
 }
-
 export default sketchpadEngine;

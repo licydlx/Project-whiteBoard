@@ -3,9 +3,7 @@ function signalResponse(engine, callback) {
     // 频道
     if (engine.channel) {
         engine.channel.onMessageChannelReceive = (account, uid, msg) => {
-            if (callback) {
-                callback(msg);
-            }
+            if (callback) callback('onMessageChannelReceive',msg);
         }
         
         engine.channel.onChannelLeaved = (account,uid) => {
@@ -19,7 +17,11 @@ function signalResponse(engine, callback) {
             // console.log(account);
             // console.log(uid);
         }
-        
+
+        engine.channel.onChannelUserJoined = (account, uid) =>{
+            console.log('onChannelUserJoined');
+            if (callback) callback('onChannelUserJoined',{'account':account,'uid':uid});
+        }
     }
 
     // 缓存
@@ -27,7 +29,7 @@ function signalResponse(engine, callback) {
         engine.session.onLogout = (a) => {
             console.log('onLogout');
             // console.log(a);
-           // callback(e);
+            // callback(e);
         }
     }
 }
