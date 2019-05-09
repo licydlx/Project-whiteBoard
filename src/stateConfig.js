@@ -41,7 +41,7 @@ const stateConfig = {
     },
 
     brush: {
-        show: false,
+        show: true,
         sketchpad:{
             type:'sketchpad',
             penSize: 2,

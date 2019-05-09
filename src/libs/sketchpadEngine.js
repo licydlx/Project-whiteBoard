@@ -1,63 +1,46 @@
 class sketchpadEngine {
-    constructor(pars, callback) {
+    constructor(callback) {
         this.callback = callback;
-        // 绘图始终
-        this.mouseFrom = {};
-        this.mouseTo = {};
-        // 绘制类型
-        this.drawType = pars.penShape;
-        // 笔触宽度
-        this.drawWidth = pars.penSize;
-        this.textSize = pars.textSize;
-        // 画笔颜色
-        this.color = pars.penColor;
+        // 绘图要素配置
+        this.drawConfig = {
+            mouseFrom: {},
+            mouseTo: {},
+            penShape: '',
+            penSize: '2',
+            penColor: '#fff',
+            textSize: '14',
+        }
+        // 文本
+        this.textbox = null;
         // 当前绘制对象
         this.drawingObject = null;
         // 绘制移动计数器
         this.moveCount = 1;
         // 绘制状态
         this.doDrawing = false;
-        // 文本
-        this.textbox = null;
 
         this.canvas = new fabric.Canvas("sketchpad", {
-            isDrawingMode: true,
+            isDrawingMode: false,
             skipTargetFind: true,
             selectable: false,
             selection: false
         });
-
-        //设置自由绘颜色
-        this.canvas.freeDrawingBrush.color = this.color;
-        //设置自由笔宽
-        this.canvas.freeDrawingBrush.width = this.drawWidth;
-
-        //绑定画板事件
+        // 绑定画板事件
         this.canvas.on("mouse:down", function (e) {
-            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
-            this.mouseFrom.x = ve2.x;
-            this.mouseFrom.y = ve2.y;
+            this.drawConfig.mouseFrom.x = e.e.offsetX;
+            this.drawConfig.mouseFrom.y = e.e.offsetY;
+            // 
             this.doDrawing = true;
-
-            // this.drawing();
-            // let data = this.dataFiltering();
-            if (callback) callback(null, 'mouseDown');
         }.bind(this));
-
+        
         this.canvas.on("mouse:move", function (e) {
-            if (this.moveCount % 2 && !this.doDrawing) {
-                // 减少绘制频率
-                return;
-            }
+            // 减少绘制频率
+            if (this.moveCount % 2 && !this.doDrawing) return;
             this.moveCount++;
-            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
-            this.mouseTo.x = ve2.x;
-            this.mouseTo.y = ve2.y;
+            this.drawConfig.mouseTo.x = e.e.offsetX;
+            this.drawConfig.mouseTo.y = e.e.offsetY;
 
-            this.drawing();
-
-            let data = this.dataFiltering();
-            if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
+            this.drawing(this.drawConfig);
         }.bind(this));
 
         this.canvas.on("path:created", function (e) {
@@ -74,42 +57,26 @@ class sketchpadEngine {
                     strokeMiterLimit: e.path.strokeMiterLimit
                 }
             }
-
             let data = this.dataFiltering();
             if (callback) callback('pathCreated', JSON.stringify(data), JSON.stringify(drawObj));
         }.bind(this));
 
         this.canvas.on("mouse:up", function (e) {
-            //console.log('mouse:up');
-            let ve2 = this.transformMouse(e.e.offsetX, e.e.offsetY);
-            this.mouseTo.x = ve2.x;
-            this.mouseTo.y = ve2.y;
-
-            let c = this.canvas.toDatalessJSON();
-            console.log(c);
-
-            //let data = this.dataFiltering();
-            if (callback) callback(null, 'mouseUp');
-            //this.drawing(this.drawConfig);
             this.drawingObject = null;
             this.doDrawing = false;
             this.moveCount = 1;
-            this.doDrawing = false;
         }.bind(this));
 
-        this.canvas.on("object:added", function (e) {
-            //console.log('object:added');
-            // console.log(e);
-        }.bind(this));
+        this.canvas.on("object:added", function (e) {console.log('object:added')}.bind(this));
 
         this.canvas.on("object:modified", function (e) {
             //console.log('object:modified');
-            if (this.drawType === 'text') {
-                let text = e.target.text;
-                let data = this.dataFiltering();
-                data.text = text;
-                if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
-            }
+            // if (this.drawType === 'text') {
+            //     let text = e.target.text;
+            //     let data = this.dataFiltering();
+            //     data.text = text;
+            //     if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
+            // }
         }.bind(this));
 
         this.canvas.on("selection:created", function (e) {
@@ -132,13 +99,9 @@ class sketchpadEngine {
             if (callback) callback('removeBlock', JSON.stringify(newTotal), JSON.stringify(newTotal));
         }.bind(this));
 
-        // this.canvas.on("selection:cleared", function (e) {
-        //     console.log('cleared');
-        // }.bind(this));
+        this.canvas.on("selection:cleared", function (e) { console.log('cleared') }.bind(this));
 
-        // this.canvas.on("object:removed", function (e) {
-        //     console.log('object:removed');
-        // }.bind(this));
+        this.canvas.on("object:removed", function (e) { console.log('object:removed') }.bind(this));
     }
 
     mouseDown(context, pars) {
@@ -178,71 +141,69 @@ class sketchpadEngine {
         });
         return obj
     }
+
     // 坐标转换
-    transformMouse(mouseX, mouseY) {
-        // return { x: mouseX / window.zoom, y: mouseY / window.zoom };
-        return { x: mouseX, y: mouseY };
-    }
+    // transformMouse(mouseX, mouseY) {
+    //     // return { x: mouseX / window.zoom, y: mouseY / window.zoom };
+    //     return { x: mouseX, y: mouseY };
+    // }
 
     // 自由绘制
     pathCreated(context, data) {
+       
         if (typeof data === 'string') data = JSON.parse(data);
         let path = new fabric.Path(data.path, data.pathConfig);
+        console.log(data)
         this.canvas.add(path);
     }
 
-    changeConfig(pars) {
-        if (Object.is(pars.type, 'pen')) {
-            this.canvas.freeDrawingBrush.color = pars.penColor;
-            this.canvas.freeDrawingBrush.width = pars.penSize;
-        }
-        this.drawType = pars.penShape;
-        this.drawWidth = pars.penSize;
-        this.textSize = pars.textSize;
-        this.color = pars.penColor;
+    // 自由绘制
+    drawingFree(pars) {   
+        if (typeof pars === 'string') pars = JSON.parse(pars);
+        let path = new fabric.Path(pars.path, pars.pathConfig);
+        console.log(pars)
+        this.canvas.add(path);
     }
 
     // 绘制
-    drawing(context, pars) {
-        if (!pars) {
-            pars = this;
-            console.log(this);
-        } else {
-            if (typeof pars === 'string') pars = JSON.parse(pars);
-        }
-
-        if (this.drawingObject) {
-            this.canvas.remove(this.drawingObject);
-        }
-
+    drawing(pars,guest) {
+        console.log(pars);
+        // var circle = new fabric.Circle({
+        //     radius: 20, fill: 'green', left: 100, top: 100
+        //   });
+        //   this.canvas.add(circle);
+        //   return;
+        if (this.drawingObject && !guest) this.canvas.remove(this.drawingObject);
         let curDrawing = null;
-        switch (pars.drawType) {
+        let mouseFrom = pars.mouseFrom;
+        let mouseTo = pars.mouseTo;
+        switch (pars.penShape) {
             case "line":
                 // 直线
-                curDrawing = new fabric.Line([pars.mouseFrom.x, pars.mouseFrom.y, pars.mouseTo.x, pars.mouseTo.y], {
-                    stroke: pars.color,
-                    strokeWidth: pars.drawWidth
+                curDrawing = new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
+                    stroke: pars.penColor,
+                    strokeWidth: pars.penSize,
+                    fill: '#fff',
+                    originX: 'center',
+                    originY: 'center'
                 });
                 break;
             case "arrow":
                 // 箭头
                 curDrawing = new fabric.Path(this.drawArrow(pars.mouseFrom.x, pars.mouseFrom.y, pars.mouseTo.x, pars.mouseTo.y, 20, 14), {
-                    stroke: pars.color,
-                    fill: "rgba(255,255,255,0)",
-                    strokeWidth: pars.drawWidth
+                    stroke: pars.penColor,
+                    strokeWidth: pars.penSize
                 });
                 break;
             case "text":
                 // 文本
-                let text = "";
-                if (pars.text) text = pars.text;
+                let text = "你好，世界";
                 this.textbox = new fabric.Textbox(text, {
                     left: pars.mouseFrom.x - 10,
                     top: pars.mouseFrom.y - 10,
                     width: 150,
                     fontSize: pars.textSize,
-                    borderColor: "#2c2c2c",
-                    fill: pars.color,
+                    fill: pars.penColor,
                     hasControls: false
                 });
 
@@ -252,10 +213,8 @@ class sketchpadEngine {
                 break;
 
             case "rectangle":
-                let mouseFrom = pars.mouseFrom;
-                let mouseTo = pars.mouseTo;
                 // 长方形
-                var path =
+                let path =
                     "M " +
                     mouseFrom.x +
                     " " +
@@ -280,33 +239,31 @@ class sketchpadEngine {
                 curDrawing = new fabric.Path(path, {
                     left: mouseFrom.x,
                     top: mouseFrom.y,
-                    stroke: pars.color,
-                    strokeWidth: pars.drawWidth,
-                    fill: "rgba(255, 255, 255, 0)"
+                    stroke: pars.penColor,
+                    strokeWidth: pars.penSize,
                 });
                 break;
             case "ellipse":
                 // 椭圆
-                let left = pars.mouseFrom.x;
-                let top = pars.mouseFrom.y;
                 curDrawing = new fabric.Ellipse({
-                    left: left,
-                    top: top,
-                    stroke: pars.color,
-                    fill: "rgba(255, 255, 255, 0)",
+                    stroke: pars.penColor,
+                    strokeWidth: pars.penSize,
                     originX: "left",
                     originY: "top",
-                    rx: Math.abs(left - pars.mouseTo.x),
-                    ry: Math.abs(top - pars.mouseTo.y),
-                    strokeWidth: pars.drawWidth
+                    left: mouseFrom.x,
+                    top: mouseFrom.y,
+                    rx: Math.abs(mouseFrom.x - mouseTo.x),
+                    ry: Math.abs(mouseFrom.y - mouseTo.y),
                 });
                 break;
             case "remove":
                 break;
         }
+
         if (curDrawing) {
             this.canvas.add(curDrawing);
-            this.drawingObject = curDrawing;
+            if (!guest) this.drawingObject = curDrawing;
+            console.log(this.canvas);
         }
     }
 

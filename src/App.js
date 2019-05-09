@@ -69,9 +69,31 @@ class App extends Component {
         // 课件iframe
         this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
         // 画板实例化
-        this.sketchpad = new sketchpadEngine(this.state.brush.sketchpad, function (method, context, pars) {
+        this.sketchpad = new sketchpadEngine(function (method, context, pars) {
             this.broadcastMessage('sketchpad', method, context, pars);
         }.bind(this));
+
+
+        let drawConfig = {
+            mouseFrom: {
+                x:350,
+                y:300,
+            },
+            mouseTo: {
+                x:500,
+                y:440,
+            },
+            penShape: 'line',
+            penSize: '2',
+            penColor: '#fff',
+            textSize: '14',
+        }
+
+        setTimeout(function(){
+            this.sketchpad.drawing(drawConfig,true);
+            console.log(this.sketchpad);
+        }.bind(this),2000)
+        
     }
 
     componentWillMount() {
@@ -135,35 +157,36 @@ class App extends Component {
             case 'pen':
                 this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
                 this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
-                this.sketchpad.color = pars.penColor;
-                this.sketchpad.drawWidth = pars.penSize;
                 break;
-            case 'text':
-                this.sketchpad.textSize = pars.textSize;
-                this.sketchpad.color = pars.penColor;
-                break;
-            case 'graph':
-                this.sketchpad.drawType = pars.penShape;
-                this.sketchpad.color = pars.penColor;
-                break;
+            // case 'text':
+            //     this.sketchpad.textSize = pars.textSize;
+            //     this.sketchpad.color = pars.penColor;
+            //     break;
+            // case 'graph':
+            //     this.sketchpad.drawType = pars.penShape;
+            //     this.sketchpad.color = pars.penColor;
+            //     break;
         }
+
         this.setState({
             brush: newBrush
-        }, () => {
-            // 时间戳
-            // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
-            let key = + new Date();
-            let pageNum = this.state.switchPage.currentPage;
-            // 不同于 localStorage，你可以存储非字符串类型
-            localforage.setItem(key + 'page' + pageNum, {
-                brush: newBrush
-            }).then(function (value) {
-
-            }).catch(function (err) {
-                console.log(err);
-            });
         });
-        if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
+        // , () => {
+        //     // 时间戳
+        //     // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
+        //     let key = + new Date();
+        //     let pageNum = this.state.switchPage.currentPage;
+        //     // 不同于 localStorage，你可以存储非字符串类型
+        //     localforage.setItem(key + 'page' + pageNum, {
+        //         brush: newBrush
+        //     }).then(function (value) {
+
+        //     }).catch(function (err) {
+        //         console.log(err);
+        //     });
+        // }
+
+        //if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
     }
 
     brushChoosedCallback(newBrush, boolean) {
@@ -176,48 +199,48 @@ class App extends Component {
         switch (pars.type) {
             case 'pen':
                 this.sketchpad.canvas.isDrawingMode = true;
-                this.sketchpad.drawType = '';
+                this.sketchpad.penShape = '';
                 this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
                 this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
 
                 newBrush.penShape = '';
                 break;
-            case 'text':
-                this.sketchpad.drawType = pars.type;
-                this.sketchpad.canvas.isDrawingMode = false;
-                this.sketchpad.canvas.skipTargetFind = true;
-                this.sketchpad.canvas.selection = false;
+            // case 'text':
+            //     this.sketchpad.drawType = pars.type;
+            //     this.sketchpad.canvas.isDrawingMode = false;
+            //     this.sketchpad.canvas.skipTargetFind = true;
+            //     this.sketchpad.canvas.selection = false;
 
-                newBrush.penShape = pars.type;
-                break;
-            case 'graph':
-                this.sketchpad.drawWidth = 2;
-                this.sketchpad.drawType = pars.penShape;
-                this.sketchpad.canvas.isDrawingMode = false;
-                this.sketchpad.canvas.skipTargetFind = true;
-                this.sketchpad.canvas.selection = false;
+            //     newBrush.penShape = pars.type;
+            //     break;
+            // case 'graph':
+            //     this.sketchpad.drawWidth = 2;
+            //     this.sketchpad.drawType = pars.penShape;
+            //     this.sketchpad.canvas.isDrawingMode = false;
+            //     this.sketchpad.canvas.skipTargetFind = true;
+            //     this.sketchpad.canvas.selection = false;
 
-                newBrush.penSize = 2;
-                break;
-            case 'remove':
-                this.sketchpad.drawType = pars.type;
-                this.sketchpad.canvas.isDrawingMode = false;
-                this.sketchpad.canvas.selection = true;
-                this.sketchpad.canvas.skipTargetFind = false;
-                this.sketchpad.canvas.selectable = true;
+            //     newBrush.penSize = 2;
+            //     break;
+            // case 'remove':
+            //     this.sketchpad.drawType = pars.type;
+            //     this.sketchpad.canvas.isDrawingMode = false;
+            //     this.sketchpad.canvas.selection = true;
+            //     this.sketchpad.canvas.skipTargetFind = false;
+            //     this.sketchpad.canvas.selectable = true;
 
-                newBrush.penShape = pars.type;
-                break;
-            case 'empty':
-                this.sketchpad.removeAll()
-                break;
+            //     newBrush.penShape = pars.type;
+            //     break;
+            // case 'empty':
+            //     this.sketchpad.removeAll()
+            //     break;
         }
 
         this.setState({
             brush: newBrush
         });
 
-        if (boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
+        // if (boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
     }
 
     fullScreen(pars, boolean) {
