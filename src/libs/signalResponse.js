@@ -20,7 +20,7 @@ function signalResponse(engine, callback) {
 
         engine.channel.onChannelUserJoined = (account, uid) =>{
             console.log('onChannelUserJoined');
-            if (callback) callback('onChannelUserJoined',{'account':account,'uid':uid});
+            if (callback) callback('onChannelUserJoined',{account,uid});
         }
     }
 
@@ -30,6 +30,11 @@ function signalResponse(engine, callback) {
             console.log('onLogout');
             // console.log(a);
             // callback(e);
+        }
+
+        engine.session.onMessageInstantReceive = (account,uid,msg) => {
+            console.log('onMessageInstantReceive');
+            if (callback) callback('onMessageInstantReceive',{account,uid,msg});
         }
     }
 }

@@ -25,6 +25,7 @@ class sketchpadEngine {
             selectable: false,
             selection: false
         });
+
         // 绑定画板事件
         this.canvas.on("mouse:down", function (e) {
             this.drawConfig.mouseFrom.x = e.e.offsetX;
@@ -44,6 +45,7 @@ class sketchpadEngine {
         }.bind(this));
 
         this.canvas.on("path:created", function (e) {
+            console.log('path:created')
             let drawPaths = e.path.path.toString().split(',').join(' ');
             let drawObj = {
                 path: drawPaths,
@@ -57,17 +59,20 @@ class sketchpadEngine {
                     strokeMiterLimit: e.path.strokeMiterLimit
                 }
             }
-            let data = this.dataFiltering();
-            if (callback) callback('pathCreated', JSON.stringify(data), JSON.stringify(drawObj));
+            if (callback && this.canvas.isDrawingMode) callback('drawingFree', null, JSON.stringify(drawObj));
         }.bind(this));
 
         this.canvas.on("mouse:up", function (e) {
+            console.log('mouse:up')
+            if (callback && !this.canvas.isDrawingMode) callback('drawing', null, this.drawConfig);
             this.drawingObject = null;
             this.doDrawing = false;
             this.moveCount = 1;
         }.bind(this));
 
-        this.canvas.on("object:added", function (e) {console.log('object:added')}.bind(this));
+        this.canvas.on("object:added", function (e) {
+            console.log('object:added')
+        }.bind(this));
 
         this.canvas.on("object:modified", function (e) {
             //console.log('object:modified');
@@ -152,18 +157,11 @@ class sketchpadEngine {
     drawingFree(pars) {   
         if (typeof pars === 'string') pars = JSON.parse(pars);
         let path = new fabric.Path(pars.path, pars.pathConfig);
-        console.log(pars)
         this.canvas.add(path);
     }
 
     // 绘制
     drawing(pars,guest) {
-        console.log(pars);
-        // var circle = new fabric.Circle({
-        //     radius: 20, fill: 'green', left: 100, top: 100
-        //   });
-        //   this.canvas.add(circle);
-        //   return;
         if (this.drawingObject && !guest) this.canvas.remove(this.drawingObject);
         let curDrawing = null;
         let mouseFrom = pars.mouseFrom;
@@ -188,7 +186,7 @@ class sketchpadEngine {
                 break;
             case "text":
                 // 文本
-                let text = "你好，世界";
+                let text = "";
                 this.textbox = new fabric.Textbox(text, {
                     left: pars.mouseFrom.x - 10,
                     top: pars.mouseFrom.y - 10,
@@ -254,7 +252,6 @@ class sketchpadEngine {
         if (curDrawing) {
             this.canvas.add(curDrawing);
             if (!guest) this.drawingObject = curDrawing;
-            console.log(this.canvas);
         }
     }
 

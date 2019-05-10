@@ -27,6 +27,7 @@ class App extends Component {
         this.message = new messageEngine(listenPostMessage.bind(this));
         this.message.listen();
         this.jumpPage = jumpPage.bind(this);
+        this.localforage = localforage;
         //
         // 默认账号登录
         // 
@@ -38,16 +39,6 @@ class App extends Component {
             canDraw: true
         }
         this.loginChannel(data);
-
-        this.localforage = localforage;
-        // 配置不同的驱动优先级
-        this.localforage.config({
-            driver: [localforage.INDEXEDDB,
-            localforage.WEBSQL,
-            localforage.LOCALSTORAGE],
-            name: "courseCache",
-            description: '白板缓存机制'
-        });
     }
 
     componentDidMount() {
@@ -72,44 +63,6 @@ class App extends Component {
         this.sketchpad = new sketchpadEngine(function (method, context, pars) {
             this.broadcastMessage('sketchpad', method, context, pars);
         }.bind(this));
-
-
-        let drawConfig = {
-            mouseFrom: {
-                x:350,
-                y:300,
-            },
-            mouseTo: {
-                x:500,
-                y:440,
-            },
-            penShape: 'line',
-            penSize: '2',
-            penColor: '#fff',
-            textSize: '14',
-        }
-
-        setTimeout(function(){
-            this.sketchpad.drawing(drawConfig,true);
-            console.log(this.sketchpad);
-        }.bind(this),2000)
-
-        setTimeout(function(){
-            var that = this;
-            localforage.getItem('page1', function(err, value) {
-                let num = 0;
-                setInterval(function(){
-                    if(!value[num]) return;
-                    if(num < 5){
-                        that.setState({
-                            brush: value[num].brush
-                        })
-                        num++;
-                    }
-
-                },2000);
-            });
-        }.bind(this),4000)
     }
 
     componentWillMount() {
@@ -130,35 +83,56 @@ class App extends Component {
             console.log('登陆成功...');
             // 接入声网信令sdk对应的回调 
             signalResponse(engine, listenSignalMessage.bind(this));
-            
             this.engine = engine;
             GLB.logined = true;
             // 老师角色为0
             if (GLB.role == 0) {
                 const newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
+        
+                let date = new Date();
+                let today = date.getDate();
+                let name = GLB.role + '-' + GLB.channel + '-' + today;
+                let curPage = 'page' + this.state.switchPage.currentPage;
+                // 配置不同的驱动优先级
+                this.localforage.config({
+                    driver: [this.localforage.INDEXEDDB,
+                    this.localforage.WEBSQL,
+                    this.localforage.LOCALSTORAGE],
+                    name: name,
+                    description: '白板缓存机制'
+                });
+
                 this.setState({
                     brush: newBrush
                 }, () => {
-                    // 时间戳
-                    // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
-                    let key = + new Date();
-                    // 不同于 localStorage，你可以存储非字符串类型
-
-                               // 回调版本：
-                    localforage.getItem('page1', function(err, value) {
-                        if(!value) value = [];
-                        value.push({ brush: newBrush })
-                        
-                        localforage.setItem('page1', value).then(function (value) {
+                    this.localforage.getItem(curPage, function(err, value) {
+                        if(value) return console.log(curPage);
+                        this.localforage.setItem(curPage, []).then(function (value) {
                             console.log(value);
                         }).catch(function (err) {
                             console.log(err);
                         });
-                    })
+                    }.bind(this));
+                });
 
-                })
+                this.broadcastMessage('dataBase',null,null,name)
             }
         }.bind(this));
+    }
+
+    getCurPageCache(callback){
+        let newCache = [];
+        let curPage = 'page' + this.state.switchPage.currentPage;
+        this.localforage.getItem(curPage, function(err, value) {
+            value.forEach(element => {
+                if(Object.is(element.belong,"sketchpad") || Object.is(element.belong,"whiteboard")) newCache.push(element);
+            });
+            if(callback) callback(newCache);
+        })
+    }
+
+    peerToPeer(account,msg,callback){
+        this.engine.session.messageInstantSend(account,JSON.stringify(msg),callback);
     }
 
     // 广播message
@@ -172,7 +146,17 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
-        this.engine.channel.messageChannelSend(JSON.stringify(data));
+        let curPage = 'page' + this.state.switchPage.currentPage;
+        this.localforage.getItem(curPage, function(err, value) {
+            if(!value) return;
+            value.push(data);
+            this.localforage.setItem(curPage, value).then(function () {
+                this.engine.channel.messageChannelSend(JSON.stringify(data));
+            }.bind(this)).catch(function (err) {
+                console.log(err);
+            });
+        }.bind(this));
+
     }
 
     sketchpadChoosedCallback(newBrush, boolean) {
@@ -182,35 +166,22 @@ class App extends Component {
                 this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
                 this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
                 break;
-            // case 'text':
-            //     this.sketchpad.textSize = pars.textSize;
-            //     this.sketchpad.color = pars.penColor;
-            //     break;
-            // case 'graph':
-            //     this.sketchpad.drawType = pars.penShape;
-            //     this.sketchpad.color = pars.penColor;
-            //     break;
+            case 'text':
+                this.sketchpad.drawConfig.textSize = pars.textSize;
+                this.sketchpad.drawConfig.penColor = pars.penColor;
+                break;
+            case 'graph':
+                this.sketchpad.drawConfig.penShape = pars.penShape;
+                this.sketchpad.drawConfig.penColor = pars.penColor;
+                break;
         }
 
         this.setState({
             brush: newBrush
-        });
-        // , () => {
-        //     // 时间戳
-        //     // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
-        //     let key = + new Date();
-        //     let pageNum = this.state.switchPage.currentPage;
-        //     // 不同于 localStorage，你可以存储非字符串类型
-        //     localforage.setItem(key + 'page' + pageNum, {
-        //         brush: newBrush
-        //     }).then(function (value) {
+        })
 
-        //     }).catch(function (err) {
-        //         console.log(err);
-        //     });
-        // }
-
-        //if (boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
+        // let date = new Date().getTime();
+        if (!boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
     }
 
     brushChoosedCallback(newBrush, boolean) {
@@ -234,35 +205,13 @@ class App extends Component {
             case 'remove':
                 newBrush.sketchpad.penShape = pars.type;
                 break;
-            // case 'empty':
-            //     this.sketchpad.removeAll()
-            //     break;
         }
 
         this.setState({
             brush: newBrush
-        }, () => {
-            // 时间戳
-            // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
-            // let key = + new Date();
-            // let pageNum = this.state.switchPage.currentPage;
-            // 不同于 localStorage，你可以存储非字符串类型
-
-            // 回调版本：
-            localforage.getItem('page1', function(err, value) {
-                // 当离线仓库中的值被载入时，此处代码运行
-                console.log(value);
-                value.push({
-                    brush: newBrush
-                });
-                localforage.setItem('page1', value).then(function (value) {
-                }).catch(function (err) {
-                    console.log(err);
-                });
-            });
-
         });
-        // if (boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
+
+        if (!boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
     }
 
     fullScreen(pars, boolean) {
@@ -301,6 +250,9 @@ class App extends Component {
                 this.sketchpad.canvas.selectable = true;
 
                 this.sketchpad.drawConfig.penShape = sketchpad.penShape;
+                break;
+            case 'empty':
+                this.sketchpad.removeAll()
                 break;
         }
         console.log(this.sketchpad);

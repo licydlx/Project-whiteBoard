@@ -84,7 +84,7 @@ class BrushBox extends Component {
         // 深拷贝 
         let newBrush = JSON.parse(JSON.stringify(this.state));
         newBrush.sketchpad.type = key;
-        this.props.brushChoosedCallback(newBrush,true); 
+        this.props.brushChoosedCallback(newBrush); 
     }
 
     // 改变画笔粗细
@@ -98,7 +98,7 @@ class BrushBox extends Component {
         // 深拷贝 
         let newBrush = JSON.parse(JSON.stringify(this.state));
         newBrush.sketchpad[name] = value;
-        this.props.sketchpadChoosedCallback(newBrush,true);
+        this.props.sketchpadChoosedCallback(newBrush);
     }
 
     // 画笔粗细模板
