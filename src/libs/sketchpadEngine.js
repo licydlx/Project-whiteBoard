@@ -149,15 +149,6 @@ class sketchpadEngine {
     // }
 
     // 自由绘制
-    pathCreated(context, data) {
-       
-        if (typeof data === 'string') data = JSON.parse(data);
-        let path = new fabric.Path(data.path, data.pathConfig);
-        console.log(data)
-        this.canvas.add(path);
-    }
-
-    // 自由绘制
     drawingFree(pars) {   
         if (typeof pars === 'string') pars = JSON.parse(pars);
         let path = new fabric.Path(pars.path, pars.pathConfig);

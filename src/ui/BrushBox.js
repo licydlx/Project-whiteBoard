@@ -148,6 +148,7 @@ class BrushBox extends Component {
     }
     render() {
         this.state = this.props.state;
+        
         const itmes = this.tools.map((value, index) => {
             return <div className='tool' key={value.type} data-type={value.type} onClick={this.brushChoosed.bind(this)}>
                 <div className={`${value.type == this.state.sketchpad.type ? 'active' : ''}`}>

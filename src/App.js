@@ -93,7 +93,23 @@ class App extends Component {
             this.sketchpad.drawing(drawConfig,true);
             console.log(this.sketchpad);
         }.bind(this),2000)
-        
+
+        setTimeout(function(){
+            var that = this;
+            localforage.getItem('page1', function(err, value) {
+                let num = 0;
+                setInterval(function(){
+                    if(!value[num]) return;
+                    if(num < 5){
+                        that.setState({
+                            brush: value[num].brush
+                        })
+                        num++;
+                    }
+
+                },2000);
+            });
+        }.bind(this),4000)
     }
 
     componentWillMount() {
@@ -127,11 +143,19 @@ class App extends Component {
                     // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
                     let key = + new Date();
                     // 不同于 localStorage，你可以存储非字符串类型
-                    this.localforage.setItem(key + 'page1', { brush: newBrush }).then(function (value) {
-                        console.log(value);
-                    }).catch(function (err) {
-                        console.log(err);
-                    });
+
+                               // 回调版本：
+                    localforage.getItem('page1', function(err, value) {
+                        if(!value) value = [];
+                        value.push({ brush: newBrush })
+                        
+                        localforage.setItem('page1', value).then(function (value) {
+                            console.log(value);
+                        }).catch(function (err) {
+                            console.log(err);
+                        });
+                    })
+
                 })
             }
         }.bind(this));
@@ -198,39 +222,18 @@ class App extends Component {
         }
         switch (pars.type) {
             case 'pen':
-                this.sketchpad.canvas.isDrawingMode = true;
-                this.sketchpad.penShape = '';
-                this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
-                this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
-
-                newBrush.penShape = '';
+                newBrush.sketchpad.penShape = '';
                 break;
-            // case 'text':
-            //     this.sketchpad.drawType = pars.type;
-            //     this.sketchpad.canvas.isDrawingMode = false;
-            //     this.sketchpad.canvas.skipTargetFind = true;
-            //     this.sketchpad.canvas.selection = false;
-
-            //     newBrush.penShape = pars.type;
-            //     break;
-            // case 'graph':
-            //     this.sketchpad.drawWidth = 2;
-            //     this.sketchpad.drawType = pars.penShape;
-            //     this.sketchpad.canvas.isDrawingMode = false;
-            //     this.sketchpad.canvas.skipTargetFind = true;
-            //     this.sketchpad.canvas.selection = false;
-
-            //     newBrush.penSize = 2;
-            //     break;
-            // case 'remove':
-            //     this.sketchpad.drawType = pars.type;
-            //     this.sketchpad.canvas.isDrawingMode = false;
-            //     this.sketchpad.canvas.selection = true;
-            //     this.sketchpad.canvas.skipTargetFind = false;
-            //     this.sketchpad.canvas.selectable = true;
-
-            //     newBrush.penShape = pars.type;
-            //     break;
+            case 'text':
+                newBrush.sketchpad.penShape = pars.type;
+                break;
+            case 'graph':
+                newBrush.sketchpad.penSize = 2;
+                newBrush.sketchpad.penShape = 'line';
+                break;
+            case 'remove':
+                newBrush.sketchpad.penShape = pars.type;
+                break;
             // case 'empty':
             //     this.sketchpad.removeAll()
             //     break;
@@ -238,8 +241,27 @@ class App extends Component {
 
         this.setState({
             brush: newBrush
-        });
+        }, () => {
+            // 时间戳
+            // 设置某个数据仓库 key 的值不会影响到另一个数据仓库
+            // let key = + new Date();
+            // let pageNum = this.state.switchPage.currentPage;
+            // 不同于 localStorage，你可以存储非字符串类型
 
+            // 回调版本：
+            localforage.getItem('page1', function(err, value) {
+                // 当离线仓库中的值被载入时，此处代码运行
+                console.log(value);
+                value.push({
+                    brush: newBrush
+                });
+                localforage.setItem('page1', value).then(function (value) {
+                }).catch(function (err) {
+                    console.log(err);
+                });
+            });
+
+        });
         // if (boolean) this.broadcastMessage('whiteboard', 'brushChoosedCallback', null, newBrush);
     }
 
@@ -250,6 +272,39 @@ class App extends Component {
     }
 
     render() {
+        let sketchpad = this.state.brush.sketchpad;
+        switch (sketchpad.type) {
+            case 'pen':
+                this.sketchpad.canvas.isDrawingMode = true;
+                this.sketchpad.canvas.freeDrawingBrush.color = sketchpad.penColor;
+                this.sketchpad.canvas.freeDrawingBrush.width = sketchpad.penSize;
+                this.sketchpad.drawConfig.penShape = '';
+                break;
+                case 'text':
+                this.sketchpad.canvas.isDrawingMode = false;
+                this.sketchpad.canvas.skipTargetFind = true;
+                this.sketchpad.canvas.selection = false;
+                this.sketchpad.drawConfig.penShape = sketchpad.penShape;
+                break;
+            case 'graph':
+                this.sketchpad.canvas.isDrawingMode = false;
+                this.sketchpad.canvas.skipTargetFind = true;
+                this.sketchpad.canvas.selection = false;
+
+                this.sketchpad.drawConfig.penSize = 2;
+                this.sketchpad.drawConfig.penShape = sketchpad.penShape;
+                break;
+            case 'remove':
+                this.sketchpad.canvas.isDrawingMode = false;
+                this.sketchpad.canvas.selection = true;
+                this.sketchpad.canvas.skipTargetFind = false;
+                this.sketchpad.canvas.selectable = true;
+
+                this.sketchpad.drawConfig.penShape = sketchpad.penShape;
+                break;
+        }
+        console.log(this.sketchpad);
+
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.course} />
             <SketchpadBox state={this.state.brush} />
