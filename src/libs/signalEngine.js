@@ -30,14 +30,7 @@ export default function (data, callback) {
                 channel: channel
             };
 
-            if (callback) {
-                callback(engine)
-            }
-        }
-
-        channel.onChannelUserList = (users) =>{
-            console.log('onChannelUserList');
-            console.log(users);
+            if (callback) callback(engine)
         }
     }
 }

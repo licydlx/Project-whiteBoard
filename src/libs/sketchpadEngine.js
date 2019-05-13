@@ -9,7 +9,11 @@ class sketchpadEngine {
             penSize: '2',
             penColor: '#fff',
             textSize: '14',
+            textContent:'',
         }
+
+        this.curMouseFrom = {};
+        this.prevMouseFrom = {};
         // 文本
         this.textbox = null;
         // 当前绘制对象
@@ -28,10 +32,19 @@ class sketchpadEngine {
 
         // 绑定画板事件
         this.canvas.on("mouse:down", function (e) {
+            if(Object.is(this.drawConfig.penShape,'text')) {
+                this.prevMouseFrom = JSON.stringify(this.drawConfig.mouseFrom);
+                this.drawConfig.textContent = '';
+            }
+
+            this.doDrawing = true;
             this.drawConfig.mouseFrom.x = e.e.offsetX;
             this.drawConfig.mouseFrom.y = e.e.offsetY;
-            // 
-            this.doDrawing = true;
+            this.curMouseFrom = JSON.stringify(this.drawConfig.mouseFrom);
+            this.drawing(this.drawConfig);
+
+            console.log(this.prevMouseFrom);
+            console.log(this.drawConfig.mouseFrom);
         }.bind(this));
         
         this.canvas.on("mouse:move", function (e) {
@@ -41,7 +54,7 @@ class sketchpadEngine {
             this.drawConfig.mouseTo.x = e.e.offsetX;
             this.drawConfig.mouseTo.y = e.e.offsetY;
 
-            this.drawing(this.drawConfig);
+            if(!Object.is(this.drawConfig.penShape,'text')) this.drawing(this.drawConfig);
         }.bind(this));
 
         this.canvas.on("path:created", function (e) {
@@ -62,8 +75,25 @@ class sketchpadEngine {
             if (callback && this.canvas.isDrawingMode) callback('drawingFree', null, JSON.stringify(drawObj));
         }.bind(this));
 
+        this.canvas.on("object:modified", function (e) {
+            console.log('object:modified');
+            let penShape = this.drawConfig.penShape;
+            if(Object.is(penShape,'text')){
+                this.drawConfig.textContent = e.target.text;
+                let prevMouseFrom = JSON.parse(this.prevMouseFrom);
+                this.drawConfig.mouseFrom = prevMouseFrom;
+                if (callback && !this.canvas.isDrawingMode) callback('drawing', null, this.drawConfig);
+            } 
+        }.bind(this));
+
         this.canvas.on("mouse:up", function (e) {
             console.log('mouse:up')
+            let penShape = this.drawConfig.penShape;
+            if(Object.is(penShape,'text')){
+                this.drawConfig.textContent = '';
+                let curMouseFrom = JSON.parse(this.curMouseFrom);
+                this.drawConfig.mouseFrom = curMouseFrom;
+            } 
             if (callback && !this.canvas.isDrawingMode) callback('drawing', null, this.drawConfig);
             this.drawingObject = null;
             this.doDrawing = false;
@@ -74,34 +104,25 @@ class sketchpadEngine {
             console.log('object:added')
         }.bind(this));
 
-        this.canvas.on("object:modified", function (e) {
-            //console.log('object:modified');
-            // if (this.drawType === 'text') {
-            //     let text = e.target.text;
-            //     let data = this.dataFiltering();
-            //     data.text = text;
-            //     if (callback) callback('drawing', JSON.stringify(data), JSON.stringify(data));
-            // }
-        }.bind(this));
-
         this.canvas.on("selection:created", function (e) {
-            let newTotal = [];
-            if (e.target._objects) {
-                for (let x = 0; x < this.canvas._objects.length; x++) {
-                    let found = e.target._objects.find(function (element) {
-                        return element == this.canvas._objects[x];
-                    }.bind(this));
-                    if (!found) newTotal.push(x)
-                }
-            } else {
-                for (let x = 0; x < this.canvas._objects.length; x++) {
-                    if (this.canvas._objects[x] !== e.target) {
-                        newTotal.push(x)
-                    }
-                }
-            }
-            this.removeBlock(e);
-            if (callback) callback('removeBlock', JSON.stringify(newTotal), JSON.stringify(newTotal));
+            console.log('selection:created') 
+            // let newTotal = [];
+            // if (e.target._objects) {
+            //     for (let x = 0; x < this.canvas._objects.length; x++) {
+            //         let found = e.target._objects.find(function (element) {
+            //             return element == this.canvas._objects[x];
+            //         }.bind(this));
+            //         if (!found) newTotal.push(x)
+            //     }
+            // } else {
+            //     for (let x = 0; x < this.canvas._objects.length; x++) {
+            //         if (this.canvas._objects[x] !== e.target) {
+            //             newTotal.push(x)
+            //         }
+            //     }
+            // }
+            // this.removeBlock(e);
+            // if (callback) callback('removeBlock', JSON.stringify(newTotal), JSON.stringify(newTotal));
         }.bind(this));
 
         this.canvas.on("selection:cleared", function (e) { console.log('cleared') }.bind(this));
@@ -186,7 +207,8 @@ class sketchpadEngine {
                 break;
             case "text":
                 // 文本
-                let text = "";
+                let text = '';
+                if (pars.textContent) text = pars.textContent;
                 this.textbox = new fabric.Textbox(text, {
                     left: pars.mouseFrom.x - 10,
                     top: pars.mouseFrom.y - 10,

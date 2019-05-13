@@ -27,7 +27,9 @@ class App extends Component {
         this.message = new messageEngine(listenPostMessage.bind(this));
         this.message.listen();
         this.jumpPage = jumpPage.bind(this);
+        this.syncCacheData = [];
         this.localforage = localforage;
+
         //
         // 默认账号登录
         // 
@@ -80,59 +82,77 @@ class App extends Component {
     // 新用户注册，加入频道
     loginChannel(data) {
         signalEngine(data, function (engine) {
-            console.log('登陆成功...');
             // 接入声网信令sdk对应的回调 
             signalResponse(engine, listenSignalMessage.bind(this));
             this.engine = engine;
             GLB.logined = true;
+
             // 老师角色为0
             if (GLB.role == 0) {
                 const newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
-        
-                let date = new Date();
-                let today = date.getDate();
-                let name = GLB.role + '-' + GLB.channel + '-' + today;
-                let curPage = 'page' + this.state.switchPage.currentPage;
-                // 配置不同的驱动优先级
-                this.localforage.config({
-                    driver: [this.localforage.INDEXEDDB,
-                    this.localforage.WEBSQL,
-                    this.localforage.LOCALSTORAGE],
-                    name: name,
-                    description: '白板缓存机制'
-                });
+                // let date = new Date();
+                // let today = date.getDate();
+                // let name = GLB.role + '-' + GLB.channel + '-' + today;
+                // let curPage = 'page' + this.state.switchPage.currentPage;
+                // // 配置不同的驱动优先级
+                // this.localforage.config({
+                //     driver: [this.localforage.INDEXEDDB,
+                //     this.localforage.WEBSQL,
+                //     this.localforage.LOCALSTORAGE],
+                //     name: name,
+                //     description: '白板缓存机制'
+                // });
 
                 this.setState({
                     brush: newBrush
                 }, () => {
-                    this.localforage.getItem(curPage, function(err, value) {
-                        if(value) return console.log(curPage);
-                        this.localforage.setItem(curPage, []).then(function (value) {
-                            console.log(value);
-                        }).catch(function (err) {
-                            console.log(err);
-                        });
-                    }.bind(this));
+                    // this.localforage.getItem(curPage, function (err, value) {
+                    //     console.log(value);
+                    //     if (value){
+                    //        return; // this.broadcastMessage('cacheRender', null, null, value)
+                    //     } else {
+                    //         this.localforage.setItem(curPage, []).then(function (value) {
+                    //             console.log(value);
+                    //         }).catch(function (err) {
+                    //             console.log(err);
+                    //         });
+                    //     };
+                    // }.bind(this));
                 });
 
-                this.broadcastMessage('dataBase',null,null,name)
+                // this.broadcastMessage('dataBase', null, null, name)
             }
         }.bind(this));
     }
 
-    getCurPageCache(callback){
+    getCurPageCache(callback) {
         let newCache = [];
         let curPage = 'page' + this.state.switchPage.currentPage;
-        this.localforage.getItem(curPage, function(err, value) {
-            value.forEach(element => {
-                if(Object.is(element.belong,"sketchpad") || Object.is(element.belong,"whiteboard")) newCache.push(element);
-            });
-            if(callback) callback(newCache);
+        this.localforage.getItem(curPage, function (err, value) {
+            if (value == []) return;
+            // 信令通道8k,拆分传输数据
+            let z = Math.ceil(value.length / 20);
+            for (let seq = 0; seq <= z; seq++) {
+                if (seq === z) return callback({ syncCacheEnd: true })
+                newCache = [];
+                value.forEach((element, index) => {
+                    if (Object.is(element.belong, "sketchpad") || Object.is(element.belong, "whiteboard")) {
+                        if (index < 20 * (seq + 1) && index >= seq * 20) {
+                            newCache.push(element);
+                        }
+                    }
+                });
+
+                if (callback) callback({
+                    key: seq,
+                    value: newCache
+                });
+            }
         })
     }
 
-    peerToPeer(account,msg,callback){
-        this.engine.session.messageInstantSend(account,JSON.stringify(msg),callback);
+    peerToPeer(account, msg, callback) {
+        this.engine.session.messageInstantSend(account, JSON.stringify(msg), callback);
     }
 
     // 广播message
@@ -146,17 +166,18 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
-        let curPage = 'page' + this.state.switchPage.currentPage;
-        this.localforage.getItem(curPage, function(err, value) {
-            if(!value) return;
-            value.push(data);
-            this.localforage.setItem(curPage, value).then(function () {
-                this.engine.channel.messageChannelSend(JSON.stringify(data));
-            }.bind(this)).catch(function (err) {
-                console.log(err);
-            });
-        }.bind(this));
+        // let curPage = 'page' + this.state.switchPage.currentPage;
+        // this.localforage.getItem(curPage, function (err, value) {
+        //     if (!value) return;
+        //     value.push(data);
+        //     this.localforage.setItem(curPage, value).then(function () {
+        //         this.engine.channel.messageChannelSend(JSON.stringify(data));
+        //     }.bind(this)).catch(function (err) {
+        //         console.log(err);
+        //     });
+        // }.bind(this));
 
+        this.engine.channel.messageChannelSend(JSON.stringify(data));
     }
 
     sketchpadChoosedCallback(newBrush, boolean) {
@@ -180,7 +201,6 @@ class App extends Component {
             brush: newBrush
         })
 
-        // let date = new Date().getTime();
         if (!boolean) this.broadcastMessage('whiteboard', 'sketchpadChoosedCallback', null, newBrush);
     }
 
@@ -229,7 +249,7 @@ class App extends Component {
                 this.sketchpad.canvas.freeDrawingBrush.width = sketchpad.penSize;
                 this.sketchpad.drawConfig.penShape = '';
                 break;
-                case 'text':
+            case 'text':
                 this.sketchpad.canvas.isDrawingMode = false;
                 this.sketchpad.canvas.skipTargetFind = true;
                 this.sketchpad.canvas.selection = false;
@@ -255,7 +275,6 @@ class App extends Component {
                 this.sketchpad.removeAll()
                 break;
         }
-        console.log(this.sketchpad);
 
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.course} />

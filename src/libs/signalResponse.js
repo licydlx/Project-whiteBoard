@@ -22,6 +22,11 @@ function signalResponse(engine, callback) {
             console.log('onChannelUserJoined');
             if (callback) callback('onChannelUserJoined',{account,uid});
         }
+
+        engine.channel.onChannelUserList = (users) =>{
+            console.log('onChannelUserList');
+            console.log(users);
+        }
     }
 
     // 缓存

@@ -2,33 +2,50 @@ import GLB from './configs/GLB';
 
 // 接受信令消息
 const listenSignalMessage = function (type, message) {
+    // 接受点对点传输来的数据
     const onMessageInstantReceive = function (message) {
-        console.log('onMessageInstantReceive');
-        let data = JSON.parse(message.msg);
-        console.log(data);
-        data.forEach(element => {
-            handleMessage(JSON.stringify(element));
-        });
+        // let data = JSON.parse(message.msg);
+        // if(data['syncCacheEnd']) {
+        //     let handleData = [].concat.apply([],this.syncCacheData);
+        //     handleData.forEach(element => {
+        //         handleMessage(JSON.stringify(element));
+        //     });
+        //     this.syncCacheData = [];
+        // } else {
+        //     this.syncCacheData[data['key']] = data['value'];
+        // }
     }.bind(this);
 
-    const onChannelUserJoined = function (message) {
-        console.log('onChannelUserJoined');
-        let that = this;
-        this.getCurPageCache(function(msg){
-            console.log(msg);
-            that.peerToPeer(message.account, msg);
-        });
+    // 频道有人加入时，点对点传输数据
+    const onChannelUserJoined = function (message) {   
+        // let that = this;
+        // this.getCurPageCache(function(msg){
+        //     that.peerToPeer(message.account, msg);
+        // });
     }.bind(this);
 
-    const onMessageChannelReceive = function (message) {
+    // 接受频道广播消息
+    const onMessageChannelReceive = function (message) { 
         handleMessage(message);
     }.bind(this);
 
     const handleMessage = function (message) {
+        console.log(message);
         if (typeof message !== 'string') return console.log('接受信令的消息应为string');
         let data = JSON.parse(message);
         // 自己广播的信令，自己不执行
-        if (data.account === GLB.account) return;
+        if (data.account === GLB.account) {
+            // console.log(data);
+            // switch (data.belong) {
+            //     case 'cacheRender':
+            //         for (let index = 0; index < data.pars.length; index++) {
+            //             data.pars[index].account = null;
+            //             handleMessage(JSON.stringify(data.pars[index]));
+            //         }
+            //         break;
+            // }
+            return;
+        };
         // 外壳与白板通信
         // if (data.sigType) {
         //     switch (data.sigType) {
