@@ -32,7 +32,7 @@ const stateConfig = {
     },
 
     switchPage: {
-        show: false,
+        show: true,
         leftIcon: false,
         rightIcon: true,
         currentPage: 1,

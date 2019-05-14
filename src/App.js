@@ -7,7 +7,7 @@ import localforage from 'localforage';
 
 import stateConfig from './stateConfig';
 import { jumpPage } from './civilServant';
-import { listenPostMessage, listenSignalMessage } from './diplomat';
+import { listenPostMessage, listenSignalMessage, handleMessage } from './diplomat';
 
 import CoursewareBox from './ui/CoursewareBox';
 import SketchpadBox from './ui/SketchpadBox';
@@ -29,7 +29,8 @@ class App extends Component {
         this.jumpPage = jumpPage.bind(this);
         this.syncCacheData = [];
         this.localforage = localforage;
-
+        this.handleMessage = handleMessage.bind(this);
+        this.currentPage = 1;
         //
         // 默认账号登录
         // 
@@ -87,40 +88,39 @@ class App extends Component {
             this.engine = engine;
             GLB.logined = true;
 
+            console.log('登录成功！！！')
             // 老师角色为0
             if (GLB.role == 0) {
                 const newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
-                // let date = new Date();
-                // let today = date.getDate();
-                // let name = GLB.role + '-' + GLB.channel + '-' + today;
-                // let curPage = 'page' + this.state.switchPage.currentPage;
-                // // 配置不同的驱动优先级
-                // this.localforage.config({
-                //     driver: [this.localforage.INDEXEDDB,
-                //     this.localforage.WEBSQL,
-                //     this.localforage.LOCALSTORAGE],
-                //     name: name,
-                //     description: '白板缓存机制'
-                // });
+                let date = new Date();
+                let today = date.getDate();
+                let name = GLB.role + '-' + GLB.channel + '-' + today;
+                let curPage = 'page' + this.state.switchPage.currentPage;
+                // 配置不同的驱动优先级
+                this.localforage.config({
+                    driver: [this.localforage.INDEXEDDB,
+                    this.localforage.WEBSQL,
+                    this.localforage.LOCALSTORAGE],
+                    name: name,
+                    description: '白板缓存机制'
+                });
 
                 this.setState({
                     brush: newBrush
                 }, () => {
-                    // this.localforage.getItem(curPage, function (err, value) {
-                    //     console.log(value);
-                    //     if (value){
-                    //        return; // this.broadcastMessage('cacheRender', null, null, value)
-                    //     } else {
-                    //         this.localforage.setItem(curPage, []).then(function (value) {
-                    //             console.log(value);
-                    //         }).catch(function (err) {
-                    //             console.log(err);
-                    //         });
-                    //     };
-                    // }.bind(this));
+                    this.setPageCacheValue(curPage);
                 });
+            }
+        }.bind(this));
+    }
 
-                // this.broadcastMessage('dataBase', null, null, name)
+    // 设置缓存页面默认值
+    setPageCacheValue(curPage) {
+        this.localforage.getItem(curPage, function (err, value) {
+            if (!Array.isArray(value)) {
+                this.localforage.setItem(curPage, []);
+            } else {
+                this.playBack(this.state.switchPage.currentPage);
             }
         }.bind(this));
     }
@@ -129,6 +129,7 @@ class App extends Component {
         let newCache = [];
         let curPage = 'page' + this.state.switchPage.currentPage;
         this.localforage.getItem(curPage, function (err, value) {
+            if (!Array.isArray(value)) return;
             if (value == []) return;
             // 信令通道8k,拆分传输数据
             let z = Math.ceil(value.length / 20);
@@ -166,18 +167,25 @@ class App extends Component {
             pars: pars
         }
         if (!this.engine) return console.log('请先登录及加入频道！');
-        // let curPage = 'page' + this.state.switchPage.currentPage;
-        // this.localforage.getItem(curPage, function (err, value) {
-        //     if (!value) return;
-        //     value.push(data);
-        //     this.localforage.setItem(curPage, value).then(function () {
-        //         this.engine.channel.messageChannelSend(JSON.stringify(data));
-        //     }.bind(this)).catch(function (err) {
-        //         console.log(err);
-        //     });
-        // }.bind(this));
 
-        this.engine.channel.messageChannelSend(JSON.stringify(data));
+        // 存储老师端的通信message
+        if (Object.is(GLB.role, 0)) {
+            let curPage = 'page' + this.state.switchPage.currentPage;
+            this.localforage.getItem(curPage, function (err, value) {
+                if (Array.isArray(value)) {
+                    value.push(data);
+                } else {
+                    value = [];
+                }
+                this.localforage.setItem(curPage, value).then(function (v) {
+                    this.engine.channel.messageChannelSend(JSON.stringify(data));
+                }.bind(this)).catch(function (err) {
+                    console.log(err);
+                });
+            }.bind(this));
+        } else {
+            this.engine.channel.messageChannelSend(JSON.stringify(data));
+        }
     }
 
     sketchpadChoosedCallback(newBrush, boolean) {
@@ -186,6 +194,8 @@ class App extends Component {
             case 'pen':
                 this.sketchpad.canvas.freeDrawingBrush.color = pars.penColor;
                 this.sketchpad.canvas.freeDrawingBrush.width = pars.penSize;
+                this.sketchpad.drawConfig.penSize = pars.penSize;
+                this.sketchpad.drawConfig.penColor = pars.penColor;
                 break;
             case 'text':
                 this.sketchpad.drawConfig.textSize = pars.textSize;
@@ -240,6 +250,33 @@ class App extends Component {
         })
     }
 
+    // 白板回放
+    playBack(pageNum) {
+        let curPage = 'page' + pageNum;
+
+        this.localforage.getItem(curPage, function (err, value) {
+            if (!value) return;
+            let total = value.length;
+            let num = 0;
+            const work = function (total, message) {
+                this.handleMessage(JSON.stringify(message));
+                if (num + 1 == total) {
+                    console.log(value[num]);
+                    console.log(typeof value[num]);
+                    if (value[num].method == 'jumpPage') {
+                        this.playBack(value[num].pars.handleData.pars);
+                    }
+                    return;
+                }
+                num++;
+                setTimeout(function () {
+                    work(total, value[num]);
+                }, 1000)
+            }.bind(this);
+            work(total, value[num]);
+        }.bind(this));
+    }
+
     render() {
         let sketchpad = this.state.brush.sketchpad;
         switch (sketchpad.type) {
@@ -276,10 +313,27 @@ class App extends Component {
                 break;
         }
 
+        // 页面切换时，根据对应页面缓存改变状态
+        let pageNum = this.state.switchPage.currentPage;
+        console.log('render');
+        console.log(pageNum);
+        if (this.currentPage !== pageNum) {
+            let curPage = 'page' + pageNum;
+            this.localforage.getItem(curPage, function (err, value) {
+                this.sketchpad.removeAll();
+                if (value && value.length > 0) {
+                    value.forEach(message => {
+                        if(Object.is(message.method,'jumpPage')) return;
+                        this.handleMessage(JSON.stringify(message));
+                    });
+                }
+                this.currentPage = pageNum;
+            }.bind(this));
+        }
+
         return (<div id="whiteboardBox" className="whiteboardBox">
             <CoursewareBox state={this.state.course} />
             <SketchpadBox state={this.state.brush} />
-            {/* <BrushBox showBrush={this.state.showBrush} sketchpadChange={this.sketchpadChange.bind(this)} childCallback={this.childCallback.bind(this)} broadcastMessage={this.broadcastMessage.bind(this)} tools={this.state.tools} sketchpadConfig={this.state.sketchpadConfig} position={this.state.position} toolsCache={this.state.toolsCache} /> */}
             <BrushBox state={this.state.brush} brushChoosedCallback={this.brushChoosedCallback.bind(this)} sketchpadChoosedCallback={this.sketchpadChoosedCallback.bind(this)} />
             <SwitchPage state={this.state.switchPage} jumpPage={this.jumpPage} fullScreen={this.fullScreen.bind(this)} />
         </div>

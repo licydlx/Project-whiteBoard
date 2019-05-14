@@ -17,7 +17,7 @@ class SwitchPage extends React.Component {
         //     }
         // }
         let key = e._dispatchInstances.key;
-        let newSwithPage = this.state;
+        let newSwithPage = Object.assign({}, this.state);
         switch (key) {
             case 'leftIcon':
                 newSwithPage.currentPage--;
@@ -35,7 +35,7 @@ class SwitchPage extends React.Component {
     handleKeydown(e) {
         if (e.keyCode == 13) {
             let value = this.currentPage;
-            let newSwithPage = this.state;
+            let newSwithPage = Object.assign({}, this.state);
             let totalPage = parseInt(newSwithPage.totalPage);
             if (value > 0 && value - 1 < totalPage) {
                 newSwithPage.currentPage = value;
