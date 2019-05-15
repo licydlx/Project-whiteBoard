@@ -1,4 +1,4 @@
-
+import GLB from './configs/GLB';
 // 白板跳到某页
 const jumpPage = function (newSwithPage, boolean) {
     let data = {
@@ -11,12 +11,44 @@ const jumpPage = function (newSwithPage, boolean) {
     if (boolean) this.broadcastMessage('courseware', 'jumpPage', null, data);
     this.message.sendMessage('child', data, this.coursewareIframe);
 
-    let brushCopy = JSON.stringify(this.state.brush);
-    let newBrush = JSON.parse(brushCopy);
-    newBrush.sketchpad.type = 'sketchpad';
+    // let brushCopy = JSON.stringify(this.state.brush);
+    // let newBrush = JSON.parse(brushCopy);
+    // newBrush.sketchpad.type = 'sketchpad';
+
     this.setState({
-        switchPage: newSwithPage,
-        brush: newBrush
+        switchPage: newSwithPage
+    },() => {
+        // 页面切换时，根据对应页面缓存改变状态
+        let newPageNum = newSwithPage.currentPage;
+        if (GLB.role == 0) {
+            // 清空画板
+            this.sketchpad.removeAll();
+            let clearAll = {
+                account:GLB.account,                 
+                belong: "sketchpad",
+                context: null,
+                method: "removeAll",
+                pars:null
+            }
+            this.engine.channel.messageChannelSend(JSON.stringify(clearAll));
+
+            // 
+            let curPage = 'page' + newPageNum;
+            this.localforage.getItem(curPage, function (err, value) {
+                if (Array.isArray(value) && value.length > 0) {
+                    let seq;
+                    value.forEach((message,index) => {
+                        if (Object.is(message.belong, 'whiteboard')) seq = index;
+                        if (Object.is(message.belong, 'sketchpad')) {
+                            this.handleMessage(JSON.stringify(message), true);
+                            this.engine.channel.messageChannelSend(JSON.stringify(message));
+                       };
+                    });
+                    this.handleMessage(JSON.stringify(value[seq]), true);
+                    this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
+                }
+            }.bind(this));
+        }
     })
 }
 

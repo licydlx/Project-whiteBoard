@@ -50,6 +50,8 @@ const stateConfig = {
             penShape: ''
         }
     },
+
+    role: 0
 }
 
 export default stateConfig;

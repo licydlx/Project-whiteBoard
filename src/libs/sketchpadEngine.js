@@ -183,6 +183,7 @@ class sketchpadEngine {
 
     // 自由绘制
     drawingFree(pars) {
+        console.log('drawingFree');
         if (typeof pars === 'string') pars = JSON.parse(pars);
         let path = new fabric.Path(pars.path, pars.pathConfig);
         this.canvas.add(path);

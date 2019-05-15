@@ -55,13 +55,11 @@ const listenPostMessage = function (e) {
     }
 };
 
-const handleMessage = function (message) {
-    console.log(message);
+const handleMessage = function (message,boolean) {
     if (typeof message !== 'string') return console.log('接受信令的消息应为string');
     let data = JSON.parse(message);
-
     // 自己广播的信令，自己不执行
-    if (data.account === GLB.account) return;
+    if (data.account === GLB.account && !boolean) return;
     // 外壳与白板通信
     // if (data.sigType) {
     //     switch (data.sigType) {

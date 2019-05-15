@@ -30,18 +30,7 @@ class App extends Component {
         this.syncCacheData = [];
         this.localforage = localforage;
         this.handleMessage = handleMessage.bind(this);
-        this.currentPage = 1;
-        //
-        // 默认账号登录
-        // 
-        let account = Math.floor(Math.random() * 100);
-        let data = {
-            role: 0,
-            uid: account,
-            channel: 'q2',
-            canDraw: true
-        }
-        this.loginChannel(data);
+
     }
 
     componentDidMount() {
@@ -80,6 +69,12 @@ class App extends Component {
         this.message.remove();
     }
 
+    // 当组件接收到新属性，或者组件的状态发生改变时触发。组件首次渲染时并不会触发
+    shouldComponentUpdate(newProps, newState) {
+        console.log('shouldComponentUpdate');
+        return true;
+    }
+
     // 新用户注册，加入频道
     loginChannel(data) {
         signalEngine(data, function (engine) {
@@ -87,7 +82,6 @@ class App extends Component {
             signalResponse(engine, listenSignalMessage.bind(this));
             this.engine = engine;
             GLB.logined = true;
-
             console.log('登录成功！！！')
             // 老师角色为0
             if (GLB.role == 0) {
@@ -116,18 +110,34 @@ class App extends Component {
 
     // 设置缓存页面默认值
     setPageCacheValue(curPage) {
+        // 老师端，首次进入，初始化存储值
         this.localforage.getItem(curPage, function (err, value) {
             if (!Array.isArray(value)) {
                 this.localforage.setItem(curPage, []);
             } else {
+                // 当前缓存页面
+                // let seq;
+                // value.forEach((message,index) => {
+                //     if (Object.is(message.belong, 'whiteboard')) seq = index;
+                //     if (Object.is(message.belong, 'sketchpad')) {
+                //         this.handleMessage(JSON.stringify(message), true);
+                //         this.engine.channel.messageChannelSend(JSON.stringify(message));
+                //     };
+                // });
+                // this.handleMessage(JSON.stringify(value[seq]), true);
+                // this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
+                
+                // 白板操作回放
                 this.playBack(this.state.switchPage.currentPage);
             }
         }.bind(this));
     }
 
+    // 获取当前页面的缓存
     getCurPageCache(callback) {
         let newCache = [];
-        let curPage = 'page' + this.state.switchPage.currentPage;
+        let curPageNum = this.state.switchPage.currentPage;
+        let curPage = 'page' + curPageNum;
         this.localforage.getItem(curPage, function (err, value) {
             if (!Array.isArray(value)) return;
             if (value == []) return;
@@ -135,7 +145,17 @@ class App extends Component {
             let z = Math.ceil(value.length / 20);
             for (let seq = 0; seq <= z; seq++) {
                 if (seq === z) return callback({ syncCacheEnd: true })
-                newCache = [];
+                let pageState = {
+                    account: GLB.account,
+                    belong: "courseware",
+                    context: null,
+                    method: "jumpPage",
+                    pars: {
+                        handleData: { method: "swithScene", pars: curPageNum },
+                        state: this.state.switchPage
+                    }
+                }
+                newCache = [pageState];
                 value.forEach((element, index) => {
                     if (Object.is(element.belong, "sketchpad") || Object.is(element.belong, "whiteboard")) {
                         if (index < 20 * (seq + 1) && index >= seq * 20) {
@@ -149,9 +169,10 @@ class App extends Component {
                     value: newCache
                 });
             }
-        })
+        }.bind(this))
     }
 
+    // 端对端数据传输
     peerToPeer(account, msg, callback) {
         this.engine.session.messageInstantSend(account, JSON.stringify(msg), callback);
     }
@@ -176,6 +197,7 @@ class App extends Component {
                     value.push(data);
                 } else {
                     value = [];
+                    value.push(data);
                 }
                 this.localforage.setItem(curPage, value).then(function (v) {
                     this.engine.channel.messageChannelSend(JSON.stringify(data));
@@ -252,29 +274,53 @@ class App extends Component {
 
     // 白板回放
     playBack(pageNum) {
-        let curPage = 'page' + pageNum;
+        this.playBackData = {};
+        this.getPlayBackData(pageNum);
+    }
 
-        this.localforage.getItem(curPage, function (err, value) {
-            if (!value) return;
-            let total = value.length;
-            let num = 0;
-            const work = function (total, message) {
+    playBackWork(curPage) {
+        let message =  this.playBackData[curPage][0];
+        if(message){
+            if (message.method == 'jumpPage'){
                 this.handleMessage(JSON.stringify(message));
-                if (num + 1 == total) {
-                    console.log(value[num]);
-                    console.log(typeof value[num]);
-                    if (value[num].method == 'jumpPage') {
-                        this.playBack(value[num].pars.handleData.pars);
-                    }
-                    return;
-                }
-                num++;
+                this.getPlayBackData(message.pars.handleData.pars);
+            } else {
                 setTimeout(function () {
-                    work(total, value[num]);
-                }, 1000)
-            }.bind(this);
-            work(total, value[num]);
-        }.bind(this));
+                    this.handleMessage(JSON.stringify(message));
+                    this.playBackData[curPage].shift();
+                    this.playBackWork(curPage);
+                }.bind(this), 1500)
+
+            }
+        }
+    }
+
+    getPlayBackData(pageNum){
+        let curPage = 'page' + pageNum;
+        if(this.playBackData[curPage]) {
+            this.playBackWork(curPage);
+        } else {
+            this.localforage.getItem(curPage, function (err, value) {
+                if(value){
+                     this.playBackData[curPage] = value;
+                     this.playBackWork(curPage);
+                }
+            }.bind(this));
+        }
+    }
+
+    login(e) {
+        //
+        // 默认账号登录
+        // 
+        let account = Math.floor(Math.random() * 100);
+        let data = {
+            role: this.state.role,
+            uid: account,
+            channel: 'q2',
+            canDraw: true
+        }
+        this.loginChannel(data);
     }
 
     render() {
@@ -313,25 +359,10 @@ class App extends Component {
                 break;
         }
 
-        // 页面切换时，根据对应页面缓存改变状态
-        let pageNum = this.state.switchPage.currentPage;
-        console.log('render');
-        console.log(pageNum);
-        if (this.currentPage !== pageNum) {
-            let curPage = 'page' + pageNum;
-            this.localforage.getItem(curPage, function (err, value) {
-                this.sketchpad.removeAll();
-                if (value && value.length > 0) {
-                    value.forEach(message => {
-                        if(Object.is(message.method,'jumpPage')) return;
-                        this.handleMessage(JSON.stringify(message));
-                    });
-                }
-                this.currentPage = pageNum;
-            }.bind(this));
-        }
-
         return (<div id="whiteboardBox" className="whiteboardBox">
+            <div>
+                <button onClick={this.login.bind(this)}>登录</button>
+            </div>
             <CoursewareBox state={this.state.course} />
             <SketchpadBox state={this.state.brush} />
             <BrushBox state={this.state.brush} brushChoosedCallback={this.brushChoosedCallback.bind(this)} sketchpadChoosedCallback={this.sketchpadChoosedCallback.bind(this)} />

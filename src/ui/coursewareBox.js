@@ -4,9 +4,9 @@ class CoursewareBox extends React.Component {
     constructor(props) {
         super(props);
         this.state = props.state;
+
     }
     render() {
-
         let style = {
             display: `${this.state.show ? 'block' : 'none'}`,
             padding: '0',
