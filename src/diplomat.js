@@ -55,38 +55,40 @@ const listenPostMessage = function (e) {
     }
 };
 
-const handleMessage = function (message,boolean) {
+const handleMessage = function (message, boolean) {
+    
     if (typeof message !== 'string') return console.log('接受信令的消息应为string');
     let data = JSON.parse(message);
     // 自己广播的信令，自己不执行
     if (data.account === GLB.account && !boolean) return;
     // 外壳与白板通信
-    // if (data.sigType) {
-    //     switch (data.sigType) {
-    //         /***画板操作****/
-    //         case 'showBrush':
-    //             // 画板显示与隐藏（授权）
-    //             let uid = data.sigUid + '123';
-    //             if (GLB.account == uid && GLB.role == '2') {
+    if (data.sigType) {
+        switch (data.sigType) {
+            /***画板操作****/
+            case 'showBrush':
+                // 画板显示与隐藏（授权）
+                let uid = data.sigUid + 'A';
+                if (GLB.account == uid && GLB.role == '2') {
+                    let brushCopy = JSON.stringify(this.state.brush);
+                    let newBrush = JSON.parse(brushCopy);
+                    newBrush.show = data.sigValue.value ? true : false;
+                    this.setState({
+                        brush: newBrush
+                    })
+                }
+                break;
+            /****展示课件*****/
+            case 'showCourseware':
+                this.setState({
+                    course: {
+                        show: data.sigValue.value ? true : false,
+                        link: data.sigValue.value ? data.sigValue.link : ''
+                    }
+                })
+                break;
+        }
+    }
 
-    //                 this.setState({
-    //                     brush: {
-    //                         show: data.sigValue.value ? true : false
-    //                     }
-    //                 })
-    //             }
-    //             break;
-    //         /****展示课件*****/
-    //         case 'showCourseware':
-    //             this.setState({
-    //                 course: {
-    //                     show: data.sigValue.value ? true : false,
-    //                     link: data.sigValue.value ? data.sigValue.link : ''
-    //                 }
-    //             })
-    //             break;
-    //     }
-    // }
     if (data.belong) {
         switch (data.belong) {
             // 白板与白板通信

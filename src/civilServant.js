@@ -31,7 +31,7 @@ const jumpPage = function (newSwithPage, boolean) {
                 pars:null
             }
             this.engine.channel.messageChannelSend(JSON.stringify(clearAll));
-
+            
             // 
             let curPage = 'page' + newPageNum;
             this.localforage.getItem(curPage, function (err, value) {
@@ -44,8 +44,10 @@ const jumpPage = function (newSwithPage, boolean) {
                             this.engine.channel.messageChannelSend(JSON.stringify(message));
                        };
                     });
-                    this.handleMessage(JSON.stringify(value[seq]), true);
-                    this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
+                    if(seq){
+                        this.handleMessage(JSON.stringify(value[seq]), true);
+                        this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
+                    }
                 }
             }.bind(this));
         }

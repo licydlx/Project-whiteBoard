@@ -36,6 +36,9 @@ class SwitchPage extends React.Component {
         if (e.keyCode == 13) {
             let value = this.currentPage;
             let newSwithPage = Object.assign({}, this.state);
+
+            console.log(value);
+
             let totalPage = parseInt(newSwithPage.totalPage);
             if (value > 0 && value - 1 < totalPage) {
                 newSwithPage.currentPage = value;
@@ -43,6 +46,7 @@ class SwitchPage extends React.Component {
                 newSwithPage.rightIcon = newSwithPage.currentPage == newSwithPage.totalPage ? false : true;
                 this.props.jumpPage(newSwithPage, true);
             }
+
         }
     }
 
@@ -67,7 +71,7 @@ class SwitchPage extends React.Component {
             <div>
                 <img className={`leftIcon ${this.state.leftIcon ? '' : 'disabled'}`} key='leftIcon' onClick={this.towardsPageFn.bind(this)} src='https://res.miaocode.com/livePlatform/soundNetwork/images/10double.png' />
             </div>
-            <div>
+            <div onClick= {this.handleKeydown.bind(this)}>
                 <input className='towardsPage' type='text' maxLength='2' placeholder={this.state.currentPage} />
             </div>
             <div className='totalPage'>/{this.state.totalPage}</div>

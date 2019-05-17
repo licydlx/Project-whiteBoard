@@ -30,7 +30,6 @@ class App extends Component {
         this.syncCacheData = [];
         this.localforage = localforage;
         this.handleMessage = handleMessage.bind(this);
-
     }
 
     componentDidMount() {
@@ -77,6 +76,7 @@ class App extends Component {
 
     // 新用户注册，加入频道
     loginChannel(data) {
+        console.log('loginChannel');
         signalEngine(data, function (engine) {
             // 接入声网信令sdk对应的回调 
             signalResponse(engine, listenSignalMessage.bind(this));
@@ -85,7 +85,10 @@ class App extends Component {
             console.log('登录成功！！！')
             // 老师角色为0
             if (GLB.role == 0) {
-                const newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
+                let newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
+                let newSwitchPage = this.state.switchPage;
+                newSwitchPage.show = true;
+
                 let date = new Date();
                 let today = date.getDate();
                 let name = GLB.role + '-' + GLB.channel + '-' + today;
@@ -100,7 +103,8 @@ class App extends Component {
                 });
 
                 this.setState({
-                    brush: newBrush
+                    brush: newBrush,
+                    switchPage:newSwitchPage
                 }, () => {
                     this.setPageCacheValue(curPage);
                 });
@@ -116,19 +120,22 @@ class App extends Component {
                 this.localforage.setItem(curPage, []);
             } else {
                 // 当前缓存页面
-                // let seq;
-                // value.forEach((message,index) => {
-                //     if (Object.is(message.belong, 'whiteboard')) seq = index;
-                //     if (Object.is(message.belong, 'sketchpad')) {
-                //         this.handleMessage(JSON.stringify(message), true);
-                //         this.engine.channel.messageChannelSend(JSON.stringify(message));
-                //     };
-                // });
-                // this.handleMessage(JSON.stringify(value[seq]), true);
-                // this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
-                
+                let seq;
+                value.forEach((message, index) => {
+                    if (Object.is(message.belong, 'whiteboard')) seq = index;
+                    if (Object.is(message.belong, 'sketchpad')) {
+                        this.handleMessage(JSON.stringify(message), true);
+                        this.engine.channel.messageChannelSend(JSON.stringify(message));
+                    };
+                });
+
+                if(seq || seq == 0){
+                    this.handleMessage(JSON.stringify(value[seq]), true);
+                    this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
+                }
+
                 // 白板操作回放
-                this.playBack(this.state.switchPage.currentPage);
+                // this.playBack(this.state.switchPage.currentPage);
             }
         }.bind(this));
     }
@@ -279,9 +286,9 @@ class App extends Component {
     }
 
     playBackWork(curPage) {
-        let message =  this.playBackData[curPage][0];
-        if(message){
-            if (message.method == 'jumpPage'){
+        let message = this.playBackData[curPage][0];
+        if (message) {
+            if (message.method == 'jumpPage') {
                 this.handleMessage(JSON.stringify(message));
                 this.getPlayBackData(message.pars.handleData.pars);
             } else {
@@ -290,20 +297,19 @@ class App extends Component {
                     this.playBackData[curPage].shift();
                     this.playBackWork(curPage);
                 }.bind(this), 1500)
-
             }
         }
     }
 
-    getPlayBackData(pageNum){
+    getPlayBackData(pageNum) {
         let curPage = 'page' + pageNum;
-        if(this.playBackData[curPage]) {
+        if (this.playBackData[curPage]) {
             this.playBackWork(curPage);
         } else {
             this.localforage.getItem(curPage, function (err, value) {
-                if(value){
-                     this.playBackData[curPage] = value;
-                     this.playBackWork(curPage);
+                if (value) {
+                    this.playBackData[curPage] = value;
+                    this.playBackWork(curPage);
                 }
             }.bind(this));
         }
