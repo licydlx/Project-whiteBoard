@@ -9,7 +9,9 @@ const jumpPage = function (newSwithPage, boolean) {
         }
     }
     if (boolean) this.broadcastMessage('courseware', 'jumpPage', null, data);
-    this.message.sendMessage('child', data, this.coursewareIframe);
+    // 课件iframe
+    let coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
+    this.message.sendMessage('child', data, coursewareIframe);
 
     // let brushCopy = JSON.stringify(this.state.brush);
     // let newBrush = JSON.parse(brushCopy);

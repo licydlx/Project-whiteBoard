@@ -47,9 +47,7 @@ class App extends Component {
         }
         // 屏幕尺寸自适应
         findDimensions();
-        window.onresize = findDimensions();
-        // 课件iframe
-        this.coursewareIframe = document.getElementById("coursewareIframe").contentWindow;
+        window.onresize = findDimensions;
         // 画板实例化
         this.sketchpad = new sketchpadEngine(function (method, context, pars) {
             this.broadcastMessage('sketchpad', method, context, pars);
@@ -83,6 +81,7 @@ class App extends Component {
             this.engine = engine;
             GLB.logined = true;
             console.log('登录成功！！！')
+            console.log(GLB)
             // 老师角色为0
             if (GLB.role == 0) {
                 let newBrush = Object.assign({}, this.state.brush, { show: GLB.canDraw });
@@ -104,7 +103,7 @@ class App extends Component {
 
                 this.setState({
                     brush: newBrush,
-                    switchPage:newSwitchPage
+                    switchPage: newSwitchPage
                 }, () => {
                     this.setPageCacheValue(curPage);
                 });
@@ -129,7 +128,7 @@ class App extends Component {
                     };
                 });
 
-                if(seq || seq == 0){
+                if (seq || seq == 0) {
                     this.handleMessage(JSON.stringify(value[seq]), true);
                     this.engine.channel.messageChannelSend(JSON.stringify(value[seq]));
                 }
@@ -366,9 +365,9 @@ class App extends Component {
         }
 
         return (<div id="whiteboardBox" className="whiteboardBox">
-            <div>
+            {/* <div>
                 <button onClick={this.login.bind(this)}>登录</button>
-            </div>
+            </div> */}
             <CoursewareBox state={this.state.course} />
             <SketchpadBox state={this.state.brush} />
             <BrushBox state={this.state.brush} brushChoosedCallback={this.brushChoosedCallback.bind(this)} sketchpadChoosedCallback={this.sketchpadChoosedCallback.bind(this)} />

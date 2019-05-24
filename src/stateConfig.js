@@ -28,11 +28,14 @@
 const stateConfig = {
     course: {
         show: true,
-        link: 'https://www.kunqu.tech/page1/'
+        link:'',
+        // 'https://www.kunqu.tech/page1/'
+        // 'http://event.img.huabanimg.com/wsjd2019/kv.jpg'
+        // 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf'
     },
 
     switchPage: {
-        show: true,
+        show: false,
         leftIcon: false,
         rightIcon: true,
         currentPage: 1,
@@ -41,7 +44,7 @@ const stateConfig = {
     },
 
     brush: {
-        show: true,
+        show: false,
         sketchpad:{
             type:'sketchpad',
             penSize: 2,

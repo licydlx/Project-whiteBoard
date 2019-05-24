@@ -2,6 +2,7 @@
 // 随意缩放导致画板出现bug，需重新实例化
 // ====================
 const findDimensions = function () {
+    console.log('findDimensions');
     let winWidth = 0;
     let winHeight = 0;
     //函数：获取尺寸
@@ -25,6 +26,7 @@ const findDimensions = function () {
     if (rate > 16 / 9) {
         whiteboardBox.style.width = winHeight * 16 / 9 + 'px';
         whiteboardBox.style.height = winHeight + 'px';
+        
         sketchpad.width = winHeight * 16 / 9;
         sketchpad.height = winHeight;
     } else {
