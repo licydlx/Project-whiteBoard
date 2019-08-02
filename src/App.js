@@ -328,6 +328,15 @@ class App extends Component {
         this.loginChannel(data);
     }
 
+    changeLink(){
+        this.setState({
+            course: {
+                show: true,
+                link: 'https://res.miaocode.com/618487b2-2fd4-48e4-8b16-f1f774ed12a5.pdf'
+            }
+        }) 
+    }
+
     render() {
         let sketchpad = this.state.brush.sketchpad;
         switch (sketchpad.type) {
@@ -365,6 +374,7 @@ class App extends Component {
         }
 
         return (<div id="whiteboardBox" className="whiteboardBox">
+            {/* <div onClick={this.changeLink.bind(this)}>改变</div> */}
             {/* <div>
                 <button onClick={this.login.bind(this)}>登录</button>
             </div> */}

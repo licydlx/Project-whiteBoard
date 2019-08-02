@@ -74,19 +74,20 @@ class CoursewareBox extends React.Component {
             border: 'none'
         };
 
-        console.log('============白板渲染参数！==========')
-        console.log(this.state)
-
         let item;
-        let newStr = this.state.link.slice(0, -3);
+        let newStr = this.state.link.slice(-3);
         if(this.state.link == ''){
+            console.log('白板渲染！');
             item = <div style={emptyBox}>我是白板</div>;
         } else if(newStr.includes('pdf')){
+            console.log('pdf渲染！');
             item = <canvas id='pdfCanvas' style={pdfBox}></canvas>;
             this.showPDF();
         } else if(newStr.includes('jpg') || newStr.includes('png')) {
+            console.log('图片渲染！');
             item = <image style={imgBox} src={this.state.link}></image>
         } else {
+            console.log('h5渲染！');
             item =<iframe id="coursewareIframe" style={courseware} title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" src={this.state.link}>
                 <p>Your browser does not support iframes.</p>
             </iframe>

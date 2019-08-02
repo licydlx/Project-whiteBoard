@@ -27,7 +27,7 @@
 
 const stateConfig = {
     course: {
-        show: true,
+        show: false,
         link:'',
         // 'https://www.kunqu.tech/page1/'
         // 'http://event.img.huabanimg.com/wsjd2019/kv.jpg'

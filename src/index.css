@@ -27,6 +27,10 @@
   background-color: aquamarine;
 }
 
+.coursewareBox > #pdfCanvas {
+  margin: auto;
+}
+
 .whiteboardBox {
   position: relative;
   width:960px;
