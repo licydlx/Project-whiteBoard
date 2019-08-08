@@ -78,6 +78,7 @@ class App extends Component {
         signalEngine(data, function (engine) {
             // 接入声网信令sdk对应的回调 
             signalResponse(engine, listenSignalMessage.bind(this));
+            
             this.engine = engine;
             GLB.logined = true;
             console.log('登录成功！！！')

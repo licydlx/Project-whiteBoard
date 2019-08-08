@@ -1,4 +1,4 @@
-let GLB = {
+let SignalData = {
     appId: 'e8ebfe19d8ba45759c7bd1ce002823be',
     role: 0,
     account: 123,
@@ -8,7 +8,7 @@ let GLB = {
     logined: false
 }
 
-export default GLB;
+export default SignalData;
 
 // 个人
 // e8ebfe19d8ba45759c7bd1ce002823be

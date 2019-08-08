@@ -1,14 +1,15 @@
-import React from 'react'
-import Footer from './Footer'
-import AddTodo from '../containers/AddTodo'
-import VisibleTodoList from '../containers/VisibleTodoList'
+import React from 'react';
+import Sketchpad from './sketchpad/index';
+import SketchpadPen from './sketchpad/pen/index';
+
+import AgoraSingal from './agoraSingal/index';
+
 
 const App = () => (
   <div>
-    <AddTodo />
-    <VisibleTodoList />
-    <Footer />
+    <Sketchpad />
+    <AgoraSingal />
   </div>
 )
 
-export default App
+export default App;

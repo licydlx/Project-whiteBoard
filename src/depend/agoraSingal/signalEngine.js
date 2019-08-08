@@ -1,24 +1,24 @@
-import GLB from '../configs/GLB';
+import SignalData from './SignalData';
 
 export default function (data, callback) {
     if (!Signal) return console.log('声网信令SDK缺失！');
 
     if (data) {
-        if (data.appId) GLB.appId = data.appId;
-        if (data.role) GLB.role = data.role;
-        if (data.uid) GLB.account = data.uid + 'A';
-        if (data.agoraSignalingToken) GLB.token = data.agoraSignalingToken;
-        if (data.channel) GLB.channel = data.channel;
-        if (data.canDraw) GLB.canDraw = data.canDraw;
+        if (data.appId) SignalData.appId = data.appId;
+        if (data.role) SignalData.role = data.role;
+        if (data.uid) SignalData.account = data.uid + 'A';
+        if (data.agoraSignalingToken) SignalData.token = data.agoraSignalingToken;
+        if (data.channel) SignalData.channel = data.channel;
+        if (data.canDraw) SignalData.canDraw = data.canDraw;
     }
 
-    const signal = Signal(GLB.appId);
+    const signal = Signal(SignalData.appId);
     // 登录
-    const session = signal.login(GLB.account, GLB.token);
-    
+    const session = signal.login(SignalData.account, SignalData.token);
+
     session.onLoginSuccess = (uid) => {
         // 加入频道
-        const channel = session.channelJoin(GLB.channel);
+        const channel = session.channelJoin(SignalData.channel);
         channel.onChannelJoined = () => {
             let engine = {
                 signal: signal,
