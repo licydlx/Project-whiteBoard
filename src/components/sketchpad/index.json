@@ -1,0 +1,26 @@
+﻿{
+    "board": {
+        "name": "board",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png"
+    },
+    "pen": {
+        "name": "pen",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/03double.png"
+    },
+    "text": {
+        "name": "text",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/04double.png"
+    },
+    "graph": {
+        "name": "graph",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/07double.png"
+    },
+    "eraser": {
+        "name": "eraser",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/06double.png"
+    },
+    "empty": {
+        "name": "empty",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/05double.png"
+    }
+}

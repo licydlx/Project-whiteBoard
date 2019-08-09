@@ -1,14 +1,12 @@
 import React from 'react';
-import Sketchpad from './sketchpad/index';
-import SketchpadPen from './sketchpad/pen/index';
 
 import AgoraSingal from './agoraSingal/index';
-
+import ToggleSketchpad from '../containers/toggleSketchpad';
 
 const App = () => (
   <div>
-    <Sketchpad />
-    <AgoraSingal />
+    <ToggleSketchpad />
+    {/* <AgoraSingal /> */}
   </div>
 )
 

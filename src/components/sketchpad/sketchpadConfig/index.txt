@@ -1,0 +1,10 @@
+画板组件工厂
+
+1.board                 2.pen               3.text                4.graph                5.eraser                6.empty
+                     
+                        penSize:array       penSize:array
+                        penColor:array      
+                                        
+
+
+

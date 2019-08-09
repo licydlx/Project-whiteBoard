@@ -5,18 +5,20 @@ export const addTodo = text => ({
   text
 })
 
-export const setVisibilityFilter = filter => ({
-  type: 'SET_VISIBILITY_FILTER',
-  filter
+
+// ======
+// 画板区
+// ======
+// 切换工具显示与隐藏
+export const toggleSketchpad = name => ({
+  type: 'TOGGLE_SKETCHPAD',
+  name
 })
 
-export const toggleTodo = id => ({
-  type: 'TOGGLE_TODO',
-  id
+// 改变文字大小
+export const changeFontSize = fontSize => ({
+  type: 'CHANGE_FONTSIZE',
+  fontSize
 })
 
-export const VisibilityFilters = {
-  SHOW_ALL: 'SHOW_ALL',
-  SHOW_COMPLETED: 'SHOW_COMPLETED',
-  SHOW_ACTIVE: 'SHOW_ACTIVE'
-}
+

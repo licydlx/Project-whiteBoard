@@ -43,3 +43,80 @@
     border-radius:4px;
     filter:blur(0px);
 }
+
+/* 组件样式 */
+.attrWrapper {
+    position: absolute;
+    left: -150px;
+    width: 120px;
+    height: auto;
+    /* top: 0;
+    bottom: 0; */
+    margin: auto;
+    padding: 5px;
+    background:rgba(68,80,74,1);
+    border-radius:4px;
+    border:1px solid rgba(68,80,74,1);
+  }
+  
+  .attrBox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  
+  .attrBox > div {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  
+    width: 30px;
+    height: 30px;
+  }
+  
+  .attrBox .penSize{
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 50%;
+  }
+  
+  .attrBox .penColor{
+    box-sizing: border-box;
+    border-radius:2px;
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+  }
+  
+  .attrBox .textSize{
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+  }
+  
+  .attrBox .penShape {
+      display: block;
+  }
+  
+  .attrBox .active .penSize{
+      background-color: rgba(255,255,255,1);
+  }
+  
+  .attrBox .penColorBox.active {
+      border-radius:2px;
+      border:1px solid rgba(55,194,255,1);
+  }
+  
+  .attrBox .textSizeBox.active .textSize {
+      color: rgba(255,255,255,1);
+  }
+  
+  .attrBox .penShapeBox.active{
+      border-radius:2px;
+      border:1px solid rgba(55,194,255,1);
+  }
+  
+  /* .attrBox div.active .penSize{
+      background-color: rgba(255,255,255,1);
+  } */

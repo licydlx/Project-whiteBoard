@@ -19,6 +19,8 @@ export default function (data, callback) {
     session.onLoginSuccess = (uid) => {
         // 加入频道
         const channel = session.channelJoin(SignalData.channel);
+
+        // 加入频道成功回调
         channel.onChannelJoined = () => {
             let engine = {
                 signal: signal,
@@ -27,15 +29,16 @@ export default function (data, callback) {
             };
             if (callback) callback(engine)
         }
+
+        // 加入频道失败回调
+        channel.onChannelJoinFailed = (ecode) => {
+            console.log('加入频道失败！')
+            console.log(ecode);
+        }
     }
 
     session.onLoginFailed = (ecode) => {
         console.log('登录失败！')
         console.log(ecode);
-    }
-
-    session.onLogout = (reason) => {
-        console.log('用户登出！')
-        console.log(reason);
     }
 }
