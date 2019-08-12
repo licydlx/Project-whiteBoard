@@ -1,4 +1,9 @@
 /* ================ */
+.sketchpadBox {
+    width: 1400px;
+    height: 1000px;
+}
+
 .drag {
     position: absolute;
     display: flex;
@@ -8,43 +13,49 @@
     z-index: 4;
     right: 30px;
     top: 80px;
-    width:46px;
+    width: 46px;
     height: 264px;
     /* height:336px; */
-    background:rgba(49,61,77,0.9);
-    box-shadow:0px 0px 0px 0px rgba(255,255,255,0.1);
+    background: rgba(49, 61, 77, 0.9);
+    box-shadow: 0px 0px 0px 0px rgba(255, 255, 255, 0.1);
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
 }
 
-.drag > .tool {
+.drag>.tool {
     position: relative;
     cursor: pointer;
+    overflow: hidden;
 }
 
-.drag > .tool > div {
+.drag>.tool.active {
+    overflow: visible;
+}
+
+.drag>.tool>.icon {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.drag > .tool > div > img {
+.drag>.tool>.icon>img {
     display: block;
     width: auto;
     height: 20px;
 }
 
-.drag > .tool > .active {
-    width:32px;
-    height:32px;
-    background:rgba(80,95,115,1);
-    border-radius:4px;
-    filter:blur(0px);
+.drag>.tool.active>.icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(80, 95, 115, 1);
+    border-radius: 4px;
+    filter: blur(0px);
 }
 
 /* 组件样式 */
+
 .attrWrapper {
     position: absolute;
     left: -150px;
@@ -54,69 +65,68 @@
     bottom: 0; */
     margin: auto;
     padding: 5px;
-    background:rgba(68,80,74,1);
-    border-radius:4px;
-    border:1px solid rgba(68,80,74,1);
-  }
-  
-  .attrBox {
+    background: rgba(68, 80, 74, 1);
+    border-radius: 4px;
+    border: 1px solid rgba(68, 80, 74, 1);
+}
+
+.attrBox {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
-  }
-  
-  .attrBox > div {
+}
+
+.attrBox>div {
     box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-  
     width: 30px;
     height: 30px;
-  }
-  
-  .attrBox .penSize{
-    background-color: rgba(255,255,255,0.5);
+}
+
+.attrBox .penSize {
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
-  }
-  
-  .attrBox .penColor{
+}
+
+.attrBox .penColor {
     box-sizing: border-box;
-    border-radius:2px;
+    border-radius: 2px;
     width: 20px;
     height: 20px;
     margin: 5px;
-  }
-  
-  .attrBox .textSize{
-    color: rgba(255,255,255,0.5);
+}
+
+.attrBox .textSize {
+    color: rgba(255, 255, 255, 0.5);
     font-size: 12px;
-  }
-  
-  .attrBox .penShape {
-      display: block;
-  }
-  
-  .attrBox .active .penSize{
-      background-color: rgba(255,255,255,1);
-  }
-  
-  .attrBox .penColorBox.active {
-      border-radius:2px;
-      border:1px solid rgba(55,194,255,1);
-  }
-  
-  .attrBox .textSizeBox.active .textSize {
-      color: rgba(255,255,255,1);
-  }
-  
-  .attrBox .penShapeBox.active{
-      border-radius:2px;
-      border:1px solid rgba(55,194,255,1);
-  }
-  
-  /* .attrBox div.active .penSize{
+}
+
+.attrBox .penShape {
+    display: block;
+}
+
+.attrBox .active .penSize {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.attrBox .penColorBox.active {
+    border-radius: 2px;
+    border: 1px solid rgba(55, 194, 255, 1);
+}
+
+.attrBox .textSizeBox.active .textSize {
+    color: rgba(255, 255, 255, 1);
+}
+
+.attrBox .penShapeBox.active {
+    border-radius: 2px;
+    border: 1px solid rgba(55, 194, 255, 1);
+}
+
+/* .attrBox div.active .penSize{
       background-color: rgba(255,255,255,1);
   } */

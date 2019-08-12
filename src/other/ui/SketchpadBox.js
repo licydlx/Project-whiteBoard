@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-04-02 15:32:43
+ * @LastEditTime: 2019-08-12 18:10:31
+ * @LastEditors: Please set LastEditors
+ */
 import React from 'react';
 
 class SketchpadBox extends React.Component {
