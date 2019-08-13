@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-08-12 17:31:04
+ * @LastEditTime: 2019-08-13 18:52:44
  * @LastEditors: Please set LastEditors
  */
 let nextTodoId = 0
@@ -49,5 +49,13 @@ export const changePenShape = (name,penShape) => ({
   name,
   penShape
 })
+
+// 窗口大小改变，画布改变
+export const changeBoard = (width,height) => ({
+  type: 'CHANGE_BOARD',
+  width,
+  height
+})
+
 
 

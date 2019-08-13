@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-12 19:03:39
+ * @LastEditTime: 2019-08-13 18:36:14
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -21,15 +21,16 @@ class Sketchpad extends React.Component {
   }
   
   componentDidMount() {
-    // 画板实例化
-    window.sketchpadObj = new sketchpadEngine('sketchpadBoard');
+
   }
 
   render() {
-    let { sketchpad, toggleSketchpad, changePenSize, changePenColor, changeTextSize, changePenShape } = {...this.props};
+    let { sketchpad, toggleSketchpad, changePenSize, changePenColor, changeTextSize, changePenShape ,changeBoard} = {...this.props};
+
+    console.log(sketchpad)
     return <div id="sketchpadBox" className="sketchpadBox">
         <div className='drag'>
-          {sketchpad.map((v) => {
+          {sketchpad.tools.map((v) => {
             return <div className={`tool ${v.active ? 'active' : ''}`} key={v.name}>
               <div className={`icon`} onClick={() => toggleSketchpad(v.name)}>
                 <img src={UiConfig[v.name].imgLink}></img>
@@ -39,7 +40,7 @@ class Sketchpad extends React.Component {
           })}
         </div>
     
-        <SketchpadBoard />
+        <SketchpadBoard boardSize={sketchpad.boardSize} changeBoard={changeBoard}/>
       </div >
   }
 }
