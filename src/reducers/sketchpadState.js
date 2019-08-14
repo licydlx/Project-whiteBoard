@@ -2,16 +2,18 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 13:33:26
- * @LastEditTime: 2019-08-13 18:12:47
+ * @LastEditTime: 2019-08-14 18:30:59
  * @LastEditors: Please set LastEditors
  */
+import visualArea from '../untils/visualArea'
+let { windowWidth, windowHeight } = { ...visualArea() }
 
 export default {
-  boardSize:{
-    width:1920,
-    height:1080
+  boardSize: {
+    width: windowWidth,
+    height: windowHeight
   },
-  tools:[
+  tools: [
     {
       name: "board",
       active: true,
@@ -31,8 +33,9 @@ export default {
     {
       name: "graph",
       active: false,
-      penShape:"line",
-      penColor: '#fff'
+      penShape: "line",
+      penColor: "#fff",
+      penSize: 2
     },
     {
       name: "eraser",

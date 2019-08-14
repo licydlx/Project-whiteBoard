@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-13 16:12:20
+ * @LastEditTime: 2019-08-14 18:51:30
  * @LastEditors: Please set LastEditors
  */
 
@@ -33,7 +33,7 @@
 
 //         window.canvas = canvas;
 //         window.zoom = window.zoom ? window.zoom : 1;
-      
+
 //         // 绑定画板事件
 //         canvas.on("mouse:down", function (options) {
 //             console.log("mouse:down");
@@ -62,7 +62,7 @@
 //             let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
 //             this.mouseTo.x = xy.x;
 //             this.mouseTo.y = xy.y;
-            
+
 //             this.drawingObject = null;
 //             this.doDrawing = false;
 //             this.moveCount = 1;
@@ -94,22 +94,28 @@
 //     }
 // }
 // export default sketchpadEngine;
-let penShape = 'line',
-penColor = '#E34F51',
-penSize = '2',
-mouseFrom = {},
-mouseTo = {},
-// 当前绘制对象
-drawingObject = null,
-// 绘制移动计数器
-moveCount = 1,
-// 绘制状态
-doDrawing = false;
 
+window.drawConfig = {
+    penShape: "",
+    penColor: "#fff",
+    penSize: "2",
+    textSize: "14"
+}
 
-const sketchpadEngine = function(domName) {
+let mouseFrom = {},
+    mouseTo = {},
+    // 当前绘制对象
+    drawingObject = null,
+    // 绘制移动计数器
+    moveCount = 1,
+    // 绘制状态
+    doDrawing = false,
+    textContent = "",
+    textInput = null;
+
+const sketchpadEngine = function (domName) {
     let canvas = new fabric.Canvas(domName, {
-        isDrawingMode: false,
+        isDrawingMode: true,
         skipTargetFind: true,
         selectable: false,
         selection: false
@@ -118,6 +124,9 @@ const sketchpadEngine = function(domName) {
     window.canvas = canvas;
     window.zoom = window.zoom ? window.zoom : 1;
 
+    canvas.freeDrawingBrush.color = window.drawConfig.penColor; //设置自由绘颜色
+    canvas.freeDrawingBrush.width = window.drawConfig.penSize;
+
     // 绑定画板事件
     canvas.on("mouse:down", function (options) {
         console.log("mouse:down");
@@ -125,12 +134,23 @@ const sketchpadEngine = function(domName) {
         mouseFrom.x = xy.x;
         mouseFrom.y = xy.y;
         doDrawing = true;
+
+        // 如果为文本编辑状态，则退出
+        if (textInput) {
+            textInput.exitEditing();
+            textInput = null;
+        }
+
+        // 如果画笔为text,则绘制
+        if (Object.is(window.drawConfig.penShape, 'text')) {
+            drawing();
+        }
     });
 
     canvas.on("mouse:move", function (options) {
         console.log("mouse:move");
         // 减少绘制频率
-        if (moveCount % 2 && !doDrawing){
+        if (moveCount % 2 && !doDrawing) {
             return;
         }
         moveCount++;
@@ -138,7 +158,11 @@ const sketchpadEngine = function(domName) {
         mouseTo.x = xy.x;
         mouseTo.y = xy.y;
 
-        drawing();
+        // 如果画笔为text,则不绘制
+        if (!Object.is(window.drawConfig.penShape, 'text')) {
+            drawing();
+        }
+
     });
 
     canvas.on("mouse:up", function (options) {
@@ -146,31 +170,125 @@ const sketchpadEngine = function(domName) {
         let xy = transformMouse(options.e.offsetX, options.e.offsetY);
         mouseTo.x = xy.x;
         mouseTo.y = xy.y;
-        
+
         drawingObject = null;
         doDrawing = false;
         moveCount = 1;
     });
+
+    // canvas.on("object:modified", function (e) {
+    //     console.log('object:modified')
+    //     if (window.drawConfig.penShape === "text") {
+    //         textContent = e.target.text;
+    //         drawing();
+    //     }
+    // });
+
+    canvas.on("selection:created", function (e) {
+        console.log('selection:created')
+        if (e.target._objects) {
+          //多选删除
+          let etCount = e.target._objects.length;
+          for (let etindex = 0; etindex < etCount; etindex++) {
+            canvas.remove(e.target._objects[etindex]);
+          }
+        } else {
+          //单选删除
+          canvas.remove(e.target);
+        }
+        canvas.discardActiveObject(); //清楚选中框
+    });
+
 }
 
 const transformMouse = (mouseX, mouseY) => {
     return { x: mouseX / window.zoom, y: mouseY / window.zoom };
 }
 
-    // 绘制
+// 绘制
 const drawing = () => {
+    if (!window.drawConfig.penShape) return;
     if (drawingObject) canvas.remove(drawingObject);
     let curDrawing = null;
-    switch (penShape) {
+    switch (window.drawConfig.penShape) {
         case "line":
             // 直线
-            curDrawing = new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y,30,30], {
-                stroke: penColor,
-                strokeWidth: penSize,
+            curDrawing = new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
+                stroke: window.drawConfig.penColor,
+                strokeWidth: window.drawConfig.penSize,
+                fill: '#fff',
+                originX: 'center',
+                originY: 'center'
             });
             break;
+        case "text":
+            // 文本
+            textInput = new fabric.Textbox(textContent, {
+                left: mouseFrom.x,
+                top: mouseFrom.y,
+                width: 150,
+                fontSize: window.drawConfig.textSize,
+                fill: window.drawConfig.penColor,
+                hasControls: false
+            });
+
+            canvas.add(textInput);
+            textInput.enterEditing();
+            textInput.hiddenTextarea.focus();
+            textContent = "";
+            break;
+        case "ellipse":
+            // 椭圆
+            curDrawing = new fabric.Ellipse({
+                stroke: window.drawConfig.penColor,
+                strokeWidth: window.drawConfig.penSize,
+                originX: "left",
+                originY: "top",
+                left: mouseFrom.x,
+                top: mouseFrom.y,
+                rx: Math.abs(mouseFrom.x - mouseTo.x),
+                ry: Math.abs(mouseFrom.y - mouseTo.y),
+                fill: "rgba(255,255,255,0)",
+            });
+            break;
+
+        case "rectangle":
+            // 长方形
+            let path =
+                "M " +
+                mouseFrom.x +
+                " " +
+                mouseFrom.y +
+                " L " +
+                mouseTo.x +
+                " " +
+                mouseFrom.y +
+                " L " +
+                mouseTo.x +
+                " " +
+                mouseTo.y +
+                " L " +
+                mouseFrom.x +
+                " " +
+                mouseTo.y +
+                " L " +
+                mouseFrom.x +
+                " " +
+                mouseFrom.y +
+                " z";
+            curDrawing = new fabric.Path(path, {
+                left: mouseFrom.x,
+                top: mouseFrom.y,
+                stroke: window.drawConfig.penColor,
+                strokeWidth: window.drawConfig.penSize,
+                fill: "rgba(255,255,255,0)",
+            });
+            break;
+        case "eraser":
+            break;
+
     }
-    
+
     if (curDrawing) {
         canvas.add(curDrawing);
         drawingObject = curDrawing;

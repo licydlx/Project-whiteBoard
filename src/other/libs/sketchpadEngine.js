@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-04-03 11:12:08
+ * @LastEditTime: 2019-08-14 17:20:53
+ * @LastEditors: Please set LastEditors
+ */
 class sketchpadEngine {
     constructor(callback) {
         this.callback = callback;

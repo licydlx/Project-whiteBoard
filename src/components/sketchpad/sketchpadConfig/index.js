@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 14:02:49
- * @LastEditTime: 2019-08-12 17:39:51
+ * @LastEditTime: 2019-08-14 18:24:35
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -42,7 +42,7 @@ const defaultConfig = {
     attr: ['textSize', 'penColor']
   },
   graph: {
-    attr: ['penShape', 'penColor']
+    attr: ['penShape','penSize','penColor']
   },
   eraser:{},
   empty: {}
