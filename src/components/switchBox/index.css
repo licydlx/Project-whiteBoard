@@ -1,0 +1,68 @@
+.switchBox {
+  position: absolute;
+  margin: auto;
+  left: 0;
+  bottom: 20px;
+  right: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  z-index: 4;
+  width: 140px;
+  height: 32px;
+  background: rgba(0, 0, 0, .5);
+  box-shadow: 0px 0px 0px 0px rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.switchBox>div {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.switchBox>div .leftIcon, .switchBox>div .rightIcon {
+  width: 9px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.switchBox>div .towardsPage {
+  width: 15px;
+  border: none;
+  background-color: #999;
+  text-align: center;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.switchBox>.totalPage {
+  width: 15px;
+  color: #f5f5f5;
+  font-size: 13px;
+}
+
+.disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Edge */
+
+.towardsPage::-webkit-input-placeholder {
+  color: #fff;
+}
+
+/* Internet Explorer 10-11 */
+
+.towardsPage:-ms-input-placeholder {
+  color: #fff;
+}
+
+.towardsPage::placeholder {
+  color: #fff;
+}

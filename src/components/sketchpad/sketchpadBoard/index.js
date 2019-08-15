@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-02 15:32:43
- * @LastEditTime: 2019-08-14 19:04:13
+ * @LastEditTime: 2019-08-15 16:08:00
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -121,19 +121,20 @@ class sketchpadBoard extends React.Component {
         // 对可视区，元素高宽等做些研究，归纳
         // 2019-08-14
         let zoom = 1;
-        let eleWidth = document.body.clientWidth,
-            eleHeight = document.body.clientHeight,
+        let whiteBoard = document.getElementById("whiteBoard");
+        let eleWidth = whiteBoard.offsetWidth,
+            eleHeight = whiteBoard.offsetHeight,
             cHeight = canvas.height,
             cWidth = canvas.width;
         let width = eleWidth > cWidth ? eleWidth : cWidth;
         let height = eleHeight > cHeight ? eleHeight : cHeight;
         if (width > height) {
-            //横版
+            // 横版
             width = eleWidth;
             height = eleHeight;
             zoom = width / this.config.width;
         } else {
-            //竖版
+            // 竖版
             height = height * eleHeight / this.config.height * 0.8;
             zoom = height / this.config.height;
         }

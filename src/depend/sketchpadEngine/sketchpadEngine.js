@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-14 18:51:30
+ * @LastEditTime: 2019-08-15 14:37:57
  * @LastEditors: Please set LastEditors
  */
 
@@ -197,6 +197,11 @@ const sketchpadEngine = function (domName) {
           canvas.remove(e.target);
         }
         canvas.discardActiveObject(); //清楚选中框
+        
+    });
+
+    canvas.on("path:created",function(e){
+        console.log("path:created");
     });
 
 }

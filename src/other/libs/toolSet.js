@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-05-10 11:47:38
+ * @LastEditTime: 2019-08-15 15:09:23
+ * @LastEditors: Please set LastEditors
+ */
 // ====================
 // 随意缩放导致画板出现bug，需重新实例化
 // ====================

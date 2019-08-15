@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-01 14:20:00
- * @LastEditTime: 2019-08-14 16:27:11
+ * @LastEditTime: 2019-08-15 18:23:00
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -12,14 +12,9 @@ import { Provider } from 'react-redux'
 
 import App from './components/App'
 import rootReducer from './reducers'
-import visualArea from './untils/visualArea'
 
 const store = createStore(rootReducer)
-
-let rootView = document.getElementById('root');
-let { windowWidth, windowHeight } = { ...visualArea() }
-rootView.style.width = windowWidth + 'px';
-rootView.style.height = windowHeight + 'px';
+const rootView = document.getElementById('root');
 
 render(
   <Provider store={store}>
