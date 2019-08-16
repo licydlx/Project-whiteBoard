@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-15 14:37:57
+ * @LastEditTime: 2019-08-16 10:49:29
  * @LastEditors: Please set LastEditors
  */
 
@@ -203,7 +203,6 @@ const sketchpadEngine = function (domName) {
     canvas.on("path:created",function(e){
         console.log("path:created");
     });
-
 }
 
 const transformMouse = (mouseX, mouseY) => {

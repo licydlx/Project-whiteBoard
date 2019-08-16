@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-04-24 10:39:17
+ * @LastEditTime: 2019-08-16 15:48:42
+ * @LastEditors: Please set LastEditors
+ */
 import React from 'react';
 import './SwitchPage.css';
 /**
