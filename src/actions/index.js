@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-08-16 18:07:30
+ * @LastEditTime: 2019-08-19 15:54:02
  * @LastEditors: Please set LastEditors
  */
 let nextTodoId = 0
@@ -79,18 +79,32 @@ export const goNextPage = (page) => ({
 })
 
 // 进入指定页
-export const handleKeydown = (page) => ({
-  type: 'HANDLE_KEYDOWN',
-  page
+export const goHandleKeydown = (e) => ({
+  type: 'GO_HANDLE_KEYDOWN',
+  e
 })
+
+// // 动态改变页码值
+// export const goHandleChange = (e) => ({
+//   type: 'GO_HANDLE_CHANGE',
+//   e
+// })
 
 // 全屏切换
 export const fullscreen = () => ({
   type: 'FULL_SCREEN',
 })
 
+// ======
+// 课件区
+// ======
 
-
+// 切换不同类型的课件 
+export const switchCourseware = (name,link) => ({
+  type: 'SWITCH_COURSEWARE',
+  name,
+  link
+})
 
 
 

@@ -2,11 +2,11 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-08-16 17:01:56
+ * @LastEditTime: 2019-08-19 15:43:07
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
-import { goPrevPage, handleKeydown, goNextPage, fullscreen } from '../actions'
+import { goPrevPage, goHandleKeydown, goNextPage, fullscreen } from '../actions'
 import SwitchBox from '../components/switchBox/index'
 
 const mapStateToProps = state => ({
@@ -15,7 +15,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   goPrevPage: page => dispatch(goPrevPage(page)),
-  handleKeydown: page => handleKeydown(handleKeydown(page)),
+  goHandleKeydown: e => dispatch(goHandleKeydown(e)),
   goNextPage: page => dispatch(goNextPage(page)),
   fullscreen: () => dispatch(fullscreen()),
 })

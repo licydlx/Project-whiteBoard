@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-04-12 14:28:43
+ * @LastEditTime: 2019-08-19 16:32:51
+ * @LastEditors: Please set LastEditors
+ */
 import React from 'react';
 import PDFJS from 'pdfjs-dist';
 import PDFWORKER from 'pdfjs-dist/build/pdf.worker.js';
