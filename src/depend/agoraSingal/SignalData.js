@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-08-08 18:24:02
+ * @LastEditTime: 2019-08-20 11:35:28
+ * @LastEditors: Please set LastEditors
+ */
 let SignalData = {
     appId: 'e8ebfe19d8ba45759c7bd1ce002823be',
     role: 0,

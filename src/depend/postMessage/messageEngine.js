@@ -1,9 +1,14 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-08-08 18:08:41
+ * @LastEditTime: 2019-08-20 11:12:56
+ * @LastEditors: Please set LastEditors
+ */
 class messageEngine {
     constructor(callback) {
         this.callback = callback;
-    }
 
-    listen() {
         window.addEventListener("message", this.callback, false);
     }
 

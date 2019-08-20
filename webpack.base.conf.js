@@ -1,3 +1,10 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-04-01 14:19:46
+ * @LastEditTime: 2019-08-20 16:35:43
+ * @LastEditors: Please set LastEditors
+ */
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -15,9 +22,14 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       },
       {
-        test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
         test: /\.(png|svg|jpg|gif)$/,

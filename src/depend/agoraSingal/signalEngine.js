@@ -1,6 +1,14 @@
+/*
+ * @Description: In User Settings Edit
+ * @Author: your name
+ * @Date: 2019-08-08 18:02:22
+ * @LastEditTime: 2019-08-20 11:35:16
+ * @LastEditors: Please set LastEditors
+ */
 import SignalData from './SignalData';
+import signalResponse from './signalResponse';
 
-export default function (data, callback) {
+const signalEngine = (data, callback) => {
     if (!Signal) return console.log('声网信令SDK缺失！');
 
     if (data) {
@@ -22,12 +30,15 @@ export default function (data, callback) {
 
         // 加入频道成功回调
         channel.onChannelJoined = () => {
-            let engine = {
+            console.log('加入频道成功！')
+            whiteBoardSignal = {
                 signal: signal,
                 session: session,
                 channel: channel
             };
-            if (callback) callback(engine)
+
+            // 信令其它回调
+            signalResponse(callback);
         }
 
         // 加入频道失败回调
@@ -42,3 +53,5 @@ export default function (data, callback) {
         console.log(ecode);
     }
 }
+
+export default signalEngine;
