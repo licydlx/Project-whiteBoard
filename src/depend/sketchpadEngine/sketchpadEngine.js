@@ -2,98 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-16 10:49:29
+ * @LastEditTime: 2019-08-21 18:33:23
  * @LastEditors: Please set LastEditors
  */
-
-// class sketchpadEngine {
-//     constructor(domName,callback) {
-//         this.callback = callback;
-//         // 绘图要素配置
-
-//         this.penShape = 'line';
-//         this.penColor = '#E34F51';
-//         this.penSize = '2';
-//         this.mouseFrom = {};
-//         this.mouseTo = {};
-
-//         // 当前绘制对象
-//         this.drawingObject = null;
-//         // 绘制移动计数器
-//         this.moveCount = 1;
-//         // 绘制状态
-//         this.doDrawing = false;
-
-//         let canvas = new fabric.Canvas(domName, {
-//             isDrawingMode: false,
-//             skipTargetFind: true,
-//             selectable: false,
-//             selection: false
-//         });
-
-//         window.canvas = canvas;
-//         window.zoom = window.zoom ? window.zoom : 1;
-
-//         // 绑定画板事件
-//         canvas.on("mouse:down", function (options) {
-//             console.log("mouse:down");
-//             let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-//             this.mouseFrom.x = xy.x;
-//             this.mouseFrom.y = xy.y;
-//             this.doDrawing = true;
-//         }.bind(this));
-
-//         canvas.on("mouse:move", function (options) {
-//             console.log("mouse:move");
-//             // 减少绘制频率
-//             if (this.moveCount % 2 && !this.doDrawing){
-//                 return;
-//             }
-//             this.moveCount++;
-//             let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-//             this.mouseTo.x = xy.x;
-//             this.mouseTo.y = xy.y;
-
-//             this.drawing();
-//         }.bind(this));
-
-//         canvas.on("mouse:up", function (options) {
-//             console.log('mouse:up')
-//             let xy = this.transformMouse(options.e.offsetX, options.e.offsetY);
-//             this.mouseTo.x = xy.x;
-//             this.mouseTo.y = xy.y;
-
-//             this.drawingObject = null;
-//             this.doDrawing = false;
-//             this.moveCount = 1;
-//         }.bind(this));
-//     }
-//     // 坐标转换
-//     transformMouse(mouseX, mouseY) {
-//         return { x: mouseX / window.zoom, y: mouseY / window.zoom };
-//     }
-
-//     // 绘制
-//     drawing() {
-//         if (this.drawingObject) canvas.remove(this.drawingObject);
-//         let curDrawing = null;
-//         switch (this.penShape) {
-//             case "line":
-//                 // 直线
-//                 curDrawing = new fabric.Line([this.mouseFrom.x, this.mouseFrom.y, this.mouseTo.x, this.mouseTo.y,30,30], {
-//                     stroke: this.penColor,
-//                     strokeWidth: this.penSize,
-//                 });
-//                 break;
-//         }
-
-//         if (curDrawing) {
-//             canvas.add(curDrawing);
-//             this.drawingObject = curDrawing;
-//         }
-//     }
-// }
-// export default sketchpadEngine;
+import { addPath, addText, addGraph,removeCreated } from '../../actions'
 
 window.drawConfig = {
     penShape: "",
@@ -113,7 +25,7 @@ let mouseFrom = {},
     textContent = "",
     textInput = null;
 
-const sketchpadEngine = function (domName) {
+const sketchpadEngine = function (domName, callback) {
     let canvas = new fabric.Canvas(domName, {
         isDrawingMode: true,
         skipTargetFind: true,
@@ -130,16 +42,18 @@ const sketchpadEngine = function (domName) {
     // 绑定画板事件
     canvas.on("mouse:down", function (options) {
         console.log("mouse:down");
+        // 如果为文本编辑状态，则退出
+        if (textInput) {
+            if (callback) callback({
+                action: addText(mouseFrom, textInput.text)
+            })
+            textInput.exitEditing();
+            textInput = null;
+        }
         let xy = transformMouse(options.e.offsetX, options.e.offsetY);
         mouseFrom.x = xy.x;
         mouseFrom.y = xy.y;
         doDrawing = true;
-
-        // 如果为文本编辑状态，则退出
-        if (textInput) {
-            textInput.exitEditing();
-            textInput = null;
-        }
 
         // 如果画笔为text,则绘制
         if (Object.is(window.drawConfig.penShape, 'text')) {
@@ -167,6 +81,15 @@ const sketchpadEngine = function (domName) {
 
     canvas.on("mouse:up", function (options) {
         console.log('mouse:up')
+        if (callback) {
+            // 如果 画笔型 为真 且 画笔型不为文本
+            if (window.drawConfig.penShape && !Object.is(window.drawConfig.penShape, 'text')) {
+                callback({
+                    action: addGraph(mouseFrom, mouseTo)
+                })
+            }
+        }
+
         let xy = transformMouse(options.e.offsetX, options.e.offsetY);
         mouseTo.x = xy.x;
         mouseTo.y = xy.y;
@@ -186,23 +109,87 @@ const sketchpadEngine = function (domName) {
 
     canvas.on("selection:created", function (e) {
         console.log('selection:created')
+        let created = [];
         if (e.target._objects) {
-          //多选删除
-          let etCount = e.target._objects.length;
-          for (let etindex = 0; etindex < etCount; etindex++) {
-            canvas.remove(e.target._objects[etindex]);
-          }
+            // 多选删除
+            for (let i = 0; i < e.target._objects.length; i++) {
+                let index = canvas._objects.findIndex((element) => element == e.target._objects[i])
+                created.push(index);
+            }
         } else {
-          //单选删除
-          canvas.remove(e.target);
+            // 单选删除
+            let index = canvas._objects.findIndex((element) => element == e.target)
+            created.push(index);
         }
-        canvas.discardActiveObject(); //清楚选中框
-        
+        canvas.removeCreated(created);
+
+        if (callback) callback({
+            action: removeCreated(created)
+        })
     });
 
-    canvas.on("path:created",function(e){
-        console.log("path:created");
+    canvas.on("path:created", function (e) {
+        console.log('path:created');
+        let path = e.path.path.toString().split(',').join(' ');
+        let pathConfig = {
+            fill: e.path.fill,
+            stroke: e.path.stroke,
+            strokeWidth: e.path.strokeWidth,
+            strokeDashArray: e.path.strokeDashArray,
+            strokeLineCap: e.path.strokeLineCap,
+            strokeLineJoin: e.path.strokeLineJoin,
+            strokeMiterLimit: e.path.strokeMiterLimit
+        }
+
+        if (callback) callback({
+            action: addPath(path, pathConfig)
+        })
     });
+
+    // 自由绘制
+    canvas.addPath = (path, pathConfig) => {
+        canvas.add(new fabric.Path(path, pathConfig));
+    }
+
+    // 添加文本
+    canvas.addText = (mf, tc) => {
+        let tInput = new fabric.Textbox(tc, {
+            left: mf.x,
+            top: mf.y,
+            width: 150,
+            fontSize: window.drawConfig.textSize,
+            fill: window.drawConfig.penColor,
+            hasControls: false
+        });
+
+        canvas.add(tInput);
+    }
+
+    canvas.removeCreated = (created) => {
+        for (let i = 0; i < created.length; i++) {
+            canvas.remove(canvas._objects[created[i]]);
+        }
+        //清楚选中框
+        canvas.discardActiveObject();
+    }
+
+    // 添加图形
+    canvas.addGraph = (mf, mt) => {
+        mouseFrom = mf;
+        mouseTo = mt;
+        switch (window.drawConfig.penShape){
+            case "line":
+                canvas.add(createLine());
+                break;
+            case "ellipse":
+                canvas.add(createEllipse());
+                break;
+            case "rectangle":
+                canvas.add(createRectangle());
+                break;           
+        }
+    }
+
 }
 
 const transformMouse = (mouseX, mouseY) => {
@@ -217,13 +204,7 @@ const drawing = () => {
     switch (window.drawConfig.penShape) {
         case "line":
             // 直线
-            curDrawing = new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
-                stroke: window.drawConfig.penColor,
-                strokeWidth: window.drawConfig.penSize,
-                fill: '#fff',
-                originX: 'center',
-                originY: 'center'
-            });
+            curDrawing = createLine();
             break;
         case "text":
             // 文本
@@ -243,50 +224,11 @@ const drawing = () => {
             break;
         case "ellipse":
             // 椭圆
-            curDrawing = new fabric.Ellipse({
-                stroke: window.drawConfig.penColor,
-                strokeWidth: window.drawConfig.penSize,
-                originX: "left",
-                originY: "top",
-                left: mouseFrom.x,
-                top: mouseFrom.y,
-                rx: Math.abs(mouseFrom.x - mouseTo.x),
-                ry: Math.abs(mouseFrom.y - mouseTo.y),
-                fill: "rgba(255,255,255,0)",
-            });
+            curDrawing = createEllipse();
             break;
 
         case "rectangle":
-            // 长方形
-            let path =
-                "M " +
-                mouseFrom.x +
-                " " +
-                mouseFrom.y +
-                " L " +
-                mouseTo.x +
-                " " +
-                mouseFrom.y +
-                " L " +
-                mouseTo.x +
-                " " +
-                mouseTo.y +
-                " L " +
-                mouseFrom.x +
-                " " +
-                mouseTo.y +
-                " L " +
-                mouseFrom.x +
-                " " +
-                mouseFrom.y +
-                " z";
-            curDrawing = new fabric.Path(path, {
-                left: mouseFrom.x,
-                top: mouseFrom.y,
-                stroke: window.drawConfig.penColor,
-                strokeWidth: window.drawConfig.penSize,
-                fill: "rgba(255,255,255,0)",
-            });
+            curDrawing = createRectangle();
             break;
         case "eraser":
             break;
@@ -298,5 +240,63 @@ const drawing = () => {
         drawingObject = curDrawing;
     }
 }
+
+const createLine = () => {
+    return new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
+        stroke: window.drawConfig.penColor,
+        strokeWidth: window.drawConfig.penSize,
+        fill: '#fff',
+        originX: 'center',
+        originY: 'center'
+    });
+}
+
+const createEllipse = () => {
+    return new fabric.Ellipse({
+        stroke: window.drawConfig.penColor,
+        strokeWidth: window.drawConfig.penSize,
+        originX: "left",
+        originY: "top",
+        left: mouseFrom.x,
+        top: mouseFrom.y,
+        rx: Math.abs(mouseFrom.x - mouseTo.x),
+        ry: Math.abs(mouseFrom.y - mouseTo.y),
+        fill: "rgba(255,255,255,0)",
+    });
+}
+
+const createRectangle = () => {
+    // 长方形
+    let path =
+        "M " +
+        mouseFrom.x +
+        " " +
+        mouseFrom.y +
+        " L " +
+        mouseTo.x +
+        " " +
+        mouseFrom.y +
+        " L " +
+        mouseTo.x +
+        " " +
+        mouseTo.y +
+        " L " +
+        mouseFrom.x +
+        " " +
+        mouseTo.y +
+        " L " +
+        mouseFrom.x +
+        " " +
+        mouseFrom.y +
+        " z";
+    return new fabric.Path(path, {
+        left: mouseFrom.x,
+        top: mouseFrom.y,
+        stroke: window.drawConfig.penColor,
+        strokeWidth: window.drawConfig.penSize,
+        fill: "rgba(255,255,255,0)",
+    });
+}
+
 
 export default sketchpadEngine;

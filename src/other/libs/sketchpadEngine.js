@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-03 11:12:08
- * @LastEditTime: 2019-08-14 17:20:53
+ * @LastEditTime: 2019-08-21 18:24:25
  * @LastEditors: Please set LastEditors
  */
 class sketchpadEngine {
@@ -126,21 +126,29 @@ class sketchpadEngine {
         this.canvas.on("selection:created", function (e) {
             console.log('selection:created')
             if (!Object.is(this.drawConfig.penShape, 'remove')) return;
+
             let newTotal = [];
             if (e.target._objects) {
+
                 for (let x = 0; x < this.canvas._objects.length; x++) {
                     let found = e.target._objects.find(function (element) {
                         return element == this.canvas._objects[x];
                     }.bind(this));
                     if (!found) newTotal.push(x)
                 }
+
             } else {
+
                 for (let x = 0; x < this.canvas._objects.length; x++) {
+
                     if (this.canvas._objects[x] !== e.target) {
                         newTotal.push(x)
                     }
+
                 }
+
             }
+
             this.removeBlock(e);
             if (callback) callback('removeBlock', null, JSON.stringify(newTotal));
         }.bind(this));
@@ -170,14 +178,19 @@ class sketchpadEngine {
             this.canvas.discardActiveObject();
         } else {
             let unRemovedSub = JSON.parse(e);
+
             let total = this.canvas._objects;
+
             this.canvas._objects = [];
+
             if (unRemovedSub.length == 0) {
                 this.canvas.add();
             }
+
             for (let x = 0; x < unRemovedSub.length; x++) {
                 this.canvas.add(total[parseInt(unRemovedSub[x])]);
             }
+            
             return;
         }
     }

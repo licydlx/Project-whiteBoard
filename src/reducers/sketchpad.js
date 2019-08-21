@@ -2,17 +2,13 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-20 14:06:54
+ * @LastEditTime: 2019-08-21 10:51:35
  * @LastEditors: Please set LastEditors
  */
 
 import defaultState from './sketchpadState'
 
 const sketchpad = (state = defaultState, action) => {
-  if (window.whiteBoardSignal) window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-    state,
-    action
-  }));
   switch (action.type) {
     case 'TOGGLE_SKETCHPAD':
       return {

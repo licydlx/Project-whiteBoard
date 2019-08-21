@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:24:02
- * @LastEditTime: 2019-08-20 11:35:28
+ * @LastEditTime: 2019-08-21 11:20:02
  * @LastEditors: Please set LastEditors
  */
 let SignalData = {
@@ -12,7 +12,9 @@ let SignalData = {
     token: '_no_need_token',
     channel: '1',
     canDraw: false,
-    logined: false
+    logined: false,
+
+    broadcast: true,
 }
 
 export default SignalData;

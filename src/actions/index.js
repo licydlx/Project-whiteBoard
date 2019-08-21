@@ -2,16 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-08-19 15:54:02
+ * @LastEditTime: 2019-08-21 17:27:20
  * @LastEditors: Please set LastEditors
  */
-let nextTodoId = 0
-export const addTodo = text => ({
-  type: 'ADD_TODO',
-  id: nextTodoId++,
-  text
-})
-
+let id = 0
 
 // ======
 // 画板区
@@ -19,12 +13,14 @@ export const addTodo = text => ({
 // 切换工具显示与隐藏
 export const toggleSketchpad = name => ({
   type: 'TOGGLE_SKETCHPAD',
+  id: id++,
   name
 })
 
 // 改变笔触大小
 export const changePenSize = (name, penSize) => ({
   type: 'CHANGE_PENSIZE',
+  id: id++,
   name,
   penSize
 })
@@ -32,6 +28,7 @@ export const changePenSize = (name, penSize) => ({
 // 改变笔触颜色
 export const changePenColor = (name, penColor) => ({
   type: 'CHANGE_PENCOLOR',
+  id: id++,
   name,
   penColor
 })
@@ -39,6 +36,7 @@ export const changePenColor = (name, penColor) => ({
 // 改变文字大小
 export const changeTextSize = (name, textSize) => ({
   type: 'CHANGE_TEXTSIZE',
+  id: id++,
   name,
   textSize
 })
@@ -46,6 +44,7 @@ export const changeTextSize = (name, textSize) => ({
 // 改变笔触形状
 export const changePenShape = (name, penShape) => ({
   type: 'CHANGE_PENSHAPE',
+  id: id++,
   name,
   penShape
 })
@@ -53,9 +52,46 @@ export const changePenShape = (name, penShape) => ({
 // 窗口大小改变，画布改变
 export const changeBoard = (width, height) => ({
   type: 'CHANGE_BOARD',
+  id: id++,
   width,
   height
 })
+
+// ======
+// canvas板区
+// ======
+
+// canvas板 添加 path
+export const addPath = (path, pathConfig) => ({
+  type: 'BOARD_ADD_PATH',
+  id: id++,
+  path,
+  pathConfig
+})
+
+// canvas板 添加 text
+export const addText = (mouseFrom, textContent) => ({
+  type: 'BOARD_ADD_TEXT',
+  id: id++,
+  mouseFrom,
+  textContent
+})
+
+// canvas板 添加 graph
+export const addGraph = (mouseFrom, mouseTo) => ({
+  type: 'BOARD_ADD_GRAPH',
+  id: id++,
+  mouseFrom,
+  mouseTo
+})
+
+// canvas板 删除 created
+export const removeCreated = (created) => ({
+  type: 'BOARD_REMOVE_CREATED',
+  id: id++,
+  created
+})
+
 
 // ======
 // 切页工具栏
@@ -64,23 +100,27 @@ export const changeBoard = (width, height) => ({
 // 切换切页工具栏
 export const toggleSwitchBox = () => ({
   type: 'TOGGLE_SWICHBOX',
+  id: id++,
 })
 
 // 去上一页
 export const goPrevPage = (page) => ({
   type: 'GO_PREVPAGE',
+  id: id++,
   page
 })
 
 // 去下一页
 export const goNextPage = (page) => ({
   type: 'GO_NEXTPAGE',
+  id: id++,
   page
 })
 
 // 进入指定页
 export const goHandleKeydown = (e) => ({
   type: 'GO_HANDLE_KEYDOWN',
+  id: id++,
   e
 })
 
@@ -93,6 +133,7 @@ export const goHandleKeydown = (e) => ({
 // 全屏切换
 export const fullscreen = () => ({
   type: 'FULL_SCREEN',
+  id: id++,
 })
 
 // ======
@@ -100,13 +141,9 @@ export const fullscreen = () => ({
 // ======
 
 // 切换不同类型的课件 
-export const switchCourseware = (name,link) => ({
+export const switchCourseware = (name, link) => ({
   type: 'SWITCH_COURSEWARE',
+  id: id++,
   name,
   link
 })
-
-
-
-
-
