@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:08:41
- * @LastEditTime: 2019-08-20 11:12:56
+ * @LastEditTime: 2019-08-23 14:00:33
  * @LastEditors: Please set LastEditors
  */
 class messageEngine {
@@ -20,6 +20,8 @@ class messageEngine {
                 if (window !== window.parent) window.parent.postMessage(data, '*');
                 break;
             case 'child':
+                // 课件iframe
+                iframeContext = document.getElementById("coursewareIframe").contentWindow;
                 if (iframeContext) iframeContext.postMessage(data, '*');
                 break;
         }

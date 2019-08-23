@@ -1,6 +1,0 @@
-1.板（board）
-2.笔（pen）
-3.文本（text）
-4.图形（graph）
-5.橡皮檫（eraser）
-6.清空（empty）

@@ -2,11 +2,11 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-08-19 16:17:40
+ * @LastEditTime: 2019-08-23 12:23:18
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
-import { switchCourseware } from '../actions'
+import { switchType } from '../actions'
 import Courseware from '../components/courseware/index'
 
 const mapStateToProps = state => ({
@@ -14,7 +14,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  switchCourseware: (name, link) => dispatch(switchCourseware(name, link))
+  switchType: (name, link) => dispatch(switchType(name, link))
 })
 
 export default connect(

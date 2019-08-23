@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-21 10:51:35
+ * @LastEditTime: 2019-08-23 11:53:25
  * @LastEditors: Please set LastEditors
  */
 
@@ -10,7 +10,13 @@ import defaultState from './sketchpadState'
 
 const sketchpad = (state = defaultState, action) => {
   switch (action.type) {
-    case 'TOGGLE_SKETCHPAD':
+    // 显示 画板工具栏
+    case 'BOARD_SHOW_TOOLBAR':
+      return {
+        ...state, show: state.show ? false : true
+      }
+
+    case 'BOARD_SWITCH_TOOLBAR':
       return {
         ...state, tools: state.tools.map(tool =>
           (tool.name === action.name)
@@ -19,7 +25,8 @@ const sketchpad = (state = defaultState, action) => {
         )
       }
 
-    case 'CHANGE_PENSIZE':
+
+    case 'BOARD_CHANGE_PENSIZE':
       return {
         ...state, tools: state.tools.map(tool =>
           (tool.name === action.name)
@@ -28,7 +35,7 @@ const sketchpad = (state = defaultState, action) => {
         )
       }
 
-    case 'CHANGE_PENCOLOR':
+    case 'BOARD_CHANGE_PENCOLOR':
       return {
         ...state, tools: state.tools.map(tool =>
           (tool.name === action.name)
@@ -37,7 +44,7 @@ const sketchpad = (state = defaultState, action) => {
         )
       }
 
-    case 'CHANGE_TEXTSIZE':
+    case 'BOARD_CHANGE_TEXTSIZE':
       return {
         ...state, tools: state.tools.map(tool =>
           (tool.name === action.name)
@@ -46,7 +53,7 @@ const sketchpad = (state = defaultState, action) => {
         )
       }
 
-    case 'CHANGE_PENSHAPE':
+    case 'BOARD_CHANGE_PENSHAPE':
       return {
         ...state, tools: state.tools.map(tool =>
           (tool.name === action.name && action.penShape)
@@ -55,7 +62,7 @@ const sketchpad = (state = defaultState, action) => {
         )
       }
 
-    case 'CHANGE_BOARD':
+    case 'BOARD_CHANGE_SIZE':
       return {
         ...state, boardSize: {
           width: action.width,
@@ -63,6 +70,20 @@ const sketchpad = (state = defaultState, action) => {
         }
       }
 
+    // 还原 画板toolbar
+    case "BOARD_REDUCE_TOOLBAR":
+      return {
+        ...state, ...defaultState, show: state.show
+      }
+
+    // 添加自由笔画
+    case "BOARD_ADD_PATH":
+    // 添加文本  
+    case "BOARD_ADD_TEXT":
+    // 添加图形
+    case "BOARD_ADD_GRAPH":
+    // 删去被选中的
+    case "BOARD_REMOVE_CREATED":
     default:
       return state
   }

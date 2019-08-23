@@ -8,7 +8,15 @@
     text-align: center;
 }
 
-.default {
+.coursewareIframe {
+    padding: 0;
+    border: none;
+    width: 100%;
+    height: 100%
+}
+
+/* 默认原始封面 */
+/* .default {
     display: flex;
     height: 100%;
     background-color: '#fff';
@@ -16,11 +24,51 @@
     font-size: 30px;
     justify-content: center;
     align-items: center;
+} */
+
+/* 星球封面 */
+/* .default {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-image: url("https://i.postimg.cc/NjZyHP9f/Untitled.png");
+  background-attachment: fixed;
+  background-size: cover;
 }
 
-.coursewareIframe {
-    padding: 0;
-    border: none;
+.default ul {
+    height: 90%;
     width: 100%;
-    height: 100%
 }
+
+.default li {
+    height: 120%;
+    width: 100%;
+}
+.default img {
+  width: auto;
+  height: 100vh;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+} */
+
+/* 熊猫封面 */
+.default {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height: 100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#66D3CD;
+}
+
+svg {
+  width:100%;
+  visibility:hidden;
+}
+

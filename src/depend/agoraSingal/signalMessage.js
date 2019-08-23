@@ -2,20 +2,30 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-08-21 15:05:43
+ * @LastEditTime: 2019-08-23 14:52:15
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
 
 function signalMessage() {
     return (next) => (action) => {
-        console.log('will dispatch', action)
-        // 中间件 广播 action
+        // console.log('will dispatch', action)
 
-        if (SignalData.broadcast) {
-            window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-                action
-            }));
+        // 中间件 广播 action
+        if (SignalData.broadcast && window.whiteBoardSignal) {
+            switch (action.type) {
+                case "SWITCHBOX_SET_TOTAL_PAGE":
+                case "SWITCHBOX_SHOW_SWITCHBAR":
+                case "SWITCHBOX_FULL_SCREEN":
+                case "BOARD_SHOW_TOOLBAR":
+                case "BOARD_REDUCE_TOOLBAR":
+                    break;
+                default:
+                    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+                        action
+                    }));
+                    break;
+            }
         } else {
             SignalData.broadcast = true;
         }

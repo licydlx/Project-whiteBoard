@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:24:02
- * @LastEditTime: 2019-08-21 11:20:02
+ * @LastEditTime: 2019-08-22 18:46:21
  * @LastEditors: Please set LastEditors
  */
 let SignalData = {

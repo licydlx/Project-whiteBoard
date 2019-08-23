@@ -2,10 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-21 18:33:23
+ * @LastEditTime: 2019-08-23 11:38:40
  * @LastEditors: Please set LastEditors
  */
-import { addPath, addText, addGraph,removeCreated } from '../../actions'
+import { addPath, addText, addGraph, removeCreated } from '../../actions'
 
 window.drawConfig = {
     penShape: "",
@@ -99,6 +99,7 @@ const sketchpadEngine = function (domName, callback) {
         moveCount = 1;
     });
 
+    canvas.on("selection:cleared", function (e) { console.log('selection:cleared') });
     // canvas.on("object:modified", function (e) {
     //     console.log('object:modified')
     //     if (window.drawConfig.penShape === "text") {
@@ -177,7 +178,7 @@ const sketchpadEngine = function (domName, callback) {
     canvas.addGraph = (mf, mt) => {
         mouseFrom = mf;
         mouseTo = mt;
-        switch (window.drawConfig.penShape){
+        switch (window.drawConfig.penShape) {
             case "line":
                 canvas.add(createLine());
                 break;
@@ -186,7 +187,7 @@ const sketchpadEngine = function (domName, callback) {
                 break;
             case "rectangle":
                 canvas.add(createRectangle());
-                break;           
+                break;
         }
     }
 
@@ -297,6 +298,4 @@ const createRectangle = () => {
         fill: "rgba(255,255,255,0)",
     });
 }
-
-
 export default sketchpadEngine;
