@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-23 12:08:43
+ * @LastEditTime: 2019-08-26 18:21:20
  * @LastEditors: Please set LastEditors
  */
 
@@ -44,7 +44,7 @@ const switchBox = (state = defaultState, action) => {
 
     // 全屏
     case 'SWITCHBOX_FULL_SCREEN':
-      return { ...state, fullScreen: action.fullScreen ? false : true }
+      return { ...state, fullScreen: state.fullScreen ? false : true }
 
     default:
       return state

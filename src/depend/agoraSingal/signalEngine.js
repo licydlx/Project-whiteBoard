@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-08-23 15:16:31
+ * @LastEditTime: 2019-08-23 17:47:34
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';

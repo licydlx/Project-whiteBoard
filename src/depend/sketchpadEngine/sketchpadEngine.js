@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-23 11:38:40
+ * @LastEditTime: 2019-08-26 18:37:57
  * @LastEditors: Please set LastEditors
  */
 import { addPath, addText, addGraph, removeCreated } from '../../actions'
@@ -45,7 +45,7 @@ const sketchpadEngine = function (domName, callback) {
         // 如果为文本编辑状态，则退出
         if (textInput) {
             if (callback) callback({
-                action: addText(mouseFrom, textInput.text)
+                action: addText({mouseFrom, textContent:textInput.text})
             })
             textInput.exitEditing();
             textInput = null;
@@ -85,7 +85,7 @@ const sketchpadEngine = function (domName, callback) {
             // 如果 画笔型 为真 且 画笔型不为文本
             if (window.drawConfig.penShape && !Object.is(window.drawConfig.penShape, 'text')) {
                 callback({
-                    action: addGraph(mouseFrom, mouseTo)
+                    action: addGraph({mouseFrom, mouseTo})
                 })
             }
         }
@@ -122,10 +122,10 @@ const sketchpadEngine = function (domName, callback) {
             let index = canvas._objects.findIndex((element) => element == e.target)
             created.push(index);
         }
-        canvas.removeCreated(created);
+        canvas.removeCreated({created});
 
         if (callback) callback({
-            action: removeCreated(created)
+            action: removeCreated({created})
         })
     });
 
@@ -143,20 +143,20 @@ const sketchpadEngine = function (domName, callback) {
         }
 
         if (callback) callback({
-            action: addPath(path, pathConfig)
+            action: addPath({path, pathConfig})
         })
     });
 
     // 自由绘制
-    canvas.addPath = (path, pathConfig) => {
+    canvas.addPath = ({path, pathConfig}) => {
         canvas.add(new fabric.Path(path, pathConfig));
     }
 
     // 添加文本
-    canvas.addText = (mf, tc) => {
-        let tInput = new fabric.Textbox(tc, {
-            left: mf.x,
-            top: mf.y,
+    canvas.addText = (par) => {
+        let tInput = new fabric.Textbox(par.textContent, {
+            left: par.mouseFrom.x,
+            top: par.mouseFrom.y,
             width: 150,
             fontSize: window.drawConfig.textSize,
             fill: window.drawConfig.penColor,
@@ -166,7 +166,7 @@ const sketchpadEngine = function (domName, callback) {
         canvas.add(tInput);
     }
 
-    canvas.removeCreated = (created) => {
+    canvas.removeCreated = ({created}) => {
         for (let i = 0; i < created.length; i++) {
             canvas.remove(canvas._objects[created[i]]);
         }
@@ -175,9 +175,9 @@ const sketchpadEngine = function (domName, callback) {
     }
 
     // 添加图形
-    canvas.addGraph = (mf, mt) => {
-        mouseFrom = mf;
-        mouseTo = mt;
+    canvas.addGraph = (par) => {
+        mouseFrom = par.mouseFrom;
+        mouseTo = par.mouseTo;
         switch (window.drawConfig.penShape) {
             case "line":
                 canvas.add(createLine());

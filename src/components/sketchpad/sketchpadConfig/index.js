@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 14:02:49
- * @LastEditTime: 2019-08-14 18:24:35
+ * @LastEditTime: 2019-08-26 18:13:08
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -55,22 +55,22 @@ const uiTemplate = (pars, name) => (
     {penConfig[name].value.map((v, i) => {
       switch (name) {
         case 'penSize':
-          return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenSize(pars.config.name, v)}>
+          return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenSize({name:pars.config.name, penSize:v})}>
             <div className={name} style={{ width: `${v}px`, height: `${v}px` }}></div>
           </div>;
 
         case 'penColor':
-          return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenColor(pars.config.name, v)}>
+          return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenColor({name:pars.config.name, penColor:v})}>
             <div className={name} style={{ backgroundColor: `${v}` }}></div>
           </div>;
 
         case 'textSize':
-            return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changeTextSize(pars.config.name, v)}>
+            return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changeTextSize({name:pars.config.name, textSize:v})}>
               <div className={name}>{v}</div>
             </div>;
 
         case 'penShape':
-            return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenShape(pars.config.name, v)}>
+            return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenShape({name:pars.config.name, penShape:v})}>
               <img className={name} style={{ display: `${penConfig.shapeImg[v] ? "block" : "none"}` }} src={`${penConfig.shapeImg[v]}`} />
             </div>;
 

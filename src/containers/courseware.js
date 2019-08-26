@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-08-23 12:23:18
+ * @LastEditTime: 2019-08-26 18:00:38
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
@@ -14,7 +14,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  switchType: (name, link) => dispatch(switchType(name, link))
+  switchType: (par) => dispatch(switchType(par))
 })
 
 export default connect(

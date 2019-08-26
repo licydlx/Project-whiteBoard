@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-23 11:53:25
+ * @LastEditTime: 2019-08-26 16:25:47
  * @LastEditors: Please set LastEditors
  */
 
@@ -13,16 +13,20 @@ const sketchpad = (state = defaultState, action) => {
     // 显示 画板工具栏
     case 'BOARD_SHOW_TOOLBAR':
       return {
-        ...state, show: state.show ? false : true
+        ...state, show: true
+      }
+
+    // 隐藏 画板工具栏
+    case 'BOARD_HIDE_TOOLBAR':
+      return {
+        ...state, show: false
       }
 
     case 'BOARD_SWITCH_TOOLBAR':
       return {
-        ...state, tools: state.tools.map(tool =>
-          (tool.name === action.name)
-            ? { ...tool, active: true }
-            : { ...tool, active: false }
-        )
+        ...state, tools: state.tools.map(tool => {
+          return { ...tool, active: (tool.name === action.name) ? true : false }
+        })
       }
 
 
