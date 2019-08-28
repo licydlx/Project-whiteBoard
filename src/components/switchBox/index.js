@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-26 13:49:50
+ * @LastEditTime: 2019-08-28 18:08:05
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -16,14 +16,29 @@ class SwitchBox extends React.Component {
 
   goChooseDown(e) {
     const { switchBox, goHandleKeydown } = { ...this.props };
-    const eventObj = e.nativeEvent;
-    const par = {
-      page: switchBox.toPage,
-      totalPage: switchBox.totalPage,
-      keyCode: eventObj.keyCode,
-      key: eventObj.key
+    let eventObj = e.nativeEvent;
+    switch (true) {
+      case eventObj.code.includes("Backspace"):
+      case eventObj.code.includes("Enter"):
+          goHandleKeydown({
+            toPage: switchBox.toPage,
+            curPage: switchBox.curPage,
+            prevPage: switchBox.prevPage,
+            totalPage: switchBox.totalPage,
+            code: eventObj.code,
+          });
+          break;
+      case eventObj.code.includes('Digit'):
+        goHandleKeydown({
+          toPage: switchBox.toPage + eventObj.code.slice(5, 6),
+          prevPage: switchBox.prevPage,
+          totalPage: switchBox.totalPage,
+          code: eventObj.code,
+        });
+        break;
+      default:
+          break;
     }
-    goHandleKeydown(par);
   }
 
   goHandleChange(e) { }
@@ -58,7 +73,7 @@ class SwitchBox extends React.Component {
       </div>
 
       <div onKeyDown={this.goChooseDown.bind(this)}>
-        <input className='towardsPage' type='text' maxLength='2' value={switchBox.curPage} onChange={this.goHandleChange} />
+        <input className='towardsPage' type='text' maxLength='2' value={switchBox.toPage} onChange={this.goHandleChange} />
       </div>
 
       <div className='totalPage'>/{switchBox.totalPage} </div>

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-08-23 17:47:34
+ * @LastEditTime: 2019-08-28 19:08:32
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -31,7 +31,6 @@ const signalEngine = (data, callback1,callback2) => {
         // 加入频道成功回调
         channel.onChannelJoined = () => {
             console.log('加入频道成功！')
-            SignalData.logined = true;
             whiteBoardSignal = {
                 signal: signal,
                 session: session,

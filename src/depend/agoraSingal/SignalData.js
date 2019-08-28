@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:24:02
- * @LastEditTime: 2019-08-22 18:46:21
+ * @LastEditTime: 2019-08-28 19:13:07
  * @LastEditors: Please set LastEditors
  */
 let SignalData = {
@@ -12,9 +12,10 @@ let SignalData = {
     token: '_no_need_token',
     channel: '1',
     canDraw: false,
-    logined: false,
 
-    broadcast: true,
+    logined: false,
+    broadcast: true,  // 是否信令广播
+    playback: false,  // 是否回放
 }
 
 export default SignalData;

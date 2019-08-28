@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-08-26 18:38:03
+ * @LastEditTime: 2019-08-28 18:07:11
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -132,19 +132,21 @@ export const goNextPage = ({ page, totalPage }) => ({
 })
 
 // 进入指定页
-export const goHandleKeydown = ({ page, totalPage, keyCode, key }) => ({
+export const goHandleKeydown = ({ toPage,curPage,prevPage, totalPage, code }) => ({
   type: 'SWITCHBOX_GO_HANDLE_KEYDOWN',
   id: id++,
-  page,
+  toPage,
+  curPage,
+  prevPage,
   totalPage,
-  keyCode,
-  key
+  code
 })
 
 // 设置 总页数
-export const setTotalPage = () => ({
+export const setTotalPage = ({totalPage}) => ({
   type: 'SWITCHBOX_SET_TOTAL_PAGE',
-  id: id++
+  id: id++,
+  totalPage
 })
 
 // 全屏切换

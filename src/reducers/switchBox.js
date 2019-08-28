@@ -2,13 +2,14 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-26 18:21:20
+ * @LastEditTime: 2019-08-28 18:19:57
  * @LastEditors: Please set LastEditors
  */
 
 import defaultState from './switchBoxState'
 
 const switchBox = (state = defaultState, action) => {
+  let newPage;
   switch (action.type) {
     // 切换显示状态
     case 'SWITCHBOX_SHOW_SWITCHBAR':
@@ -16,26 +17,29 @@ const switchBox = (state = defaultState, action) => {
 
     // 上一页
     case 'SWITCHBOX_GO_PREVPAGE':
-      return { ...state, curPage: action.page > 1 ? action.page - 1 : action.page }
+      newPage = action.page > 1 ? action.page - 1 : action.page
+      return { ...state, curPage: newPage, toPage: newPage + "" }
 
     // 下一页
     case 'SWITCHBOX_GO_NEXTPAGE':
-      return { ...state, curPage: action.page < state.totalPage ? action.page + 1 : action.page }
+      newPage = action.page < state.totalPage ? action.page + 1 : action.page;
+      return { ...state, curPage: newPage, toPage: newPage + "" }
 
     // 键盘侠
     case 'SWITCHBOX_GO_HANDLE_KEYDOWN':
-      switch (action.keyCode) {
-        case 13:
-          break;
-        case 8:
-          // delete 键盘删去
-          return { ...state, toPage: action.page.slice(0, -1) }
-        default:
-          if (action.keyCode >= 49 && action.keyCode <= 57) {
-            return { ...state, toPage: action.page + action.key }
+      switch (action.code) {
+        case "Enter":
+          if(parseInt(state.toPage) < action.totalPage + 1 && parseInt(state.toPage) > 0){
+            return { ...state, prevPage: state.curPage, curPage: parseInt(state.toPage) }
           } else {
-            return state
+            return state;
           }
+          
+        case "Backspace":
+          // delete 键盘删去
+          return { ...state, toPage: action.toPage.slice(0, -1) }
+        default:
+          return { ...state, toPage: action.toPage }
       }
 
     // 设置总页数

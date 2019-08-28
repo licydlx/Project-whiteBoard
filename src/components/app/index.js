@@ -2,23 +2,20 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-08-26 18:38:00
+ * @LastEditTime: 2019-08-28 19:38:40
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
 import './index.css';
+import localforage from 'localforage';
 
 import WhiteBoard from './../whiteBoard/index';
-
 import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-
-import { showToolbar, hideToolbar, showSwitchBar, reduceToolbar, childMessageBox, switchType } from '../../actions';
-
+import { showToolbar, hideToolbar, showSwitchBar, reduceToolbar, childMessageBox, switchType, setTotalPage } from '../../actions';
 import setZoom from '../../untils/setZoom';
-
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
 class App extends React.Component {
   constructor(props) {
@@ -26,8 +23,19 @@ class App extends React.Component {
 
     window.whiteBoardMessage = new messageEngine(this.messageCallback.bind(this));
     window.whiteBoardSignal = null;
+
     // 画板缓存
     window.boardCache = [];
+
+    // 1.数据库：gzjy 2.数据仓库：whiteBoard
+    window.gzjyDataBase = localforage.createInstance({
+      name: "gzjy",
+      driver: [localforage.INDEXEDDB,
+      localforage.WEBSQL,
+      localforage.LOCALSTORAGE],
+      description: '白板缓存机制',
+      storeName: "whiteBoard"
+    });
   }
 
   // ====================
@@ -41,10 +49,34 @@ class App extends React.Component {
   // 加入声网频道成功
   // ====================
   joinChannelSuccess() {
+    console.log("joinChannelSuccess")
+    SignalData.logined = true;
     // 如果是老师 显示 画板工具栏 切页栏
     if (SignalData.role == 0) {
-      this.props.dispatch(showToolbar());
-      this.props.dispatch(showSwitchBar());
+      gzjyDataBase.length().then((numberOfKeys) => {
+        // 输出数据库的大小
+        if (numberOfKeys > 0) {
+          // 同样的代码，但使用 ES6 Promises
+          gzjyDataBase.iterate((value, key, iterationNumber) => {
+            // 此回调函数将对所有 key/value 键值对运行
+            setTimeout(() => {
+              SignalData.playback = true;
+              this.props.dispatch(value);
+            }, 100 * iterationNumber);
+          }).then(() => {
+            console.log('Iteration has completed');
+          }).catch((err) => {
+            // 当出错时，此处代码运行
+            console.log(err);
+          });
+        } else {
+          this.props.dispatch(showToolbar());
+          this.props.dispatch(showSwitchBar());
+        }
+      }).catch((err) => {
+        // 当出错时，此处代码运行
+        console.log(err);
+      });
     }
   }
 
@@ -61,27 +93,20 @@ class App extends React.Component {
       if (data.type) {
         switch (data.type) {
           case "SWITCHBOX_SET_TOTAL_PAGE":
-            this.props.dispatch(data);
+            // 页面为重载时，不执行
+            gzjyDataBase.length().then((numberOfKeys) => {
+              console.log(numberOfKeys);
+              if (numberOfKeys === 2) this.props.dispatch(setTotalPage({ totalPage: data.totalPage }));
+            })
             break;
 
           default:
-            this.props.dispatch(childMessageBox({data}));
+            this.props.dispatch(childMessageBox({ data }));
             break;
         }
       }
     }
   }
-
-  // testShow(){
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     sigType:"showBrush",
-  //     sigUid:"test",
-  //     sigValue:{
-  //       value:true
-  //     }
-  // }));
-  // }
-
 
   // ====================
   // signal 回调监听
@@ -89,9 +114,28 @@ class App extends React.Component {
   signalCallback(e) {
     if (!e) return;
 
+    // 其它用户加入频道通知
+    if(typeof e !== 'string' && e.type === "onChannelUserJoined") {
+      if(SignalData.role === 0){
+        console.log(e.data)
+        window.whiteBoardSignal.session.messageInstantSend(e.data.account,JSON.stringify(SignalData));
+
+        setTimeout(() => {
+          window.whiteBoardSignal.session.messageInstantSend(e.data.account,"哈哈哈啊哈哈上海市");
+        }, 5);
+      }
+
+    }
+
+    // 接收到 点对点 消息
+    if(typeof e !== 'string' && e.type === "onMessageInstantReceive") {
+      console.log("接收到 点对点 消息")
+      console.log(e.data)
+    }
+    
+    // 接收到群广播消息
     if (typeof e !== 'string' && e.type === "onMessageChannelReceive") {
       let msg = JSON.parse(e.data.msg);
-      console.log(msg)
       // ----------------- 
       // 描述：客户端信令广播 -- 白板执行
       // 功能：1.白板：画板工具栏 显示与隐藏   2.白板：课件显示 配置
@@ -105,7 +149,7 @@ class App extends React.Component {
           case 'showCourseware':
             let name = msg.sigValue.value ? "html5" : "default";
             let link = msg.sigValue.value ? msg.sigValue.link : '';
-            this.props.dispatch(switchType({name, link}));
+            this.props.dispatch(switchType({ name, link }));
 
             break;
 
@@ -124,6 +168,7 @@ class App extends React.Component {
       // 功能：1.画笔栏及画笔 state 2.画板 添删 
       // ----------------- 
       if (msg.action) {
+
         // 如果不是自己
         if (e.data.account !== SignalData.account) {
           // 设置是否信令广播
@@ -131,28 +176,28 @@ class App extends React.Component {
 
           // 画笔栏及画笔 执行action
           this.props.dispatch(msg.action);
-
           // 画板 添删 
-          switch (msg.action.type) {
+          let action = msg.action;
+          switch (action.type) {
             case "BOARD_ADD_PATH":
-              canvas.addPath({path:msg.action.path, pathConfig:msg.action.pathConfig})
+              canvas.addPath({ path: action.path, pathConfig: action.pathConfig })
               break;
 
             case "BOARD_ADD_TEXT":
-              canvas.addText({mouseFrom:msg.action.mouseFrom,textContent: msg.action.textContent})
+              canvas.addText({ mouseFrom: action.mouseFrom, textContent: action.textContent })
               break;
 
             case "BOARD_ADD_GRAPH":
-              canvas.addGraph({mouseFrom:msg.action.mouseFrom, mouseTo:msg.action.mouseTo})
+              canvas.addGraph({ mouseFrom: action.mouseFrom, mouseTo: action.mouseTo })
               break;
 
             case "BOARD_REMOVE_CREATED":
-              canvas.removeCreated({created:msg.action.created})
+              canvas.removeCreated({ created: action.created })
               break;
 
             // 课件通信，声网信令传输 
             case "CHILD_MESSAGE_BOX":
-              whiteBoardMessage.sendMessage("child", JSON.stringify({ type: msg.action.data.type, handleData: msg.action.data.handleData }));
+              whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
               break;
             default:
               break;
@@ -166,8 +211,7 @@ class App extends React.Component {
               window.boardCache[msg.action.page - 1] = canvas.getObjects();
               canvas.clear();
 
-              this.props.dispatch(reduceToolbar());
-
+              // this.props.dispatch(reduceToolbar());
               let page = msg.action.page - 1;
               if (window.boardCache[page - 1]) {
                 for (let i = 0; i < window.boardCache[page - 1].length; i++) {
@@ -184,7 +228,7 @@ class App extends React.Component {
               window.boardCache[msg.action.page - 1] = canvas.getObjects();
               canvas.clear();
 
-              this.props.dispatch(reduceToolbar());
+              // this.props.dispatch(reduceToolbar());
               let page = msg.action.page + 1;
               if (window.boardCache[page - 1]) {
                 for (let i = 0; i < window.boardCache[page - 1].length; i++) {
@@ -196,8 +240,16 @@ class App extends React.Component {
             break;
 
           case "SWITCHBOX_GO_HANDLE_KEYDOWN":
-            let page = parseInt(msg.action.page);
-            if (msg.action.totalPage >= page && page > 0) {
+            let page = parseInt(msg.action.toPage);
+            if (msg.action.code == "Enter" && msg.action.totalPage + 1 > page && page > 0) {
+              window.boardCache[msg.action.curPage - 1] = canvas.getObjects();
+              canvas.clear();
+              if (window.boardCache[page - 1]) {
+                  for (let i = 0; i < window.boardCache[page - 1].length; i++) {
+                      canvas.add(window.boardCache[page - 1][i])
+                  }
+              }
+              
               whiteBoardMessage.sendMessage("child", JSON.stringify({ type: msg.action.type, handleData: { page: page } }));
             }
             break;
@@ -222,9 +274,9 @@ class App extends React.Component {
     //                                                            |---------> children: --> 信令回调(signalCallback) 禁止广播 --> action(state 重新渲染)
     //                                                                                                                      |
     //                                                                                                                      |--> switch(业务逻辑)
-
+    let action = e.action;
     // 画板 图形 增删
-    this.props.dispatch(e.action);
+    this.props.dispatch(action);
   }
 
   // 组件完成挂载
@@ -276,7 +328,7 @@ class App extends React.Component {
     let data = {
       role: role,
       uid: account,
-      channel: 'q2',
+      channel: 'q3',
       canDraw: true
     }
 
@@ -287,8 +339,8 @@ class App extends React.Component {
   componentWillUnmount() {
     // 移除监听
     window.whiteBoardMessage.remove();
+
     // 信令登出
-    // window.whiteBoardSignal
     // 页面刷新或关闭提示
     window.onbeforeunload = function (event) {
       window.whiteBoardSignal.channel.channelLeave();
@@ -298,7 +350,6 @@ class App extends React.Component {
   render() {
     return <div className="container">
       <WhiteBoard />
-      <div style={{position:"absolute",top:"50px",left:"50px",width:"100px",height:"40px"}} onClick={() => this.testShow()}>学生端显示工具栏</div>
     </div>
   }
 }
