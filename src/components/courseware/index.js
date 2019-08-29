@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-26 13:38:58
+ * @LastEditTime: 2019-08-29 16:49:24
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,6 +15,7 @@ class Courseware extends React.Component {
   }
 
   componentDidMount() {
+    console.log("Courseware-Dom")
     // 星球封面
     // let scene = document.getElementById('scene');
     // let parallax = new Parallax(scene);
@@ -99,8 +100,7 @@ class Courseware extends React.Component {
         return <iframe id="coursewareIframe" className="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" src={courseware.link}>
           <p>Your browser does not support iframes.</p>
         </iframe>
-
-      default:
+      case "default":
         // 默认原始封面
         // return <div>
         //  <img src="https://res.miaocode.com/livePlatform/soundNetwork/images/logo.png" />

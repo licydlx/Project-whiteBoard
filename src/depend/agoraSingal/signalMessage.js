@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-08-28 18:36:42
+ * @LastEditTime: 2019-08-29 17:08:11
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -92,14 +92,24 @@ function signalMessage() {
         }
 
         // 不是回放 才存储
-        if (!SignalData.playback) {
+        if (!SignalData.playback && SignalData.role === 0) {
             // localStorage 存储 actions
-            gzjyDataBase.setItem(JSON.stringify(+new Date()), action).then(value => {
+            switch (action.type) {
+                case "BOARD_SHOW_TOOLBAR":              // 老师显示画板工具栏
+                case "SWITCHBOX_SHOW_SWITCHBAR":        // 老师显示切换工具栏 
+                case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
+                    break;
 
-            }).catch((err) => {
-                // 当出错时，此处代码运行
-                console.log(err);
-            });
+                default:
+                    gzjyDataBase.setItem(JSON.stringify(+new Date()), action).then(value => {
+
+                    }).catch((err) => {
+                        // 当出错时，此处代码运行
+                        console.log(err);
+                    });
+                    break;
+            }
+
         }
 
         // 条件：1.白板信令 2.是否广播 3.是否是回放 

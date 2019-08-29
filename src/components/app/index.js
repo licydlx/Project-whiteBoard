@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-08-28 19:38:40
+ * @LastEditTime: 2019-08-29 18:27:01
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -16,6 +16,8 @@ import signalEngine from '../../depend/agoraSingal/signalEngine';
 import SignalData from '../../depend/agoraSingal/SignalData';
 import { showToolbar, hideToolbar, showSwitchBar, reduceToolbar, childMessageBox, switchType, setTotalPage } from '../../actions';
 import setZoom from '../../untils/setZoom';
+import isBrowser from '../../untils/isBrowser';
+
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
 class App extends React.Component {
   constructor(props) {
@@ -27,6 +29,10 @@ class App extends React.Component {
     // 画板缓存
     window.boardCache = [];
 
+    window.actionsCache = [];
+  }
+
+  createInstance() {
     // 1.数据库：gzjy 2.数据仓库：whiteBoard
     window.gzjyDataBase = localforage.createInstance({
       name: "gzjy",
@@ -34,7 +40,7 @@ class App extends React.Component {
       localforage.WEBSQL,
       localforage.LOCALSTORAGE],
       description: '白板缓存机制',
-      storeName: "whiteBoard"
+      storeName: SignalData.account + SignalData.channel
     });
   }
 
@@ -49,10 +55,14 @@ class App extends React.Component {
   // 加入声网频道成功
   // ====================
   joinChannelSuccess() {
-    console.log("joinChannelSuccess")
     SignalData.logined = true;
     // 如果是老师 显示 画板工具栏 切页栏
-    if (SignalData.role == 0) {
+    if (SignalData.role === 0) {
+      this.createInstance();
+
+      this.props.dispatch(showToolbar());
+      this.props.dispatch(showSwitchBar());
+
       gzjyDataBase.length().then((numberOfKeys) => {
         // 输出数据库的大小
         if (numberOfKeys > 0) {
@@ -62,21 +72,19 @@ class App extends React.Component {
             setTimeout(() => {
               SignalData.playback = true;
               this.props.dispatch(value);
-            }, 100 * iterationNumber);
+            }, 400 * iterationNumber);
           }).then(() => {
-            console.log('Iteration has completed');
+            console.log('teacher 缓存回滚！');
           }).catch((err) => {
             // 当出错时，此处代码运行
             console.log(err);
           });
-        } else {
-          this.props.dispatch(showToolbar());
-          this.props.dispatch(showSwitchBar());
         }
       }).catch((err) => {
         // 当出错时，此处代码运行
         console.log(err);
       });
+
     }
   }
 
@@ -93,13 +101,22 @@ class App extends React.Component {
       if (data.type) {
         switch (data.type) {
           case "SWITCHBOX_SET_TOTAL_PAGE":
-            // 页面为重载时，不执行
-            gzjyDataBase.length().then((numberOfKeys) => {
-              console.log(numberOfKeys);
-              if (numberOfKeys === 2) this.props.dispatch(setTotalPage({ totalPage: data.totalPage }));
-            })
+            this.props.dispatch(setTotalPage({ totalPage: data.totalPage }));
             break;
 
+          case "COURSEWARE_ONLOAD":
+            if (SignalData.sycnSignal) {
+              let orIValue = 0;
+              if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") orIValue = 1;
+              for (let i = orIValue; i < window.actionsCache.length; i++) {
+                setTimeout(() => {
+                  SignalData.playback = true;
+                  this.props.dispatch(window.actionsCache[i]);
+                }, 400 * i);
+              }
+
+            }
+            break;
           default:
             this.props.dispatch(childMessageBox({ data }));
             break;
@@ -108,6 +125,21 @@ class App extends React.Component {
     }
   }
 
+  signalSlice(account, slicePoint, seq, numberOfKeys) {
+    let sliceObj = {};
+    gzjyDataBase.iterate((value, key, iterationNumber) => {
+      if (iterationNumber > slicePoint * seq) sliceObj[key] = value;
+      if (iterationNumber == slicePoint * (seq + 1) || iterationNumber == numberOfKeys) return sliceObj;
+    }).then((sliceData) => {
+      window.whiteBoardSignal.session.messageInstantSend(account, JSON.stringify({ type: "TEACHER_SYNCH_CACHE_SIGNAL", data: sliceData }));
+      if (Object.keys(sliceData).length !== slicePoint) window.whiteBoardSignal.session.messageInstantSend(account, JSON.stringify({ type: "SYNCH_CACHE_SIGNAL_END" }));
+    }).catch((err) => {
+      // 当出错时，此处代码运行
+      console.log(err);
+    });
+  }
+
+
   // ====================
   // signal 回调监听
   // ====================
@@ -115,24 +147,54 @@ class App extends React.Component {
     if (!e) return;
 
     // 其它用户加入频道通知
-    if(typeof e !== 'string' && e.type === "onChannelUserJoined") {
-      if(SignalData.role === 0){
-        console.log(e.data)
-        window.whiteBoardSignal.session.messageInstantSend(e.data.account,JSON.stringify(SignalData));
-
-        setTimeout(() => {
-          window.whiteBoardSignal.session.messageInstantSend(e.data.account,"哈哈哈啊哈哈上海市");
-        }, 5);
+    if (typeof e !== 'string' && e.type === "onChannelUserJoined") {
+      // 学生中途进入频道，老师同步缓存信令
+      if (SignalData.role === 0) {
+        // 切点
+        const slicePoint = 20;
+        gzjyDataBase.length().then((numberOfKeys) => {
+          if (numberOfKeys > 0) {
+            for (let i = 0; i < Math.ceil(numberOfKeys / slicePoint); i++) {
+              this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+            }
+          }
+        }).catch(function (err) {
+          console.log(err);
+        });
       }
-
     }
 
     // 接收到 点对点 消息
-    if(typeof e !== 'string' && e.type === "onMessageInstantReceive") {
+    if (typeof e !== 'string' && e.type === "onMessageInstantReceive") {
       console.log("接收到 点对点 消息")
-      console.log(e.data)
+      let msg = JSON.parse(e.data.msg);
+
+      if(window.webkit){
+        window.webkit.messageHandlers.WebLog.postMessage('接收到 点对点 消息');
+        window.webkit.messageHandlers.WebLog.postMessage(e.data.msg);
+      }
+
+      switch (msg.type) {
+        case "TEACHER_SYNCH_CACHE_SIGNAL":
+          const actions = Object.values(msg.data);
+          window.actionsCache.push(actions)
+          break;
+
+        case "SYNCH_CACHE_SIGNAL_END":
+          SignalData.sycnSignal = true;
+          window.actionsCache = window.actionsCache.reduce(function (a, b) { return a.concat(b) })
+
+          // 切换课件
+          if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") {
+            SignalData.playback = true;
+            this.props.dispatch(window.actionsCache[0]);
+          }
+          break;
+        default:
+          break;
+      }
     }
-    
+
     // 接收到群广播消息
     if (typeof e !== 'string' && e.type === "onMessageChannelReceive") {
       let msg = JSON.parse(e.data.msg);
@@ -245,11 +307,11 @@ class App extends React.Component {
               window.boardCache[msg.action.curPage - 1] = canvas.getObjects();
               canvas.clear();
               if (window.boardCache[page - 1]) {
-                  for (let i = 0; i < window.boardCache[page - 1].length; i++) {
-                      canvas.add(window.boardCache[page - 1][i])
-                  }
+                for (let i = 0; i < window.boardCache[page - 1].length; i++) {
+                  canvas.add(window.boardCache[page - 1][i])
+                }
               }
-              
+
               whiteBoardMessage.sendMessage("child", JSON.stringify({ type: msg.action.type, handleData: { page: page } }));
             }
             break;
@@ -323,16 +385,24 @@ class App extends React.Component {
     //   canDraw: 0
     // }
 
-    let account = Math.floor(Math.random() * 100);
-    let role = Math.random() > 0.5 ? 0 : 2;
-    let data = {
-      role: role,
-      uid: account,
-      channel: 'q3',
-      canDraw: true
-    }
+    // let account = Math.floor(Math.random() * 100);
+    // let ran;
 
-    this.joinChannel(data);
+    // if (isBrowser() == "Chrome") {
+    //   ran = 0;
+    // } else {
+    //   ran = 2;
+    // }
+
+    // let data = {
+    //   role: ran,
+    //   uid: ran + "1",
+    //   channel: 'q7',
+    //   canDraw: true
+    // }
+
+    // console.log(data)
+    // this.joinChannel(data);
   }
 
   // 组件将要被卸载
@@ -347,9 +417,31 @@ class App extends React.Component {
     }.bind(this);
   }
 
+  // showDefault() {
+  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+  //     sigType: "showCourseware",
+  //     sigValue: {
+  //       value: false,
+  //       link: ""
+  //     },
+  //   }));
+  // }
+
+  // showHtml5() {
+  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+  //     sigType: "showCourseware",
+  //     sigValue: {
+  //       value: true,
+  //       link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+  //     },
+  //   }));
+  // }
+
   render() {
     return <div className="container">
       <WhiteBoard />
+      {/* <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
+      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div> */}
     </div>
   }
 }
