@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-26 18:15:34
+ * @LastEditTime: 2019-09-03 14:05:20
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -27,7 +27,7 @@ const Sketchpad = ({ sketchpad, switchToolbar, changePenSize, changePenColor, ch
       })}
     </div>
 
-    <SketchpadBoard tools={sketchpad.tools} changeBoard={changeSize} />
+    <SketchpadBoard tools={sketchpad.tools} boardData = {sketchpad.boardData} changeBoard={changeSize} />
   </div >
 )
 

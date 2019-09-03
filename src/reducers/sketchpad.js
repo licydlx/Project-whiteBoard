@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-26 16:25:47
+ * @LastEditTime: 2019-09-03 14:48:02
  * @LastEditors: Please set LastEditors
  */
 
@@ -82,12 +82,48 @@ const sketchpad = (state = defaultState, action) => {
 
     // 添加自由笔画
     case "BOARD_ADD_PATH":
+      return {
+        ...state, boardData: {
+          account:action.account,
+          curPage:action.curPage,
+          type: action.type,
+          path: action.path,
+          pathConfig: action.pathConfig
+        }
+      }
     // 添加文本  
     case "BOARD_ADD_TEXT":
+      return {
+        ...state, boardData: {
+          account:action.account,
+          curPage:action.curPage,
+          type: action.type,
+          textContent: action.textContent,
+          mouseFrom: action.mouseFrom
+        }
+      }
     // 添加图形
     case "BOARD_ADD_GRAPH":
+      return {
+        ...state, boardData: {
+          account:action.account,
+          curPage:action.curPage,
+          type: action.type,
+          mouseFrom: action.mouseFrom,
+          mouseTo: action.mouseTo
+        }
+      }
     // 删去被选中的
     case "BOARD_REMOVE_CREATED":
+      return {
+        ...state, boardData: {
+          account:action.account,
+          curPage:action.curPage,
+          type: action.type,
+          created: action.created
+        }
+      }
+
     default:
       return state
   }

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 13:33:26
- * @LastEditTime: 2019-08-22 18:57:59
+ * @LastEditTime: 2019-09-03 14:47:02
  * @LastEditors: Please set LastEditors
  */
 import visualArea from '../untils/visualArea'
@@ -13,7 +13,7 @@ export default {
     width: windowWidth,
     height: windowHeight
   },
-  show:false,
+  show: false,
   tools: [
     {
       name: "board",
@@ -46,5 +46,16 @@ export default {
       name: "empty",
       active: false,
     }
-  ]
+  ],
+  boardData: {
+    account: "",
+    curPage: "",
+    type: "",
+    path: "",
+    pathConfig: "",
+    textContent: "",
+    mouseFrom: "",
+    mouseTo: "",
+    created: ""
+  }
 } 

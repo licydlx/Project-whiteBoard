@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-30 11:40:47
+ * @LastEditTime: 2019-09-03 18:07:21
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -28,7 +28,6 @@ class Courseware extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState){
-    console.log("Courseware-Dom-Update")
     if(this.props.courseware.name == "default") this.comeUp();
   }
 
