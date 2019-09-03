@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-23 13:32:00
- * @LastEditTime: 2019-08-23 13:33:01
+ * @LastEditTime: 2019-08-30 14:49:56
  * @LastEditors: Please set LastEditors
  */
 const setZoom = canvas => {

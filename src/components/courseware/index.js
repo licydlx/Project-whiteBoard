@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-29 16:49:24
+ * @LastEditTime: 2019-08-30 11:40:47
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -14,9 +14,27 @@ class Courseware extends React.Component {
     super(props);
   }
 
+  shouldComponentUpdate(nextProps,nextState){
+      if (nextProps.courseware == this.props.courseware) {
+        return false;
+      } else {
+        return true;
+      }
+  }
+
   componentDidMount() {
     console.log("Courseware-Dom")
-    // 星球封面
+    this.comeUp();
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    console.log("Courseware-Dom-Update")
+    if(this.props.courseware.name == "default") this.comeUp();
+  }
+
+  // 使默认封面熊猫动起来
+  comeUp(){
+  // 星球封面
     // let scene = document.getElementById('scene');
     // let parallax = new Parallax(scene);
 

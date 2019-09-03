@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-08-28 18:08:05
+ * @LastEditTime: 2019-08-30 18:49:25
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -12,6 +12,10 @@ import './index.css';
 class SwitchBox extends React.Component {
   constructor(props) {
     super(props);
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    window.coursewareCurPage = this.props.switchBox.curPage;
   }
 
   goChooseDown(e) {

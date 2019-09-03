@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-08-29 18:27:01
+ * @LastEditTime: 2019-08-30 18:51:43
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -66,15 +66,18 @@ class App extends React.Component {
       gzjyDataBase.length().then((numberOfKeys) => {
         // 输出数据库的大小
         if (numberOfKeys > 0) {
-          // 同样的代码，但使用 ES6 Promises
+          // 重置空
+          window.actionsCache = [];
           gzjyDataBase.iterate((value, key, iterationNumber) => {
             // 此回调函数将对所有 key/value 键值对运行
-            setTimeout(() => {
-              SignalData.playback = true;
-              this.props.dispatch(value);
-            }, 400 * iterationNumber);
+            window.actionsCache.push(value);
           }).then(() => {
             console.log('teacher 缓存回滚！');
+            SignalData.sycnSignal = true;
+            if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") {
+              SignalData.playback = true;
+              this.props.dispatch(window.actionsCache[0]);
+            }
           }).catch((err) => {
             // 当出错时，此处代码运行
             console.log(err);
@@ -95,7 +98,7 @@ class App extends React.Component {
     if (e.data && typeof e.data == "string") {
       let data = JSON.parse(e.data);
       // 加入频道通知
-      if (data.uid && data.channel) this.joinChannel(data);
+      if (data.uid && data.channel && !SignalData.logined) this.joinChannel(data);
 
       // 课件message
       if (data.type) {
@@ -105,16 +108,29 @@ class App extends React.Component {
             break;
 
           case "COURSEWARE_ONLOAD":
+            SignalData.coursewareLoaded = true;
             if (SignalData.sycnSignal) {
-              let orIValue = 0;
-              if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") orIValue = 1;
-              for (let i = orIValue; i < window.actionsCache.length; i++) {
-                setTimeout(() => {
-                  SignalData.playback = true;
-                  this.props.dispatch(window.actionsCache[i]);
-                }, 400 * i);
-              }
+              // this.factorial(window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE" ? 1 : 0, window.actionsCache)
 
+              for (let i = 1; i < window.actionsCache.length + 1; i++) {
+                if(window.actionsCache.length == i){
+                  setTimeout(() => {
+                    SignalData.playback = true;
+                    SignalData.sycnSignal = false;
+                    let lastIndex = window.actionsCache.map(v=>{
+                      return v.type.substring(0,12);
+                    }).lastIndexOf("SWITCHBOX_GO");
+              
+                    this.props.dispatch(window.actionsCache[lastIndex]);
+                  }, 200 * i);
+                } else {
+                  setTimeout(() => {
+                    SignalData.playback = true;
+                    this.props.dispatch(window.actionsCache[i]);
+                  }, 200 * i);
+                }
+
+              }
             }
             break;
           default:
@@ -125,20 +141,45 @@ class App extends React.Component {
     }
   }
 
+  factorial(n, actions) {
+    if (n == actions.length){
+
+      SignalData.playback = true;
+      SignalData.sycnSignal = false;
+      let lastIndex = window.actionsCache.map(v=>{
+        return v.type.substring(0,12);
+      }).lastIndexOf("SWITCHBOX_GO");
+
+      this.props.dispatch(window.actionsCache[lastIndex]);
+      return console.log("actionsCache长度：" + actions.length);
+    } 
+    SignalData.playback = true;
+    this.props.dispatch(window.actionsCache[n]);
+    return this.factorial(n + 1, actions)
+  }
+
   signalSlice(account, slicePoint, seq, numberOfKeys) {
     let sliceObj = {};
     gzjyDataBase.iterate((value, key, iterationNumber) => {
       if (iterationNumber > slicePoint * seq) sliceObj[key] = value;
-      if (iterationNumber == slicePoint * (seq + 1) || iterationNumber == numberOfKeys) return sliceObj;
+      if (iterationNumber == slicePoint * (seq + 1)) return sliceObj;
+      if (iterationNumber == numberOfKeys) return sliceObj;
     }).then((sliceData) => {
       window.whiteBoardSignal.session.messageInstantSend(account, JSON.stringify({ type: "TEACHER_SYNCH_CACHE_SIGNAL", data: sliceData }));
-      if (Object.keys(sliceData).length !== slicePoint) window.whiteBoardSignal.session.messageInstantSend(account, JSON.stringify({ type: "SYNCH_CACHE_SIGNAL_END" }));
+      if (Math.ceil(numberOfKeys / slicePoint) - 1 == seq) {
+        window.whiteBoardSignal.session.messageInstantSend(account, JSON.stringify({ type: "SYNCH_CACHE_SIGNAL_END" }));
+
+        if (seq >= 8 && seq < 16) {
+          window.clearTimeout(this.clearTime1)
+        } else if (seq >= 16 && seq < 24) {
+          window.clearTimeout(this.clearTime2)
+        }
+      }
     }).catch((err) => {
       // 当出错时，此处代码运行
       console.log(err);
     });
   }
-
 
   // ====================
   // signal 回调监听
@@ -151,12 +192,47 @@ class App extends React.Component {
       // 学生中途进入频道，老师同步缓存信令
       if (SignalData.role === 0) {
         // 切点
-        const slicePoint = 20;
+        const slicePoint = 6;
         gzjyDataBase.length().then((numberOfKeys) => {
           if (numberOfKeys > 0) {
-            for (let i = 0; i < Math.ceil(numberOfKeys / slicePoint); i++) {
-              this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+            let sliceNum = Math.ceil(numberOfKeys / slicePoint);
+
+            if (sliceNum < 9) {
+              for (let i = 0; i < sliceNum; i++) {
+                this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+              }
             }
+
+            if (sliceNum >= 9 && sliceNum < 17) {
+              for (let i = 0; i < 8; i++) {
+                this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+              }
+
+              this.clearTime1 = setTimeout(() => {
+                for (let i = 8; i < sliceNum; i++) {
+                  this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+                }
+              }, 200);
+            }
+
+            if (sliceNum >= 17 && sliceNum < 25) {
+              for (let i = 0; i < 8; i++) {
+                this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+              }
+
+              this.clearTime1 = setTimeout(() => {
+                for (let i = 8; i < 16; i++) {
+                  this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+                }
+              }, 200);
+
+              this.clearTime2 = setTimeout(() => {
+                for (let i = 16; i < sliceNum; i++) {
+                  this.signalSlice(e.data.account, slicePoint, i, numberOfKeys);
+                }
+              }, 400);
+            }
+
           }
         }).catch(function (err) {
           console.log(err);
@@ -169,30 +245,37 @@ class App extends React.Component {
       console.log("接收到 点对点 消息")
       let msg = JSON.parse(e.data.msg);
 
-      if(window.webkit){
-        window.webkit.messageHandlers.WebLog.postMessage('接收到 点对点 消息');
-        window.webkit.messageHandlers.WebLog.postMessage(e.data.msg);
+      //  为学生时才执行
+      if(SignalData.role == 2){
+        if (window.webkit) {
+          window.webkit.messageHandlers.WebLog.postMessage('接收到 点对点 消息');
+          window.webkit.messageHandlers.WebLog.postMessage(e.data.msg);
+        }
+  
+        switch (msg.type) {
+          case "TEACHER_SYNCH_CACHE_SIGNAL":
+            const actions = Object.values(msg.data);
+            window.actionsCache.push(actions)
+            break;
+  
+          case "SYNCH_CACHE_SIGNAL_END":
+            SignalData.sycnSignal = true;
+            console.log("SYNCH_CACHE_SIGNAL_END")
+            console.log(window.actionsCache)
+            let actionsBox = window.actionsCache.reduce(function (a, b) { return a.concat(b) })
+            // 切换课件
+            console.log(actionsBox)
+            window.actionsCache = actionsBox;
+            if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") {
+              SignalData.playback = true;
+              this.props.dispatch(window.actionsCache[0]);
+            }
+            break;
+          default:
+            break;
+        }
       }
 
-      switch (msg.type) {
-        case "TEACHER_SYNCH_CACHE_SIGNAL":
-          const actions = Object.values(msg.data);
-          window.actionsCache.push(actions)
-          break;
-
-        case "SYNCH_CACHE_SIGNAL_END":
-          SignalData.sycnSignal = true;
-          window.actionsCache = window.actionsCache.reduce(function (a, b) { return a.concat(b) })
-
-          // 切换课件
-          if (window.actionsCache[0].type == "COURSEWARE_SWITCH_TYPE") {
-            SignalData.playback = true;
-            this.props.dispatch(window.actionsCache[0]);
-          }
-          break;
-        default:
-          break;
-      }
     }
 
     // 接收到群广播消息
@@ -238,11 +321,13 @@ class App extends React.Component {
 
           // 画笔栏及画笔 执行action
           this.props.dispatch(msg.action);
+          console.log(this.props)
           // 画板 添删 
           let action = msg.action;
           switch (action.type) {
             case "BOARD_ADD_PATH":
               canvas.addPath({ path: action.path, pathConfig: action.pathConfig })
+
               break;
 
             case "BOARD_ADD_TEXT":
@@ -290,7 +375,6 @@ class App extends React.Component {
               window.boardCache[msg.action.page - 1] = canvas.getObjects();
               canvas.clear();
 
-              // this.props.dispatch(reduceToolbar());
               let page = msg.action.page + 1;
               if (window.boardCache[page - 1]) {
                 for (let i = 0; i < window.boardCache[page - 1].length; i++) {
@@ -386,23 +470,23 @@ class App extends React.Component {
     // }
 
     // let account = Math.floor(Math.random() * 100);
-    // let ran;
 
-    // if (isBrowser() == "Chrome") {
-    //   ran = 0;
-    // } else {
-    //   ran = 2;
-    // }
+    let ran;
+    if (isBrowser() == "Chrome") {
+      ran = 0;
+    } else {
+      ran = 2;
+    }
 
-    // let data = {
-    //   role: ran,
-    //   uid: ran + "1",
-    //   channel: 'q7',
-    //   canDraw: true
-    // }
+    let data = {
+      role: ran,
+      uid: ran + "1",
+      channel: 'q7',
+      canDraw: true
+    }
 
-    // console.log(data)
-    // this.joinChannel(data);
+    console.log(data)
+    this.joinChannel(data);
   }
 
   // 组件将要被卸载
@@ -417,31 +501,31 @@ class App extends React.Component {
     }.bind(this);
   }
 
-  // showDefault() {
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     sigType: "showCourseware",
-  //     sigValue: {
-  //       value: false,
-  //       link: ""
-  //     },
-  //   }));
-  // }
+  showDefault() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      sigType: "showCourseware",
+      sigValue: {
+        value: false,
+        link: ""
+      },
+    }));
+  }
 
-  // showHtml5() {
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     sigType: "showCourseware",
-  //     sigValue: {
-  //       value: true,
-  //       link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
-  //     },
-  //   }));
-  // }
+  showHtml5() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      sigType: "showCourseware",
+      sigValue: {
+        value: true,
+        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+      },
+    }));
+  }
 
   render() {
     return <div className="container">
       <WhiteBoard />
-      {/* <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
-      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div> */}
+      <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
+      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div>
     </div>
   }
 }

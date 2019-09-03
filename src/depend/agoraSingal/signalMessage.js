@@ -2,14 +2,14 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-08-29 17:08:11
+ * @LastEditTime: 2019-08-30 18:23:10
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
 
 function signalMessage() {
     return (next) => (action) => {
-        console.log('will dispatch', action)
+       console.log('will dispatch', action)
         // 回放为真时 画板逻辑
         if (SignalData.playback) {
 
@@ -33,7 +33,7 @@ function signalMessage() {
 
                 // 课件通信，声网信令传输 
                 case "CHILD_MESSAGE_BOX":
-                    whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
+                    // whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
                     break;
 
                 // switchBar 页面跳转
@@ -48,7 +48,7 @@ function signalMessage() {
                             }
                         }
 
-                        whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
+                        if(!SignalData.sycnSignal) whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
                     }
                     break;
 
@@ -63,7 +63,7 @@ function signalMessage() {
                                 canvas.add(window.boardCache[page - 1][i])
                             }
                         }
-                        whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
+                        if(!SignalData.sycnSignal) whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
                     }
                     break;
 
@@ -77,7 +77,7 @@ function signalMessage() {
                                 canvas.add(window.boardCache[page - 1][i])
                             }
                         }
-                        whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
+                        if(!SignalData.sycnSignal) whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.type, handleData: { page: page } }));
                     }
                     break;
                 case "SWITCHBOX_FULL_SCREEN":
@@ -99,17 +99,13 @@ function signalMessage() {
                 case "SWITCHBOX_SHOW_SWITCHBAR":        // 老师显示切换工具栏 
                 case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
                     break;
-
+                case "COURSEWARE_SWITCH_TYPE": 
+                    if(Object.is(action.name,"html5") && action.link && !SignalData.coursewareLoaded) actionDataSave(action);
+                    break;
                 default:
-                    gzjyDataBase.setItem(JSON.stringify(+new Date()), action).then(value => {
-
-                    }).catch((err) => {
-                        // 当出错时，此处代码运行
-                        console.log(err);
-                    });
+                    actionDataSave(action);
                     break;
             }
-
         }
 
         // 条件：1.白板信令 2.是否广播 3.是否是回放 
@@ -138,6 +134,15 @@ function signalMessage() {
         let returnValue = next(action)
         return returnValue
     }
+}
+
+const actionDataSave = (action) => {
+    gzjyDataBase.setItem(JSON.stringify(+new Date()), action).then(value => {
+
+    }).catch((err) => {
+        // 当出错时，此处代码运行
+        console.log(err);
+    });
 }
 
 export default signalMessage

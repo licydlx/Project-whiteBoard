@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-26 18:37:57
+ * @LastEditTime: 2019-08-30 18:49:42
  * @LastEditors: Please set LastEditors
  */
 import { addPath, addText, addGraph, removeCreated } from '../../actions'
