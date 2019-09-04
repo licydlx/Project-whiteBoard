@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-08-30 18:49:42
+ * @LastEditTime: 2019-09-04 12:00:29
  * @LastEditors: Please set LastEditors
  */
 import { addPath, addText, addGraph, removeCreated } from '../../actions'
@@ -41,7 +41,6 @@ const sketchpadEngine = function (domName, callback) {
 
     // 绑定画板事件
     canvas.on("mouse:down", function (options) {
-        console.log("mouse:down");
         // 如果为文本编辑状态，则退出
         if (textInput) {
             if (callback) callback({
@@ -62,7 +61,6 @@ const sketchpadEngine = function (domName, callback) {
     });
 
     canvas.on("mouse:move", function (options) {
-        console.log("mouse:move");
         // 减少绘制频率
         if (moveCount % 2 && !doDrawing) {
             return;
@@ -80,7 +78,6 @@ const sketchpadEngine = function (domName, callback) {
     });
 
     canvas.on("mouse:up", function (options) {
-        console.log('mouse:up')
         if (callback) {
             // 如果 画笔型 为真 且 画笔型不为文本
             if (window.drawConfig.penShape && !Object.is(window.drawConfig.penShape, 'text')) {
@@ -109,7 +106,6 @@ const sketchpadEngine = function (domName, callback) {
     // });
 
     canvas.on("selection:created", function (e) {
-        console.log('selection:created')
         let created = [];
         if (e.target._objects) {
             // 多选删除
@@ -130,7 +126,6 @@ const sketchpadEngine = function (domName, callback) {
     });
 
     canvas.on("path:created", function (e) {
-        console.log('path:created');
         let path = e.path.path.toString().split(',').join(' ');
         let pathConfig = {
             fill: e.path.fill,

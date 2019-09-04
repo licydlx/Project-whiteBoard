@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-03 18:51:52
+ * @LastEditTime: 2019-09-04 13:24:29
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -16,7 +16,7 @@ class SwitchBox extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar } = { ...this.props };
+    const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar,childMessageBox } = { ...this.props };
 
     if (this.props.switchBox == nextProps.switchBox) {
       return false;
@@ -67,6 +67,9 @@ class SwitchBox extends React.Component {
                 case "BOARD_REMOVE_CREATED":
                   removeCreated({...v})
                   break;
+                case "CHILD_MESSAGE_BOX":
+                  childMessageBox({...v})
+                  break;
                 default:
                   break;
               }
@@ -81,7 +84,6 @@ class SwitchBox extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("componentDidUpdate");
   }
 
   goChooseDown(e) {

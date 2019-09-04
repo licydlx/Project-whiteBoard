@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-03 19:52:28
+ * @LastEditTime: 2019-09-04 18:50:52
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -130,7 +130,7 @@ class App extends React.Component {
       }
     }
   }
-  
+
   // ====================
   // signal 回调监听
   // ====================
@@ -148,22 +148,22 @@ class App extends React.Component {
               ACTIONS_database.getItem(keyName).then(keyValue => {
                 window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_LINK", data: keyValue }));
 
-                PAGE_database.length().then((numberOfKeys) => {
-                  if (numberOfKeys > 0) {
-                    PAGE_database.key(numberOfKeys - 1).then(keyName => {
-                      PAGE_database.getItem(keyName).then(keyValue => {
-                        // window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_PAGE", data: keyValue }));
-                        // let boards = [];
-                        // BOARD_database.iterate(v => {
-                        //   if (v.curPage == coursewareCurPage) boards.push(v);
-                        // }).then(() => {
-                        //   console.log(boards)
-                        // })
-                      })
-                    })
-                  }
-                })
-                
+                // PAGE_database.length().then((numberOfKeys) => {
+                //   if (numberOfKeys > 0) {
+                //     PAGE_database.key(numberOfKeys - 1).then(keyName => {
+                //       PAGE_database.getItem(keyName).then(keyValue => {
+                //         window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_PAGE", data: keyValue }));
+                //         let boards = [];
+                //         BOARD_database.iterate(v => {
+                //           if (v.curPage == coursewareCurPage) boards.push(v);
+                //         }).then(() => {
+                //           console.log(boards)
+                //         })
+                //       })
+                //     })
+                //   }
+                // })
+
               })
             })
           }
@@ -188,15 +188,13 @@ class App extends React.Component {
 
         switch (msg.type) {
           case "SYCN_COURSEWARE_LINK":
-            console.log(msg.data);
             this.props.dispatch(msg.data);
             break;
 
           case "SYCN_COURSEWARE_PAGE":
-              console.log(msg.data);
-              this.props.dispatch(msg.data);
-              break;
-
+            // console.log(msg.data);
+            // this.props.dispatch(msg.data);
+            break;
           default:
             break;
         }
@@ -219,8 +217,9 @@ class App extends React.Component {
           case 'showCourseware':
             let name = msg.sigValue.value ? "html5" : "default";
             let link = msg.sigValue.value ? msg.sigValue.link : '';
+            if (link && link == SignalData.coursewareLink) return;
+            if(link) SignalData.coursewareLink = link;
             this.props.dispatch(switchType({ name, link }));
-
             break;
 
           /*画板操作*/
@@ -297,34 +296,22 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    // let account = Math.floor(Math.random() * 100);
-    // let data = {
-    //   agoraSignalingToken: "1:7344c75464964565a3515963ec9298ff:1568347320:049033716a4da72bb3a2bdcc0390da4c",
-    //   appId: "7344c75464964565a3515963ec9298ff",
-    //   role: 0,
-    //   uid: 73878,
-    //   channel: 476399192,
-    //   canDraw: 0
+    // let ran;
+    // if (isBrowser() == "Chrome") {
+    //   ran = 0;
+    // } else {
+    //   ran = 2;
     // }
 
-    // let account = Math.floor(Math.random() * 100);
+    // let data = {
+    //   role: ran,
+    //   uid: ran + "1",
+    //   channel: 'q7',
+    //   canDraw: true
+    // }
 
-    let ran;
-    if (isBrowser() == "Chrome") {
-      ran = 0;
-    } else {
-      ran = 2;
-    }
-
-    let data = {
-      role: ran,
-      uid: ran + "1",
-      channel: 'q7',
-      canDraw: true
-    }
-
-    console.log(data)
-    this.joinChannel(data);
+    // console.log(data)
+    // this.joinChannel(data);
   }
 
   // 组件将要被卸载
@@ -339,31 +326,31 @@ class App extends React.Component {
     }.bind(this);
   }
 
-  showDefault() {
-    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      sigType: "showCourseware",
-      sigValue: {
-        value: false,
-        link: ""
-      },
-    }));
-  }
+  // showDefault() {
+  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+  //     sigType: "showCourseware",
+  //     sigValue: {
+  //       value: false,
+  //       link: ""
+  //     },
+  //   }));
+  // }
 
-  showHtml5() {
-    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      sigType: "showCourseware",
-      sigValue: {
-        value: true,
-        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
-      },
-    }));
-  }
+  // showHtml5() {
+  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+  //     sigType: "showCourseware",
+  //     sigValue: {
+  //       value: true,
+  //       link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+  //     },
+  //   }));
+  // }
 
   render() {
     return <div className="container">
       <WhiteBoard />
-      <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
-      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div>
+      {/* <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
+      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div> */}
     </div>
   }
 }

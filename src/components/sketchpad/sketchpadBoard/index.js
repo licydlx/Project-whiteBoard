@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-02 15:32:43
- * @LastEditTime: 2019-09-03 16:09:28
+ * @LastEditTime: 2019-09-04 11:58:20
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -21,7 +21,6 @@ class sketchpadBoard extends React.Component {
     componentWillReceiveProps(nextProps) { }
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("shouldComponentUpdate");
         if (nextProps.sketchpad == this.props) {
             return false;
         } else {

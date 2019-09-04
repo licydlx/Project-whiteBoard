@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:24:02
- * @LastEditTime: 2019-08-30 16:56:25
+ * @LastEditTime: 2019-09-04 11:27:12
  * @LastEditors: Please set LastEditors
  */
 let SignalData = {
@@ -14,10 +14,11 @@ let SignalData = {
     canDraw: false,
 
     logined: false,
-    broadcast: true,  // 是否信令广播
-    playback: false,  // 是否回放
-    sycnSignal:false,  // 同步缓存信令
-    coursewareLoaded:false // 课件已加载
+    broadcast: true,        // 是否信令广播
+    playback: false,        // 是否回放
+    sycnSignal:false,       // 同步缓存信令
+    coursewareLoaded:false,  // 课件已加载
+    coursewareLink:""        // 当前课件link
 }
 
 export default SignalData;

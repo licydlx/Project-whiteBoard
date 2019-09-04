@@ -2,14 +2,16 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-03 19:26:39
+ * @LastEditTime: 2019-09-04 13:19:57
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
 
 function signalMessage() {
     return (next) => (action) => {
-        console.log('will dispatch', action)
+        console.log('⛈🌪🌫🌬🌚')
+        console.log('白板 will dispatch', action)
+        console.log('☔🐟🐒🐬☔')
         // 回放为真时 画板逻辑
         if (SignalData.playback) {
             switch (action.type) {
@@ -27,9 +29,20 @@ function signalMessage() {
                 case "BOARD_SHOW_TOOLBAR":              // 老师显示画板工具栏
                 case "SWITCHBOX_SHOW_SWITCHBAR":        // 老师显示切换工具栏 
                 case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
+                case "BOARD_REDUCE_TOOLBAR":
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
-                    if (Object.is(action.name, "html5") && action.link && !SignalData.coursewareLoaded) actionDataSave(action);
+                    if (Object.is(action.name, "html5") && action.link && !SignalData.coursewareLoaded) {
+                        ACTIONS_database.length().then((numberOfKeys) => {
+                            if (numberOfKeys > 0) {
+                                ACTIONS_database.key(0).then(keyName => {
+                                    if (!keyName) actionDataSave(action);
+                                })
+                            } else {
+                                actionDataSave(action);
+                            }
+                        })
+                    }
                     break;
                 default:
                     actionDataSave(action);
@@ -79,6 +92,7 @@ const actionDataSave = (action) => {
             case "BOARD_ADD_TEXT":
             case "BOARD_ADD_GRAPH":
             case "BOARD_REMOVE_CREATED":
+            case "CHILD_MESSAGE_BOX":
                 BOARD_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { account: SignalData.account, curPage: coursewareCurPage })).then(v => { })
                 break;
             case "SWITCHBOX_GO_PREVPAGE":
