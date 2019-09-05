@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-04 11:58:39
+ * @LastEditTime: 2019-09-05 18:13:51
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -12,6 +12,7 @@ import './index.css';
 import Sketchpad from '../../containers/sketchpad';
 import SwitchBox from '../../containers/switchBox';
 import Courseware from '../../containers/courseware';
+import MaskLayer from '../../containers/maskLayer';
 
 import compar169 from '../../untils/compar169';
 const { width, height } = { ...compar169() };
@@ -21,6 +22,7 @@ const WhiteBoard = () => (
     <Courseware />
     <Sketchpad />
     <SwitchBox />
+    <MaskLayer />
   </div >
 )
 

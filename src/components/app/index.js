@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-04 18:50:52
+ * @LastEditTime: 2019-09-05 19:16:03
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -218,7 +218,7 @@ class App extends React.Component {
             let name = msg.sigValue.value ? "html5" : "default";
             let link = msg.sigValue.value ? msg.sigValue.link : '';
             if (link && link == SignalData.coursewareLink) return;
-            if(link) SignalData.coursewareLink = link;
+            if (link) SignalData.coursewareLink = link;
             this.props.dispatch(switchType({ name, link }));
             break;
 
@@ -341,7 +341,7 @@ class App extends React.Component {
   //     sigType: "showCourseware",
   //     sigValue: {
   //       value: true,
-  //       link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+  //       link: "https://www.kunqu.tech/test/"
   //     },
   //   }));
   // }
