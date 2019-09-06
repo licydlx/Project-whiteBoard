@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-05 19:16:08
+ * @LastEditTime: 2019-09-06 13:07:36
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -32,7 +32,7 @@ function signalMessage() {
                 case "BOARD_REDUCE_TOOLBAR":
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
-                    if (Object.is(action.name, "html5") && action.link && !SignalData.coursewareLoaded) {
+                    if (Object.is(action.name, "html5") && action.link) {
                         ACTIONS_database.length().then((numberOfKeys) => {
                             if (numberOfKeys > 0) {
                                 ACTIONS_database.key(0).then(keyName => {

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-09-05 19:23:47
+ * @LastEditTime: 2019-09-06 13:46:16
  * @LastEditors: Please set LastEditors
  */
 
@@ -72,6 +72,7 @@ const signalResponse = callback => {
         // 获取频道内用户列表回调
         whiteBoardSignal.channel.onChannelUserList = (users) => {
             console.log('获取频道内用户列表');
+            console.log(users);
             if (callback) callback({
                 type: 'onChannelUserList',
                 data: { users }

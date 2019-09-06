@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-05 19:16:03
+ * @LastEditTime: 2019-09-06 18:55:05
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -20,6 +20,7 @@ import isBrowser from '../../untils/isBrowser';
 
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
 
+import vConsole from 'vconsole';
 
 class App extends React.Component {
   constructor(props) {
@@ -27,6 +28,8 @@ class App extends React.Component {
     window.whiteBoardMessage = new messageEngine(this.messageCallback.bind(this));
     window.whiteBoardSignal = null;
     window.coursewareCurPage = 1;
+
+    new vConsole();
   }
 
   createInstance(data) {
@@ -45,7 +48,7 @@ class App extends React.Component {
         localforage.WEBSQL,
         localforage.LOCALSTORAGE],
         description: data[i].description,
-        storeName: data[i].storeName + "-" + SignalData.account + SignalData.channel
+        storeName: data[i].storeName + "-" + SignalData.account
       });
     }
   }
@@ -69,17 +72,34 @@ class App extends React.Component {
       // 初始化本地数据库
       this.props.dispatch(showToolbar());
       this.props.dispatch(showSwitchBar());
-
-      ACTIONS_database.length().then((numberOfKeys) => {
-        if (numberOfKeys > 0) {
-          ACTIONS_database.key(0).then(keyName => {
-            ACTIONS_database.getItem(keyName).then(keyValue => {
-              this.props.dispatch(keyValue);
-            })
-          })
-        }
-      })
     }
+
+    ACTIONS_database.length().then((numberOfKeys) => {
+      if (numberOfKeys > 0) {
+        ACTIONS_database.key(0).then(keyName => {
+          ACTIONS_database.getItem(keyName).then(keyValue => {
+            // 大于2个小时，清空缓存
+            // 浏览器表现不一致，容错处理 
+            // 1.手机火狐 获取缓存值 有问题
+            let curTime = parseInt((+new Date()).toString().slice(-11));
+            let cacheTime = parseInt(keyName.slice(-11));
+            console.log(curTime);
+            console.log(cacheTime);
+
+            const gap = Math.ceil((curTime - cacheTime) / (100 * 3600));
+            if (gap > 2) {
+              ACTIONS_database.clear();
+              BOARD_database.clear();
+              PAGE_database.clear();
+              console.log('清空超过当前频道2小时的数据缓存！');
+            } else {
+              if (SignalData.role === 0) this.props.dispatch(keyValue);
+            }
+          })
+        })
+      }
+    });
+
   }
 
   // ====================
@@ -103,20 +123,24 @@ class App extends React.Component {
             PAGE_database.length().then((numberOfKeys) => {
               if (numberOfKeys > 0) {
                 PAGE_database.key(numberOfKeys - 1).then(keyName => {
-                  PAGE_database.getItem(keyName).then(keyValue => {
+                  console.log(keyName)
 
+                  PAGE_database.getItem(keyName).then(keyValue => {
                     SignalData.playback = true;
                     this.props.dispatch(keyValue);
-
                     BOARD_database.iterate(v => {
                       if (v.curPage == keyValue.curPage) {
                         SignalData.playback = true;
                         this.props.dispatch(Object.assign({}, v, { account: "" }));
                       }
-                    }).then((data) => { })
-
+                    }).then((data) => {
+                      console.log("回放完成！")
+                    })
                   })
-                })
+                }).catch((err) => {
+                  console.log(err);
+                });
+
               }
             }).catch((err) => {
               console.log(err);
@@ -242,6 +266,7 @@ class App extends React.Component {
           // 设置是否信令广播
           SignalData.broadcast = false;
 
+          console.log(msg.action)
           // 画笔栏及画笔 执行action
           this.props.dispatch(msg.action);
 
@@ -266,6 +291,7 @@ class App extends React.Component {
 
   // 组件完成挂载
   componentDidMount() {
+    console.log("白板组件挂载！")
     // ====================
     // 描述：画板
     // 功能：1.实例化 画板 2.动态配置尺寸
@@ -286,9 +312,14 @@ class App extends React.Component {
           return "数据类型" + typeof data + ";客户端传输数据 NO OBJECT" + data;
         }
       }.bind(this);
+
+      console.log("ipad message")
       window.webkit.messageHandlers.readyForChannel.postMessage('readyForChannel');
     } else {
-      if (!SignalData.logined) whiteBoardMessage.sendMessage('father', 'readyForChannel', '*');
+      if (!SignalData.logined) {
+        console.log("web message！")
+        whiteBoardMessage.sendMessage('father', 'readyForChannel', '*');
+      }
     }
 
     // ====================
@@ -296,22 +327,22 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    // let ran;
-    // if (isBrowser() == "Chrome") {
-    //   ran = 0;
-    // } else {
-    //   ran = 2;
-    // }
+    let ran;
+    if (isBrowser() == "Chrome") {
+      ran = 0;
+    } else {
+      ran = 2;
+    }
 
-    // let data = {
-    //   role: ran,
-    //   uid: ran + "1",
-    //   channel: 'q7',
-    //   canDraw: true
-    // }
+    let data = {
+      role: ran,
+      uid: ran + "1",
+      channel: 'q8',
+      canDraw: true
+    }
 
-    // console.log(data)
-    // this.joinChannel(data);
+    console.log(data)
+    this.joinChannel(data);
   }
 
   // 组件将要被卸载
@@ -326,31 +357,31 @@ class App extends React.Component {
     }.bind(this);
   }
 
-  // showDefault() {
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     sigType: "showCourseware",
-  //     sigValue: {
-  //       value: false,
-  //       link: ""
-  //     },
-  //   }));
-  // }
+  showDefault() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      sigType: "showCourseware",
+      sigValue: {
+        value: false,
+        link: ""
+      },
+    }));
+  }
 
-  // showHtml5() {
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     sigType: "showCourseware",
-  //     sigValue: {
-  //       value: true,
-  //       link: "https://www.kunqu.tech/test/"
-  //     },
-  //   }));
-  // }
+  showHtml5() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      sigType: "showCourseware",
+      sigValue: {
+        value: true,
+        link: "https://www.kunqu.tech/test/"
+      },
+    }));
+  }
 
   render() {
     return <div className="container">
       <WhiteBoard />
-      {/* <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
-      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div> */}
+      <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
+      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div>
     </div>
   }
 }

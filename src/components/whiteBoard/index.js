@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-05 18:13:51
+ * @LastEditTime: 2019-09-06 17:09:28
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,7 +15,7 @@ import Courseware from '../../containers/courseware';
 import MaskLayer from '../../containers/maskLayer';
 
 import compar169 from '../../untils/compar169';
-const { width, height } = { ...compar169() };
+const { width, height} = { ...compar169() };
 
 const WhiteBoard = () => (
   <div id="whiteBoard" className="whiteBoard" style={{ width: `${width}`, height: `${height}` }}>

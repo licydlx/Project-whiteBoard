@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-05-10 11:47:38
- * @LastEditTime: 2019-08-16 11:02:38
+ * @LastEditTime: 2019-09-06 17:08:45
  * @LastEditors: Please set LastEditors
  */
 import visualArea from './visualArea';
@@ -15,7 +15,6 @@ const compar169 = () => {
     let width = 0,
         height = 0;
     let rate = windowWidth / windowHeight;
-    
     if (rate > 16 / 9) {
         width = windowHeight * 16 / 9 + 'px';
         height = windowHeight + 'px';
@@ -24,9 +23,23 @@ const compar169 = () => {
         height = windowWidth * 9 / 16 + 'px';
     }
 
+    // 手机端横屏
+    // if (navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)) {
+    //     // if (rate > 16 / 9) {
+    //     //     width = windowHeight * 16 / 9 + 'px';
+    //     //     height = windowHeight + 'px';
+    //     // } else {
+    //     //     width = windowWidth + 'px';
+    //     //     height = windowWidth * 9 / 16 + 'px';
+    //     // }
+    //     // document.getElementsByTagName('body')[0].style.width = windowWidth + "px";
+    //     // document.getElementsByTagName('body')[0].style.height = windowHeight + "px";
+    //     // document.getElementsByTagName('body')[0].style.transform = 'rotate(90deg)';
+    // } else {}
+
     return {
-        width:width,
-        height:height,
+        width: width,
+        height: height
     }
 }
 

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-09-04 12:00:29
+ * @LastEditTime: 2019-09-06 18:14:24
  * @LastEditors: Please set LastEditors
  */
 import { addPath, addText, addGraph, removeCreated } from '../../actions'
@@ -49,7 +49,8 @@ const sketchpadEngine = function (domName, callback) {
             textInput.exitEditing();
             textInput = null;
         }
-        let xy = transformMouse(options.e.offsetX, options.e.offsetY);
+        console.log(options);
+        let xy = transformMouse(options.pointer.x, options.pointer.y);
         mouseFrom.x = xy.x;
         mouseFrom.y = xy.y;
         doDrawing = true;
@@ -66,18 +67,24 @@ const sketchpadEngine = function (domName, callback) {
             return;
         }
         moveCount++;
-        let xy = transformMouse(options.e.offsetX, options.e.offsetY);
-        mouseTo.x = xy.x;
-        mouseTo.y = xy.y;
 
         // 如果画笔为text,则不绘制
         if (!Object.is(window.drawConfig.penShape, 'text')) {
+            let xy = transformMouse(options.pointer.x, options.pointer.y);
+            mouseTo.x = xy.x;
+            mouseTo.y = xy.y;
             drawing();
         }
 
     });
 
     canvas.on("mouse:up", function (options) {
+        if (!Object.is(window.drawConfig.penShape, 'text')) {
+            let xy = transformMouse(options.pointer.x, options.pointer.y);
+            mouseTo.x = xy.x;
+            mouseTo.y = xy.y;
+        }
+        
         if (callback) {
             // 如果 画笔型 为真 且 画笔型不为文本
             if (window.drawConfig.penShape && !Object.is(window.drawConfig.penShape, 'text')) {
@@ -86,10 +93,6 @@ const sketchpadEngine = function (domName, callback) {
                 })
             }
         }
-
-        let xy = transformMouse(options.e.offsetX, options.e.offsetY);
-        mouseTo.x = xy.x;
-        mouseTo.y = xy.y;
 
         drawingObject = null;
         doDrawing = false;
@@ -215,7 +218,7 @@ const drawing = () => {
 
             canvas.add(textInput);
             textInput.enterEditing();
-            textInput.hiddenTextarea.focus();
+            // textInput.hiddenTextarea.focus();
             textContent = "";
             break;
         case "ellipse":
