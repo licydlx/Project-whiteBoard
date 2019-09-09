@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-06 18:55:05
+ * @LastEditTime: 2019-09-09 19:07:38
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -81,12 +81,16 @@ class App extends React.Component {
             // 大于2个小时，清空缓存
             // 浏览器表现不一致，容错处理 
             // 1.手机火狐 获取缓存值 有问题
+            console.log(+new Date());
+            console.log(keyName);
+            
             let curTime = parseInt((+new Date()).toString().slice(-11));
             let cacheTime = parseInt(keyName.slice(-11));
+
             console.log(curTime);
             console.log(cacheTime);
 
-            const gap = Math.ceil((curTime - cacheTime) / (100 * 3600));
+            const gap = Math.ceil((curTime - cacheTime) / (1000 * 3600));
             if (gap > 2) {
               ACTIONS_database.clear();
               BOARD_database.clear();
@@ -95,6 +99,7 @@ class App extends React.Component {
             } else {
               if (SignalData.role === 0) this.props.dispatch(keyValue);
             }
+            
           })
         })
       }
@@ -123,8 +128,7 @@ class App extends React.Component {
             PAGE_database.length().then((numberOfKeys) => {
               if (numberOfKeys > 0) {
                 PAGE_database.key(numberOfKeys - 1).then(keyName => {
-                  console.log(keyName)
-
+                  
                   PAGE_database.getItem(keyName).then(keyValue => {
                     SignalData.playback = true;
                     this.props.dispatch(keyValue);
