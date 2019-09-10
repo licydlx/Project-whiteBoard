@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-04 13:24:29
+ * @LastEditTime: 2019-09-10 18:34:50
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -22,7 +22,7 @@ class SwitchBox extends React.Component {
       return false;
     } else {
       if (this.props.switchBox.fullScreen !== nextProps.switchBox.fullScreen) {
-        let data = msg.action.fullScreen ? 'miniWhiteboard' : 'maxWhiteboard';
+        let data = this.props.switchBox.fullScreen ? 'miniWhiteboard' : 'maxWhiteboard';
         if (window !== window.parent) window.parent.postMessage(data, '*');
         if (window.webkit) window.webkit.messageHandlers[data].postMessage(data);
       }

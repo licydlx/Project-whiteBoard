@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-08-28 19:08:32
+ * @LastEditTime: 2019-09-10 10:05:54
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -53,6 +53,7 @@ const signalEngine = (data, callback1,callback2) => {
     session.onLoginFailed = (ecode) => {
         console.log('登录失败！')
         console.log(ecode);
+        SignalData.logined = false;
     }
 }
 

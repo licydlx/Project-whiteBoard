@@ -6,6 +6,7 @@
     bottom: 0;
     z-index: 2;
     text-align: center;
+    overflow: hidden;
 }
 
 .coursewareIframe {

@@ -18,3 +18,16 @@ body {
     justify-content: center;
     align-content: center;
 }
+
+.clearCache {
+    position: absolute;
+    top: 20px;
+    left: 600px;
+    background-color: #17507d;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    z-index: 10;
+    padding: 4px 6px;
+    cursor: pointer;
+}

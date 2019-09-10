@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-09 19:07:38
+ * @LastEditTime: 2019-09-10 18:29:20
  * @LastEditors: Please set LastEditors
  */
 import React, { Component } from 'react';
@@ -64,7 +64,6 @@ class App extends React.Component {
   // 加入声网频道成功
   // ====================
   joinChannelSuccess() {
-    SignalData.logined = true;
     // 如果是老师 显示 画板工具栏 切页栏
     this.createInstance([{ storeName: "PAGE", description: "页面state缓存" }, { storeName: "BOARD", description: "画板缓存" }, { storeName: "ACTIONS", description: "actions缓存" }]);
 
@@ -81,17 +80,11 @@ class App extends React.Component {
             // 大于2个小时，清空缓存
             // 浏览器表现不一致，容错处理 
             // 1.手机火狐 获取缓存值 有问题
-            console.log(+new Date());
-            console.log(keyName);
-            
             let curTime = parseInt((+new Date()).toString().slice(-11));
             let cacheTime = parseInt(keyName.slice(-11));
 
-            console.log(curTime);
-            console.log(cacheTime);
-
-            const gap = Math.ceil((curTime - cacheTime) / (1000 * 3600));
-            if (gap > 2) {
+            const gap = Math.ceil((curTime - cacheTime) / (1000 * 60));
+            if (gap > 120) {
               ACTIONS_database.clear();
               BOARD_database.clear();
               PAGE_database.clear();
@@ -99,7 +92,7 @@ class App extends React.Component {
             } else {
               if (SignalData.role === 0) this.props.dispatch(keyValue);
             }
-            
+
           })
         })
       }
@@ -114,7 +107,10 @@ class App extends React.Component {
     if (e.data && typeof e.data == "string") {
       let data = JSON.parse(e.data);
       // 加入频道通知
-      if (data.uid && data.channel && !SignalData.logined) this.joinChannel(data);
+      if (data.uid && data.channel && !SignalData.logined) {
+        SignalData.logined = true;
+        this.joinChannel(data);
+      }
 
       // 课件message
       if (data.type) {
@@ -128,7 +124,7 @@ class App extends React.Component {
             PAGE_database.length().then((numberOfKeys) => {
               if (numberOfKeys > 0) {
                 PAGE_database.key(numberOfKeys - 1).then(keyName => {
-                  
+
                   PAGE_database.getItem(keyName).then(keyValue => {
                     SignalData.playback = true;
                     this.props.dispatch(keyValue);
@@ -269,8 +265,6 @@ class App extends React.Component {
         if (e.data.account !== SignalData.account) {
           // 设置是否信令广播
           SignalData.broadcast = false;
-
-          console.log(msg.action)
           // 画笔栏及画笔 执行action
           this.props.dispatch(msg.action);
 
@@ -316,12 +310,9 @@ class App extends React.Component {
           return "数据类型" + typeof data + ";客户端传输数据 NO OBJECT" + data;
         }
       }.bind(this);
-
-      console.log("ipad message")
       window.webkit.messageHandlers.readyForChannel.postMessage('readyForChannel');
     } else {
       if (!SignalData.logined) {
-        console.log("web message！")
         whiteBoardMessage.sendMessage('father', 'readyForChannel', '*');
       }
     }
@@ -339,14 +330,16 @@ class App extends React.Component {
     }
 
     let data = {
-      role: ran,
+      // appId:"7344c75464964565a3515963ec9298ff",
+      role: 0,
       uid: ran + "1",
-      channel: 'q8',
+      channel: "2125514557",
       canDraw: true
     }
 
     console.log(data)
     this.joinChannel(data);
+
   }
 
   // 组件将要被卸载
@@ -376,9 +369,15 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://www.kunqu.tech/test/"
+        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
       },
     }));
+  }
+
+  clearCache(){
+    ACTIONS_database.clear();
+    BOARD_database.clear();
+    PAGE_database.clear();
   }
 
   render() {
@@ -386,6 +385,8 @@ class App extends React.Component {
       <WhiteBoard />
       <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
       <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div>
+      <div className="clearCache" onClick={() => this.clearCache()}>清空缓存</div>
+      <div> </div>
     </div>
   }
 }
