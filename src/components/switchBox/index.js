@@ -2,11 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-10 18:34:50
+ * @LastEditTime: 2019-09-12 12:01:52
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
-import PropTypes from 'prop-types'
 import './index.css';
 import SignalData from '../../depend/agoraSingal/SignalData';
 
@@ -15,7 +14,7 @@ class SwitchBox extends React.Component {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar,childMessageBox } = { ...this.props };
 
     if (this.props.switchBox == nextProps.switchBox) {
@@ -29,15 +28,15 @@ class SwitchBox extends React.Component {
 
       if (this.props.switchBox.curPage !== nextProps.switchBox.curPage) {
         // 清空画板
-        canvas.clear()
+        window.canvas.clear()
         reduceToolbar();
-        coursewareCurPage = nextProps.switchBox.curPage;
-        whiteBoardMessage.sendMessage("child", JSON.stringify({ type: "SWITCHBOX_GO_HANDLE_KEYDOWN", handleData: { page: coursewareCurPage } }));
+        window.coursewareCurPage = nextProps.switchBox.curPage;
+        window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: "SWITCHBOX_GO_HANDLE_KEYDOWN", handleData: { page:  window.coursewareCurPage } }));
 
         // 切换页面缓存操作
-        if (PAGE_database) {
-          BOARD_database.iterate(v => {
-            if (v.curPage == coursewareCurPage) {
+        if ( window.PAGE_database) {
+          window.BOARD_database.iterate(v => {
+            if (v.curPage ==  window.coursewareCurPage) {
               SignalData.playback = true;
               switch (v.type) {
                 case "BOARD_SWITCH_TOOLBAR":
@@ -68,22 +67,22 @@ class SwitchBox extends React.Component {
                   removeCreated({...v})
                   break;
                 case "CHILD_MESSAGE_BOX":
-                  childMessageBox({...v})
+                  // 小游戏不回放
+                  if (!v.data.type.includes("GAME_")) {
+                    childMessageBox({...v})
+                  }
                   break;
                 default:
                   break;
               }
             }
-          }).then((data) => { })
+          }).then(() => { })
         }
 
       }
 
       return true;
     }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
   }
 
   goChooseDown(e) {
@@ -113,7 +112,7 @@ class SwitchBox extends React.Component {
     }
   }
 
-  goHandleChange(e) { }
+  goHandleChange() { }
 
   // 上一页中间函数
   goPrevMiddle() {

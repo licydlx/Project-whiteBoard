@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-06 13:07:36
+ * @LastEditTime: 2019-09-11 12:01:46
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -17,7 +17,7 @@ function signalMessage() {
             switch (action.type) {
                 // 课件通信，声网信令传输 
                 case "CHILD_MESSAGE_BOX":
-                    whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
+                    window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
                     break;
             }
         }
@@ -33,9 +33,9 @@ function signalMessage() {
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
                     if (Object.is(action.name, "html5") && action.link) {
-                        ACTIONS_database.length().then((numberOfKeys) => {
+                        window.ACTIONS_database.length().then((numberOfKeys) => {
                             if (numberOfKeys > 0) {
-                                ACTIONS_database.key(0).then(keyName => {
+                                window.ACTIONS_database.key(0).then(keyName => {
                                     if (!keyName) actionDataSave(action);
                                 })
                             } else {
@@ -79,26 +79,24 @@ function signalMessage() {
 }
 
 const actionDataSave = (action) => {
-    ACTIONS_database.setItem(JSON.stringify(+new Date()), action).then(value => {
+    window.ACTIONS_database.setItem(JSON.stringify(+new Date()), action).then(() => {
         switch (action.type) {
             case "BOARD_SWITCH_TOOLBAR":
             case "BOARD_CHANGE_PENSIZE":
             case "BOARD_CHANGE_PENCOLOR":
             case "BOARD_CHANGE_TEXTSIZE":
             case "BOARD_CHANGE_PENSHAPE":
-            // case "BOARD_REDUCE_TOOLBAR":
-
             case "BOARD_ADD_PATH":
             case "BOARD_ADD_TEXT":
             case "BOARD_ADD_GRAPH":
             case "BOARD_REMOVE_CREATED":
             case "CHILD_MESSAGE_BOX":
-                BOARD_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { account: SignalData.account, curPage: coursewareCurPage })).then(v => { })
+                window.BOARD_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { account: SignalData.account, curPage: window.coursewareCurPage }));
                 break;
             case "SWITCHBOX_GO_PREVPAGE":
             case "SWITCHBOX_GO_NEXTPAGE":
             case "SWITCHBOX_GO_HANDLE_KEYDOWN":
-                PAGE_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { curPage: coursewareCurPage })).then(v => { })
+                window.PAGE_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { curPage: window.coursewareCurPage }));
                 break;
         }
     }).catch((err) => {

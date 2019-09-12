@@ -2,14 +2,14 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-09-10 10:05:54
+ * @LastEditTime: 2019-09-11 12:00:27
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
 import signalResponse from './signalResponse';
 
 const signalEngine = (data, callback1,callback2) => {
-    if (!Signal) return console.log('声网信令SDK缺失！');
+    if (!window.Signal) return console.log('声网信令SDK缺失！');
 
     if (data) {
         if (data.appId) SignalData.appId = data.appId;
@@ -20,18 +20,18 @@ const signalEngine = (data, callback1,callback2) => {
         if (data.canDraw) SignalData.canDraw = data.canDraw;
     }
 
-    const signal = Signal(SignalData.appId);
+    const signal = window.Signal(SignalData.appId);
     // 登录
     const session = signal.login(SignalData.account, SignalData.token);
 
-    session.onLoginSuccess = (uid) => {
+    session.onLoginSuccess = () => {
         // 加入频道
         const channel = session.channelJoin(SignalData.channel);
 
         // 加入频道成功回调
         channel.onChannelJoined = () => {
             console.log('加入频道成功！')
-            whiteBoardSignal = {
+            window.whiteBoardSignal = {
                 signal: signal,
                 session: session,
                 channel: channel

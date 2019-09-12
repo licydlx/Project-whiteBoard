@@ -2,13 +2,15 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-10 18:29:20
+ * @LastEditTime: 2019-09-12 18:07:58
  * @LastEditors: Please set LastEditors
  */
-import React, { Component } from 'react';
+import React from 'react';
 import './index.css';
 import localforage from 'localforage';
-
+// eslint-disable-next-line no-unused-vars
+import fabric from 'fabric';
+// eslint-disable-next-line no-unused-vars
 import WhiteBoard from './../whiteBoard/index';
 import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
@@ -64,19 +66,19 @@ class App extends React.Component {
   // 加入声网频道成功
   // ====================
   joinChannelSuccess() {
-    // 如果是老师 显示 画板工具栏 切页栏
+   // 初始化本地数据库
     this.createInstance([{ storeName: "PAGE", description: "页面state缓存" }, { storeName: "BOARD", description: "画板缓存" }, { storeName: "ACTIONS", description: "actions缓存" }]);
-
+    
+    // 如果是老师 显示 画板工具栏 切页栏
     if (SignalData.role === 0) {
-      // 初始化本地数据库
       this.props.dispatch(showToolbar());
       this.props.dispatch(showSwitchBar());
     }
 
-    ACTIONS_database.length().then((numberOfKeys) => {
+    window.ACTIONS_database.length().then((numberOfKeys) => {
       if (numberOfKeys > 0) {
-        ACTIONS_database.key(0).then(keyName => {
-          ACTIONS_database.getItem(keyName).then(keyValue => {
+        window.ACTIONS_database.key(0).then(keyName => {
+          window.ACTIONS_database.getItem(keyName).then(keyValue => {
             // 大于2个小时，清空缓存
             // 浏览器表现不一致，容错处理 
             // 1.手机火狐 获取缓存值 有问题
@@ -85,9 +87,9 @@ class App extends React.Component {
 
             const gap = Math.ceil((curTime - cacheTime) / (1000 * 60));
             if (gap > 120) {
-              ACTIONS_database.clear();
-              BOARD_database.clear();
-              PAGE_database.clear();
+              window.ACTIONS_database.clear();
+              window.BOARD_database.clear();
+              window.PAGE_database.clear();
               console.log('清空超过当前频道2小时的数据缓存！');
             } else {
               if (SignalData.role === 0) this.props.dispatch(keyValue);
@@ -121,21 +123,23 @@ class App extends React.Component {
 
           case "COURSEWARE_ONLOAD":
             // 课件加载完成，有缓存，就跳到最近的
-            PAGE_database.length().then((numberOfKeys) => {
+            window.PAGE_database.length().then((numberOfKeys) => {
               if (numberOfKeys > 0) {
-                PAGE_database.key(numberOfKeys - 1).then(keyName => {
+                window.PAGE_database.key(numberOfKeys - 1).then(keyName => {
 
-                  PAGE_database.getItem(keyName).then(keyValue => {
+                  window.PAGE_database.getItem(keyName).then(keyValue => {
                     SignalData.playback = true;
                     this.props.dispatch(keyValue);
-                    BOARD_database.iterate(v => {
+
+                    window.BOARD_database.iterate(v => {
                       if (v.curPage == keyValue.curPage) {
                         SignalData.playback = true;
                         this.props.dispatch(Object.assign({}, v, { account: "" }));
                       }
-                    }).then((data) => {
+                    }).then(() => {
                       console.log("回放完成！")
                     })
+                    
                   })
                 }).catch((err) => {
                   console.log(err);
@@ -166,10 +170,10 @@ class App extends React.Component {
       // 学生中途进入频道，老师同步缓存信令
       if (SignalData.role === 0) {
 
-        ACTIONS_database.length().then((numberOfKeys) => {
+        window.ACTIONS_database.length().then((numberOfKeys) => {
           if (numberOfKeys > 0) {
-            ACTIONS_database.key(0).then(keyName => {
-              ACTIONS_database.getItem(keyName).then(keyValue => {
+            window.ACTIONS_database.key(0).then(keyName => {
+              window.ACTIONS_database.getItem(keyName).then(keyValue => {
                 window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_LINK", data: keyValue }));
 
                 // PAGE_database.length().then((numberOfKeys) => {
@@ -236,11 +240,12 @@ class App extends React.Component {
         // 设置是否信令广播
         SignalData.broadcast = false;
 
+        let name, link, uid;
         switch (msg.sigType) {
           /*课件*/
           case 'showCourseware':
-            let name = msg.sigValue.value ? "html5" : "default";
-            let link = msg.sigValue.value ? msg.sigValue.link : '';
+            name = msg.sigValue.value ? "html5" : "default";
+            link = msg.sigValue.value ? msg.sigValue.link : '';
             if (link && link == SignalData.coursewareLink) return;
             if (link) SignalData.coursewareLink = link;
             this.props.dispatch(switchType({ name, link }));
@@ -248,7 +253,7 @@ class App extends React.Component {
 
           /*画板操作*/
           case 'showBrush':
-            let uid = msg.sigUid + 'A';
+            uid = msg.sigUid + 'A';
             if (SignalData.account == uid && SignalData.role == '2') {
               msg.sigValue.value ? this.props.dispatch(showToolbar()) : this.props.dispatch(hideToolbar())
             }
@@ -271,7 +276,7 @@ class App extends React.Component {
           // 画板 添删 
           switch (msg.action.type) {
             case "CHILD_MESSAGE_BOX":
-              whiteBoardMessage.sendMessage("child", JSON.stringify({ type: msg.action.data.type, handleData: msg.action.data.handleData }));
+              window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: msg.action.data.type, handleData: msg.action.data.handleData }));
               break;
             default:
               break;
@@ -284,7 +289,7 @@ class App extends React.Component {
   // board 画板回调监听
   boardCallback(e) {
     // 画板 图形 增删
-    this.props.dispatch(Object.assign({}, { account: SignalData.account, curPage: coursewareCurPage }, e.action));
+    this.props.dispatch(Object.assign({}, { account: SignalData.account, curPage: window.coursewareCurPage }, e.action));
   }
 
   // 组件完成挂载
@@ -313,7 +318,7 @@ class App extends React.Component {
       window.webkit.messageHandlers.readyForChannel.postMessage('readyForChannel');
     } else {
       if (!SignalData.logined) {
-        whiteBoardMessage.sendMessage('father', 'readyForChannel', '*');
+        window.whiteBoardMessage.sendMessage('father', 'readyForChannel', '*');
       }
     }
 
@@ -331,7 +336,7 @@ class App extends React.Component {
 
     let data = {
       // appId:"7344c75464964565a3515963ec9298ff",
-      role: 0,
+      role: ran,
       uid: ran + "1",
       channel: "2125514557",
       canDraw: true
@@ -349,7 +354,7 @@ class App extends React.Component {
 
     // 信令登出
     // 页面刷新或关闭提示
-    window.onbeforeunload = function (event) {
+    window.onbeforeunload = function () {
       window.whiteBoardSignal.channel.channelLeave();
     }.bind(this);
   }
@@ -369,23 +374,32 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+        link: "https://www.kunqu.tech/test/"
       },
     }));
   }
 
-  clearCache(){
-    ACTIONS_database.clear();
-    BOARD_database.clear();
-    PAGE_database.clear();
+  authorization(){
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      action:{
+        type:"BOARD_SHOW_TOOLBAR"
+      }
+    }));
+  }
+  
+  clearCache() {
+    window.ACTIONS_database.clear();
+    window.BOARD_database.clear();
+    window.PAGE_database.clear();
   }
 
   render() {
     return <div className="container">
       <WhiteBoard />
-      <div style={{ position: "absolute", top: "100px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showDefault()}>默认白板</div>
-      <div style={{ position: "absolute", top: "200px", left: "100px", width: "50px", height: "30px", zIndex: 10 }} onClick={() => this.showHtml5()}>HTML5课件</div>
-      <div className="clearCache" onClick={() => this.clearCache()}>清空缓存</div>
+      <div className="test showDefault" onClick={() => this.showDefault()}>默认白板</div>
+      <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
+      <div className="test authorization" onClick={() => this.authorization()}>授权</div>
+      <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div>
       <div> </div>
     </div>
   }

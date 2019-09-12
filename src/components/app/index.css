@@ -19,10 +19,12 @@ body {
     align-content: center;
 }
 
-.clearCache {
+.test {
     position: absolute;
+    width: 80px;
+    line-height: 30px;
+    text-align: center;
     top: 20px;
-    left: 600px;
     background-color: #17507d;
     border-radius: 4px;
     color: #fff;
@@ -30,4 +32,27 @@ body {
     z-index: 10;
     padding: 4px 6px;
     cursor: pointer;
+
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* 显示默认白板 */
+.showDefault{
+    left: 200px;
+}
+
+/* 显示html5课件 */
+.showHtml5 {
+    left: 320px;
+}
+
+/* 授权 */
+.authorization {
+    left: 440px;
+}
+
+/* 清除indexedDB缓存 */
+.clearCache {
+    left: 560px;
 }

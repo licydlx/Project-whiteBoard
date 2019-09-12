@@ -2,13 +2,11 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 14:02:49
- * @LastEditTime: 2019-09-04 11:58:22
+ * @LastEditTime: 2019-09-12 09:27:46
  * @LastEditors: Please set LastEditors
  */
-import React from 'react'
-import PropTypes from 'prop-types'
-// import './index.css';
-
+// eslint-disable-next-line no-unused-vars
+import React from 'react';
 const penConfig = {
   penSize: {
     name: 'penSize',

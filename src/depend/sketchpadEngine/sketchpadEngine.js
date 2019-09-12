@@ -2,9 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-09-06 18:14:24
+ * @LastEditTime: 2019-09-12 09:30:04
  * @LastEditors: Please set LastEditors
  */
+
 import { addPath, addText, addGraph, removeCreated } from '../../actions'
 
 window.drawConfig = {
@@ -26,7 +27,7 @@ let mouseFrom = {},
     textInput = null;
 
 const sketchpadEngine = function (domName, callback) {
-    let canvas = new fabric.Canvas(domName, {
+    let canvas = new window.fabric.Canvas(domName, {
         isDrawingMode: true,
         skipTargetFind: true,
         selectable: false,
@@ -99,7 +100,7 @@ const sketchpadEngine = function (domName, callback) {
         moveCount = 1;
     });
 
-    canvas.on("selection:cleared", function (e) { console.log('selection:cleared') });
+    canvas.on("selection:cleared", () => { console.log('selection:cleared') });
     // canvas.on("object:modified", function (e) {
     //     console.log('object:modified')
     //     if (window.drawConfig.penShape === "text") {
@@ -147,12 +148,12 @@ const sketchpadEngine = function (domName, callback) {
 
     // 自由绘制
     canvas.addPath = ({path, pathConfig}) => {
-        canvas.add(new fabric.Path(path, pathConfig));
+        canvas.add(new window.fabric.Path(path, pathConfig));
     }
 
     // 添加文本
     canvas.addText = (par) => {
-        let tInput = new fabric.Textbox(par.textContent, {
+        let tInput = new window.fabric.Textbox(par.textContent, {
             left: par.mouseFrom.x,
             top: par.mouseFrom.y,
             width: 150,
@@ -198,7 +199,9 @@ const transformMouse = (mouseX, mouseY) => {
 // 绘制
 const drawing = () => {
     if (!window.drawConfig.penShape) return;
-    if (drawingObject) canvas.remove(drawingObject);
+    if (drawingObject){
+        window.canvas.remove(drawingObject);
+    }
     let curDrawing = null;
     switch (window.drawConfig.penShape) {
         case "line":
@@ -207,7 +210,7 @@ const drawing = () => {
             break;
         case "text":
             // 文本
-            textInput = new fabric.Textbox(textContent, {
+            textInput = new window.fabric.Textbox(textContent, {
                 left: mouseFrom.x,
                 top: mouseFrom.y,
                 width: 150,
@@ -216,7 +219,7 @@ const drawing = () => {
                 hasControls: false
             });
 
-            canvas.add(textInput);
+            window.canvas.add(textInput);
             textInput.enterEditing();
             // textInput.hiddenTextarea.focus();
             textContent = "";
@@ -235,13 +238,13 @@ const drawing = () => {
     }
 
     if (curDrawing) {
-        canvas.add(curDrawing);
+        window.canvas.add(curDrawing);
         drawingObject = curDrawing;
     }
 }
 
 const createLine = () => {
-    return new fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
+    return new window.fabric.Line([mouseFrom.x, mouseFrom.y, mouseTo.x, mouseTo.y], {
         stroke: window.drawConfig.penColor,
         strokeWidth: window.drawConfig.penSize,
         fill: '#fff',
@@ -251,7 +254,7 @@ const createLine = () => {
 }
 
 const createEllipse = () => {
-    return new fabric.Ellipse({
+    return new window.fabric.Ellipse({
         stroke: window.drawConfig.penColor,
         strokeWidth: window.drawConfig.penSize,
         originX: "left",
@@ -288,7 +291,7 @@ const createRectangle = () => {
         " " +
         mouseFrom.y +
         " z";
-    return new fabric.Path(path, {
+    return new window.fabric.Path(path, {
         left: mouseFrom.x,
         top: mouseFrom.y,
         stroke: window.drawConfig.penColor,

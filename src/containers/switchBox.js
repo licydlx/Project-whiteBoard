@@ -2,11 +2,11 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-09-10 17:59:20
+ * @LastEditTime: 2019-09-11 11:59:16
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
-import { goPrevPage, goHandleKeydown, goNextPage, fullscreen, switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar,childMessageBox } from '../actions'
+import { goPrevPage, goHandleKeydown, goNextPage, fullscreen, switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } from '../actions'
 
 
 import SwitchBox from '../components/switchBox/index'
@@ -25,15 +25,15 @@ const mapDispatchToProps = dispatch => ({
   changePenSize: (par) => dispatch(changePenSize(par)),
   changePenColor: (par) => dispatch(changePenColor(par)),
   changeTextSize: (par) => dispatch(changeTextSize(par)),
-  changePenShape: (par)  => dispatch(changePenShape(par)),
-  goHandleKeydown: (par) => dispatch(goHandleKeydown(par)),
+  changePenShape: (par) => dispatch(changePenShape(par)),
+
   addPath: (par) => dispatch(addPath(par)),
-  addText: (par)  => dispatch(addText(par)),
+  addText: (par) => dispatch(addText(par)),
   addGraph: (par) => dispatch(addGraph(par)),
   removeCreated: (par) => dispatch(removeCreated(par)),
   reduceToolbar: () => dispatch(reduceToolbar()),
-  
-  childMessageBox:(par) => dispatch(childMessageBox(par)),
+
+  childMessageBox: (par) => dispatch(childMessageBox(par)),
 })
 
 export default connect(

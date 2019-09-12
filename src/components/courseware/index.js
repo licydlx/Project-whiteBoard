@@ -2,11 +2,10 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-04 11:58:05
+ * @LastEditTime: 2019-09-11 11:50:41
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
-import PropTypes from 'prop-types'
 import './index.css';
 
 class Courseware extends React.Component {
@@ -14,7 +13,7 @@ class Courseware extends React.Component {
     super(props);
   }
 
-  shouldComponentUpdate(nextProps,nextState){
+  shouldComponentUpdate(nextProps){
       if (nextProps.courseware == this.props.courseware) {
         return false;
       } else {
@@ -26,7 +25,7 @@ class Courseware extends React.Component {
     this.comeUp();
   }
 
-  componentDidUpdate(prevProps, prevState){
+  componentDidUpdate(){
     if(this.props.courseware.name == "default") this.comeUp();
   }
 
@@ -45,16 +44,16 @@ class Courseware extends React.Component {
       zzz = document.querySelectorAll('#sleep polyline');
       if(!body) return;
       
-    TweenMax.set('svg', { visibility: 'visible' });
-    TweenMax.set(zzz, { opacity: 0 });
-    TweenMax.set(ear, { rotation: 3, transformOrigin: "bottom center" })
+    window.TweenMax.set('svg', { visibility: 'visible' });
+    window.TweenMax.set(zzz, { opacity: 0 });
+    window.TweenMax.set(ear, { rotation: 3, transformOrigin: "bottom center" })
 
     const breathe = () => {
-      const tl = new TimelineMax({});
-      tl.to(body, 1.28, { scaleY: 1.2, transformOrigin: "bottom center", ease: Power1.easeOut }, 'in')
-        .to(body, 1.12, { scaleY: 1, ease: Linear.easeNone }, 'out')
-        .to(head, 1.28, { scaleY: 1.045, transformOrigin: "bottom center", ease: Power1.easeOut }, 'in')
-        .to(head, 1.12, { scaleY: 1, ease: Linear.easeNone }, 'out')
+      const tl = new window.TimelineMax({});
+      tl.to(body, 1.28, { scaleY: 1.2, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
+        .to(body, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
+        .to(head, 1.28, { scaleY: 1.045, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
+        .to(head, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
         .to(ear, 1, { rotation: 7, transformOrigin: "bottom center" }, 'in')
         // Eyes 
         .to(eye, 0.8, { y: 2 }, 'in+=0.32')
@@ -63,15 +62,15 @@ class Courseware extends React.Component {
     }
 
     const earTwitch = () => {
-      const tl = new TimelineMax({});
+      const tl = new window.TimelineMax({});
       // Ear twitch
-      tl.to(ear, 0.16, { y: 1.5, x: -2, ease: Power1.easeIn, transformOrigin: "bottom center", rotation: 15 })
-        .to(ear, 0.16, { y: 0, x: 0, ease: Power1.easeInOut, transformOrigin: "bottom center", rotation: 3 })
+      tl.to(ear, 0.16, { y: 1.5, x: -2, ease: window.Power1.easeIn, transformOrigin: "bottom center", rotation: 15 })
+        .to(ear, 0.16, { y: 0, x: 0, ease: window.Power1.easeInOut, transformOrigin: "bottom center", rotation: 3 })
       return tl;
     }
 
     const earTwitch2 = () => {
-      const tl = new TimelineMax({});
+      const tl = new window.TimelineMax({});
       // Ear twitch2 
       tl.to(ear, 0.12, { y: -0.5, transformOrigin: "bottom center", rotation: 5 })
         .to(ear, 0.12, { y: 0.5, transformOrigin: "bottom center", rotation: 10 })
@@ -82,20 +81,20 @@ class Courseware extends React.Component {
     }
 
     const zzzText = () => {
-      const tl = new TimelineMax({});
+      const tl = new window.TimelineMax({});
       tl.staggerFromTo(zzz, 0.24, { opacity: 0 }, { opacity: 1 }, 0.16)
         .staggerFromTo(zzz, 0.24, { opacity: 1, immediateRender: false }, { opacity: 0 }, 0.16)
       return tl;
     }
 
     const mouthMove = () => {
-      const tl = new TimelineMax({});
+      const tl = new window.TimelineMax({});
       tl.to(mouth, 0.72, { drawSVG: '0% 65%', y: -0.5, transformOrigin: "top center" })
-        .to(mouth, 0.72, { drawSVG: '0% 100%', y: 0, transformOrigin: "top center", ease: Power1.easeOut })
+        .to(mouth, 0.72, { drawSVG: '0% 100%', y: 0, transformOrigin: "top center", ease: window.Power1.easeOut })
       return tl;
     }
 
-    const masterTl = new TimelineMax({ repeat: -1 });
+    const masterTl = new window.TimelineMax({ repeat: -1 });
 
     masterTl
       .add(breathe(), 'start')

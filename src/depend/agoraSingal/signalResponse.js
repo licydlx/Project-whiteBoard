@@ -2,15 +2,15 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-09-06 13:46:16
+ * @LastEditTime: 2019-09-11 12:02:20
  * @LastEditors: Please set LastEditors
  */
 
 const signalResponse = callback => {
     // 缓存
-    if (whiteBoardSignal.session) {
+    if (window.whiteBoardSignal.session) {
         // 用户登出回调
-        whiteBoardSignal.session.onLogout = (reason) => {
+        window.whiteBoardSignal.session.onLogout = (reason) => {
             console.log('用户登出！')
             if (callback) callback({
                 type: 'onLogout',
@@ -19,7 +19,7 @@ const signalResponse = callback => {
         }
 
         // 接收方收到消息时接收方收到的回调
-        whiteBoardSignal.session.onMessageInstantReceive = (account, uid, msg) => {
+        window.whiteBoardSignal.session.onMessageInstantReceive = (account, uid, msg) => {
             console.log('接收方收到消息时接收方收到');
             if (callback) callback({
                 type: 'onMessageInstantReceive',
@@ -29,9 +29,9 @@ const signalResponse = callback => {
     }
 
     // 频道
-    if (whiteBoardSignal.channel) {
+    if (window.whiteBoardSignal.channel) {
         // 离开频道回调
-        whiteBoardSignal.channel.onChannelLeaved = (account, uid) => {
+        window.whiteBoardSignal.channel.onChannelLeaved = (account, uid) => {
             console.log('离开频道！')
             if (callback) callback({
                 type: 'onChannelLeaved',
@@ -40,7 +40,7 @@ const signalResponse = callback => {
         }
 
         // 接受频道广播消息
-        whiteBoardSignal.channel.onMessageChannelReceive = (account, uid, msg) => {
+        window.whiteBoardSignal.channel.onMessageChannelReceive = (account, uid, msg) => {
             console.log('接受频道广播消息');
             console.log(account);
             console.log(uid);
@@ -52,7 +52,7 @@ const signalResponse = callback => {
         }
 
         // 其他用户离开频道回调
-        whiteBoardSignal.channel.onChannelUserLeaved = (account, uid) => {
+        window.whiteBoardSignal.channel.onChannelUserLeaved = (account, uid) => {
             console.log('其他用户离开频道');
             if (callback) callback({
                 type: 'onChannelUserLeaved',
@@ -61,7 +61,7 @@ const signalResponse = callback => {
         }
 
         // 其他用户加入频道回调
-        whiteBoardSignal.channel.onChannelUserJoined = (account, uid) => {
+        window.whiteBoardSignal.channel.onChannelUserJoined = (account, uid) => {
             console.log('其他用户加入频道');
             if (callback) callback({
                 type: 'onChannelUserJoined',
@@ -70,7 +70,7 @@ const signalResponse = callback => {
         }
 
         // 获取频道内用户列表回调
-        whiteBoardSignal.channel.onChannelUserList = (users) => {
+        window.whiteBoardSignal.channel.onChannelUserList = (users) => {
             console.log('获取频道内用户列表');
             console.log(users);
             if (callback) callback({
@@ -80,7 +80,7 @@ const signalResponse = callback => {
         }
 
         // 频道属性发生变化回调
-        whiteBoardSignal.channel.onChannelAttrUpdated = (name, value, type) => {
+        window.whiteBoardSignal.channel.onChannelAttrUpdated = (name, value, type) => {
             console.log('频道属性发生变化！')
             if (callback) callback({
                 type: 'onChannelAttrUpdated',

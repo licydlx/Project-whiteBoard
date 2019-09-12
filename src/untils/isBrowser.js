@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-29 16:15:34
- * @LastEditTime: 2019-08-29 16:23:36
+ * @LastEditTime: 2019-09-12 10:15:55
  * @LastEditors: Please set LastEditors
  */
 const isBrowser = () => {
@@ -33,8 +33,7 @@ const isBrowser = () => {
             return "IE11";
         } else {
             return "0";
-        }//IE版本过低
-        return "IE";
+        }
     }
     if (isOpera) {
         return "Opera";
@@ -51,7 +50,6 @@ const isBrowser = () => {
     if (isChrome) {
         return "Chrome";
     }
-    
 }
 
 export default isBrowser;
