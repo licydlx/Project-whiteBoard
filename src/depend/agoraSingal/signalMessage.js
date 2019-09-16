@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-16 11:35:24
+ * @LastEditTime: 2019-09-16 18:29:38
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -12,21 +12,22 @@ function signalMessage() {
         console.log('⛈🌪🌫🌬🌚')
         console.log('白板 will dispatch', action)
         console.log('☔🐟🐒🐬☔')
-        // 回放为真时 画板逻辑
+        
         if (SignalData.playback) {
+            // 回放为真时 画板逻辑
             switch (action.type) {
                 // 课件通信，声网信令传输 
                 case "CHILD_MESSAGE_BOX":
                     window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: action.data.type, handleData: action.data.handleData }));
                     break;
             }
-        }
-
-        // 不是回放 才存储
-        if (!SignalData.playback) {
+        } else {
+            // 不是回放 才存储
+            
             // localStorage 存储 actions
             switch (action.type) {
                 case "BOARD_SHOW_TOOLBAR":              // 老师显示画板工具栏
+                case "BOARD_HIDE_TOOLBAR":
                 case "SWITCHBOX_SHOW_SWITCHBAR":        // 老师显示切换工具栏 
                 case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
                 case "BOARD_REDUCE_TOOLBAR":
@@ -61,6 +62,7 @@ function signalMessage() {
                 case "SWITCHBOX_SHOW_SWITCHBAR":
                 case "SWITCHBOX_FULL_SCREEN":
                 case "BOARD_SHOW_TOOLBAR":
+                case "BOARD_HIDE_TOOLBAR":
                 case "BOARD_REDUCE_TOOLBAR":
                     break;
                 default:
@@ -74,7 +76,6 @@ function signalMessage() {
             SignalData.broadcast = true;
             SignalData.playback = false;
         }
-
         // 调用 middleware 链中下一个 middleware 的 dispatch。
         let returnValue = next(action)
         return returnValue

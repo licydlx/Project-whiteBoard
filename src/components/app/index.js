@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-16 14:15:54
+ * @LastEditTime: 2019-09-16 18:20:50
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -32,6 +32,8 @@ class App extends React.Component {
     window.coursewareCurPage = 1;
 
     new vConsole();
+
+    this.sigValue = false;
   }
 
   createInstance(data) {
@@ -237,13 +239,12 @@ class App extends React.Component {
       // 功能：1.白板：画板工具栏 显示与隐藏   2.白板：课件显示 配置
       // ----------------- 
       if (msg.sigType) {
-        // 设置是否信令广播
-        SignalData.broadcast = false;
-
         let name, link, uid;
         switch (msg.sigType) {
           /*课件*/
           case 'showCourseware':
+            // 设置是否信令广播
+            SignalData.broadcast = false;
             name = msg.sigValue.value ? "html5" : "default";
             link = msg.sigValue.value ? msg.sigValue.link : '';
 
@@ -260,7 +261,8 @@ class App extends React.Component {
           /*画板操作*/
           case 'showBrush':
             uid = msg.sigUid + 'A';
-            if (SignalData.account == uid && SignalData.role == '2') {
+            if (SignalData.account == uid && SignalData.role == 2) {
+              SignalData.broadcast = false;
               msg.sigValue.value ? this.props.dispatch(showToolbar()) : this.props.dispatch(hideToolbar())
             }
             break;
@@ -344,7 +346,7 @@ class App extends React.Component {
       // appId:"7344c75464964565a3515963ec9298ff",
       role: ran,
       uid: ran + "1",
-      channel: "2125514557",
+      channel: "123",
       canDraw: true
     }
 
@@ -380,15 +382,18 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+        link: "https://www.kunqu.tech/test/"
       },
     }));
   }
 
   authorization(){
+    this.sigValue = this.sigValue ? false : true;
     window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      action:{
-        type:"BOARD_SHOW_TOOLBAR"
+      sigType:"showBrush",
+      sigUid:"21",
+      sigValue:  {
+        value: this.sigValue
       }
     }));
   }
