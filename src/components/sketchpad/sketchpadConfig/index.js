@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 14:02:49
- * @LastEditTime: 2019-09-12 09:27:46
+ * @LastEditTime: 2019-09-16 14:39:35
  * @LastEditors: Please set LastEditors
  */
 // eslint-disable-next-line no-unused-vars
@@ -22,7 +22,7 @@ const penConfig = {
   },
   penShape: {
     name: 'penShape',
-    value: ['line', 'ellipse', 'rectangle',''],
+    value: ['line', 'ellipse', 'rectangle'],
   },
   shapeImg: {
     'line': 'https://res.miaocode.com/livePlatform/soundNetwork/images/pathdouble.png',
@@ -69,7 +69,7 @@ const uiTemplate = (pars, name) => (
 
         case 'penShape':
             return <div key={i} className={`${name}Box ${v == pars.config[name] ? 'active' : ''}`} onClick={() => pars.changePenShape({name:pars.config.name, penShape:v})}>
-              <img className={name} style={{ display: `${penConfig.shapeImg[v] ? "block" : "none"}` }} src={`${penConfig.shapeImg[v]}`} />
+                <img className={name} style={{ display: `${penConfig.shapeImg[v] ? "block" : "none"}` }} src={`${penConfig.shapeImg[v]}`} />
             </div>;
 
         default:

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-09-04 10:20:54
+ * @LastEditTime: 2019-09-16 11:24:12
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -115,6 +115,19 @@ export const removeCreated = ({ created }) => ({
 // =============
 // 切页区
 // =============
+
+// 初始值
+export const goDefaultState = () => ({
+  type: 'SWITCHBOX_GO_DEFAULT_VALUE',
+  id: id++,
+  show: false,
+  prevPage: 1,
+  curPage: 1,
+  toPage: "1",
+  totalPage: 1,
+  fullScreen: false
+})
+
 
 // 去上一页
 export const goPrevPage = ({ page }) => ({

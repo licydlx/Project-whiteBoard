@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-12 12:01:52
+ * @LastEditTime: 2019-09-16 11:43:53
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -16,7 +16,6 @@ class SwitchBox extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar,childMessageBox } = { ...this.props };
-
     if (this.props.switchBox == nextProps.switchBox) {
       return false;
     } else {

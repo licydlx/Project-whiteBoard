@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-11 12:01:46
+ * @LastEditTime: 2019-09-16 11:35:24
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -30,13 +30,16 @@ function signalMessage() {
                 case "SWITCHBOX_SHOW_SWITCHBAR":        // 老师显示切换工具栏 
                 case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
                 case "BOARD_REDUCE_TOOLBAR":
+                case "SWITCHBOX_GO_DEFAULT_VALUE":      // 初始化切换值
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
                     if (Object.is(action.name, "html5") && action.link) {
                         window.ACTIONS_database.length().then((numberOfKeys) => {
                             if (numberOfKeys > 0) {
                                 window.ACTIONS_database.key(0).then(keyName => {
-                                    if (!keyName) actionDataSave(action);
+                                    if (!keyName){
+                                        actionDataSave(action);
+                                    } 
                                 })
                             } else {
                                 actionDataSave(action);

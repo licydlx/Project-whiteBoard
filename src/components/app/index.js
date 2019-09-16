@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-12 18:07:58
+ * @LastEditTime: 2019-09-16 14:15:54
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -16,7 +16,7 @@ import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage } from '../../actions';
+import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage,goDefaultState} from '../../actions';
 import setZoom from '../../untils/setZoom';
 import isBrowser from '../../untils/isBrowser';
 
@@ -246,9 +246,15 @@ class App extends React.Component {
           case 'showCourseware':
             name = msg.sigValue.value ? "html5" : "default";
             link = msg.sigValue.value ? msg.sigValue.link : '';
-            if (link && link == SignalData.coursewareLink) return;
-            if (link) SignalData.coursewareLink = link;
+
+            if(link){
+              SignalData.coursewareLink = link;
+            } else {
+              this.props.dispatch(goDefaultState());
+            }
+
             this.props.dispatch(switchType({ name, link }));
+            
             break;
 
           /*画板操作*/
@@ -374,7 +380,7 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://www.kunqu.tech/test/"
+        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
       },
     }));
   }

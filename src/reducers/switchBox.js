@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-08-28 18:19:57
+ * @LastEditTime: 2019-09-16 11:29:55
  * @LastEditors: Please set LastEditors
  */
 
@@ -14,6 +14,10 @@ const switchBox = (state = defaultState, action) => {
     // 切换显示状态
     case 'SWITCHBOX_SHOW_SWITCHBAR':
       return { ...state, show: action.show ? false : true }
+
+    // 值初始化
+    case 'SWITCHBOX_GO_DEFAULT_VALUE':
+      return { ...state, ...defaultState };
 
     // 上一页
     case 'SWITCHBOX_GO_PREVPAGE':
@@ -29,12 +33,12 @@ const switchBox = (state = defaultState, action) => {
     case 'SWITCHBOX_GO_HANDLE_KEYDOWN':
       switch (action.code) {
         case "Enter":
-          if(parseInt(state.toPage) < action.totalPage + 1 && parseInt(state.toPage) > 0){
+          if (parseInt(state.toPage) < action.totalPage + 1 && parseInt(state.toPage) > 0) {
             return { ...state, prevPage: state.curPage, curPage: parseInt(state.toPage) }
           } else {
             return state;
           }
-          
+
         case "Backspace":
           // delete 键盘删去
           return { ...state, toPage: action.toPage.slice(0, -1) }
