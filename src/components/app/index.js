@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-16 18:20:50
+ * @LastEditTime: 2019-09-17 18:25:47
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -16,7 +16,7 @@ import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage,goDefaultState} from '../../actions';
+import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, goDefaultState } from '../../actions';
 import setZoom from '../../untils/setZoom';
 import isBrowser from '../../untils/isBrowser';
 
@@ -68,9 +68,9 @@ class App extends React.Component {
   // 加入声网频道成功
   // ====================
   joinChannelSuccess() {
-   // 初始化本地数据库
+    // 初始化本地数据库
     this.createInstance([{ storeName: "PAGE", description: "页面state缓存" }, { storeName: "BOARD", description: "画板缓存" }, { storeName: "ACTIONS", description: "actions缓存" }]);
-    
+
     // 如果是老师 显示 画板工具栏 切页栏
     if (SignalData.role === 0) {
       this.props.dispatch(showToolbar());
@@ -141,7 +141,7 @@ class App extends React.Component {
                     }).then(() => {
                       console.log("回放完成！")
                     })
-                    
+
                   })
                 }).catch((err) => {
                   console.log(err);
@@ -238,6 +238,19 @@ class App extends React.Component {
       // 描述：客户端信令广播 -- 白板执行
       // 功能：1.白板：画板工具栏 显示与隐藏   2.白板：课件显示 配置
       // ----------------- 
+
+      if (msg.type) {
+        switch (msg.type) {
+          case "COURSEWARE_PDF":
+            SignalData.broadcast = false;
+            this.props.dispatch(switchType({ ...msg.handleData }));
+            break;
+
+          default:
+            break;
+        }
+      }
+
       if (msg.sigType) {
         let name, link, uid;
         switch (msg.sigType) {
@@ -248,14 +261,14 @@ class App extends React.Component {
             name = msg.sigValue.value ? "html5" : "default";
             link = msg.sigValue.value ? msg.sigValue.link : '';
 
-            if(link){
+            if (link) {
               SignalData.coursewareLink = link;
             } else {
               this.props.dispatch(goDefaultState());
             }
 
             this.props.dispatch(switchType({ name, link }));
-            
+
             break;
 
           /*画板操作*/
@@ -387,17 +400,29 @@ class App extends React.Component {
     }));
   }
 
-  authorization(){
+  showPDF() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      type: "COURSEWARE_PDF",
+      handleData: {
+        name: "pdf",
+        ratio: 4 / 3,
+        link: "http://res.miaocode.com/livePlatform/pdf/wxmg.pdf"
+      },
+    }));
+  }
+
+
+  authorization() {
     this.sigValue = this.sigValue ? false : true;
     window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      sigType:"showBrush",
-      sigUid:"21",
-      sigValue:  {
+      sigType: "showBrush",
+      sigUid: "21",
+      sigValue: {
         value: this.sigValue
       }
     }));
   }
-  
+
   clearCache() {
     window.ACTIONS_database.clear();
     window.BOARD_database.clear();
@@ -409,6 +434,7 @@ class App extends React.Component {
       <WhiteBoard />
       <div className="test showDefault" onClick={() => this.showDefault()}>默认白板</div>
       <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
+      <div className="test showPDF" onClick={() => this.showPDF()}>PDF课件</div>
       <div className="test authorization" onClick={() => this.authorization()}>授权</div>
       <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div>
       <div> </div>

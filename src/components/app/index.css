@@ -47,12 +47,18 @@ body {
     left: 320px;
 }
 
+/* 显示PDF课件 */
+.showPDF {
+   left: 440px; 
+}
+
+
 /* 授权 */
 .authorization {
-    left: 440px;
+    left: 560px;
 }
 
 /* 清除indexedDB缓存 */
 .clearCache {
-    left: 560px;
+    left: 680px;
 }

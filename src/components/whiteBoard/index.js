@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-12 18:36:52
+ * @LastEditTime: 2019-09-17 17:30:41
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,9 +15,11 @@ import SwitchBox from '../../containers/switchBox';
 import Courseware from '../../containers/courseware';
 import MaskLayer from '../../containers/maskLayer';
 
-import compar169 from '../../untils/compar169';
-const { width, height} = { ...compar169() };
+import ratio from '../../untils/ratio';
+const { width, height} = { ...ratio(16/9) };
 
+console.log(width);
+console.log(height);
 const WhiteBoard = () => (
   <div id="whiteBoard" className="whiteBoard" style={{ width: `${width}`, height: `${height}` }}>
     <Courseware />

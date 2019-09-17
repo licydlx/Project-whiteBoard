@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-01 14:19:46
- * @LastEditTime: 2019-09-11 12:07:39
+ * @LastEditTime: 2019-09-17 16:32:50
  * @LastEditors: Please set LastEditors
  */
 const path = require('path');
@@ -33,11 +33,16 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+        test: /\.(pdf|png|svg|jpg|gif)$/,
         use: [
           'file-loader'
         ]
-      }
+      },
+      {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        use: 'babel-loader',
+      },
     ]
   },
   plugins: [

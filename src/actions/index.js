@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-09-16 11:24:12
+ * @LastEditTime: 2019-09-17 17:57:05
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -173,11 +173,12 @@ export const fullscreen = () => ({
 // =============
 
 // 切换不同类型的课件 
-export const switchType = ({ name, link }) => ({
+export const switchType = ({ name, link , ratio}) => ({
   type: 'COURSEWARE_SWITCH_TYPE',
   id: id++,
   name,
-  link
+  link,
+  ratio
 })
 
 // 课件 message 包装

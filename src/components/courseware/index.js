@@ -2,11 +2,14 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-11 11:50:41
+ * @LastEditTime: 2019-09-17 18:21:17
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
 import './index.css';
+// eslint-disable-next-line no-unused-vars
+import PDF from 'react-pdf-js';
+import ratio from '../../untils/ratio';
 
 class Courseware extends React.Component {
   constructor(props) {
@@ -17,6 +20,13 @@ class Courseware extends React.Component {
       if (nextProps.courseware == this.props.courseware) {
         return false;
       } else {
+        let {width} = { ...ratio(4/3) };
+        switch (nextProps.courseware.name) {
+          case "pdf":
+            this.scale = parseFloat(width)/720;
+            break;
+        }
+
         return true;
       }
   }
@@ -26,7 +36,10 @@ class Courseware extends React.Component {
   }
 
   componentDidUpdate(){
-    if(this.props.courseware.name == "default") this.comeUp();
+    if(this.props.courseware.name == "default"){
+      this.comeUp();
+    } 
+
   }
 
   // 使默认封面熊猫动起来
@@ -115,6 +128,17 @@ class Courseware extends React.Component {
         return <iframe id="coursewareIframe" className="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" src={courseware.link}>
           <p>Your browser does not support iframes.</p>
         </iframe>
+
+      case "pdf":
+          return  <div>
+              <PDF
+                file="http://res.miaocode.com/livePlatform/pdf/wxmg.pdf"
+                page={2}
+                scale={this.scale}
+              />
+            </div>
+          
+
       case "default":
         // 默认原始封面
         // return <div>

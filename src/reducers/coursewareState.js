@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 13:33:26
- * @LastEditTime: 2019-09-04 18:50:55
+ * @LastEditTime: 2019-09-17 18:15:04
  * @LastEditors: Please set LastEditors
  */
 
@@ -16,5 +16,6 @@
 
 export default {
   name: "default",
-  link: ""
+  link: "",
+  ratio:16/9
 }

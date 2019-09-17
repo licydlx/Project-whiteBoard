@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-05-10 11:47:38
- * @LastEditTime: 2019-09-17 17:29:18
+ * @LastEditTime: 2019-09-17 17:31:23
  * @LastEditors: Please set LastEditors
  */
 import visualArea from './visualArea';
