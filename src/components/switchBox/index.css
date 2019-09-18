@@ -7,7 +7,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  z-index: 4;
+  z-index: 99;
   width: 140px;
   height: 32px;
   background: rgba(0, 0, 0, .5);

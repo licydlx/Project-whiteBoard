@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-09-16 11:29:55
+ * @LastEditTime: 2019-09-18 15:38:43
  * @LastEditors: Please set LastEditors
  */
 
@@ -21,12 +21,12 @@ const switchBox = (state = defaultState, action) => {
 
     // 上一页
     case 'SWITCHBOX_GO_PREVPAGE':
-      newPage = action.page > 1 ? action.page - 1 : action.page
+      newPage = state.curPage > 1 ? state.curPage - 1 : state.curPage;
       return { ...state, curPage: newPage, toPage: newPage + "" }
 
     // 下一页
     case 'SWITCHBOX_GO_NEXTPAGE':
-      newPage = action.page < state.totalPage ? action.page + 1 : action.page;
+      newPage = state.curPage < state.totalPage ? state.curPage + 1 : state.curPage;
       return { ...state, curPage: newPage, toPage: newPage + "" }
 
     // 键盘侠
@@ -42,6 +42,10 @@ const switchBox = (state = defaultState, action) => {
         case "Backspace":
           // delete 键盘删去
           return { ...state, toPage: action.toPage.slice(0, -1) }
+
+        case "Focus":
+          // focus 清空 
+          return { ...state, toPage: ""}
         default:
           return { ...state, toPage: action.toPage }
       }

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-09-16 11:25:00
+ * @LastEditTime: 2019-09-18 15:08:09
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
@@ -16,9 +16,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  goPrevPage: par => dispatch(goPrevPage(par)),
+  goPrevPage: () => dispatch(goPrevPage()),
+  goNextPage: () => dispatch(goNextPage()),
   goHandleKeydown: (par) => dispatch(goHandleKeydown(par)),
-  goNextPage: (par) => dispatch(goNextPage(par)),
   fullscreen: () => dispatch(fullscreen()),
 
   switchToolbar: par => dispatch(switchToolbar(par)),

@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-17 17:30:41
+ * @LastEditTime: 2019-09-18 11:49:00
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -14,7 +14,7 @@ import Sketchpad from '../../containers/sketchpad';
 import SwitchBox from '../../containers/switchBox';
 import Courseware from '../../containers/courseware';
 import MaskLayer from '../../containers/maskLayer';
-
+import Loading from '../../containers/loading';
 import ratio from '../../untils/ratio';
 const { width, height} = { ...ratio(16/9) };
 
@@ -26,7 +26,8 @@ const WhiteBoard = () => (
     <Sketchpad />
     <SwitchBox />
     <MaskLayer />
-  </div >
+    <Loading />
+  </div>
 )
 
 export default WhiteBoard;

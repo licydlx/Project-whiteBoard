@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 18:02:22
- * @LastEditTime: 2019-09-11 12:02:20
+ * @LastEditTime: 2019-09-18 15:47:36
  * @LastEditors: Please set LastEditors
  */
 
@@ -42,9 +42,6 @@ const signalResponse = callback => {
         // 接受频道广播消息
         window.whiteBoardSignal.channel.onMessageChannelReceive = (account, uid, msg) => {
             console.log('接受频道广播消息');
-            console.log(account);
-            console.log(uid);
-            console.log(msg);
             if (callback) callback({
                 type: 'onMessageChannelReceive',
                 data: { account, uid, msg }
@@ -72,7 +69,6 @@ const signalResponse = callback => {
         // 获取频道内用户列表回调
         window.whiteBoardSignal.channel.onChannelUserList = (users) => {
             console.log('获取频道内用户列表');
-            console.log(users);
             if (callback) callback({
                 type: 'onChannelUserList',
                 data: { users }

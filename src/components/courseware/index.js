@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-17 18:21:17
+ * @LastEditTime: 2019-09-18 18:44:21
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -17,18 +17,18 @@ class Courseware extends React.Component {
   }
 
   shouldComponentUpdate(nextProps){
-      if (nextProps.courseware == this.props.courseware) {
-        return false;
-      } else {
-        let {width} = { ...ratio(4/3) };
-        switch (nextProps.courseware.name) {
-          case "pdf":
-            this.scale = parseFloat(width)/720;
-            break;
-        }
+    if (nextProps.courseware.name !== this.props.courseware.name || nextProps.courseware.link !== this.props.courseware.link
+      || nextProps.switchBox.curPage !== this.props.switchBox.curPage) {
 
-        return true;
+      switch (nextProps.courseware.name) {
+        case "pdf":
+          this.scale = parseFloat(ratio(4/3).width)/720;
+          break;
       }
+      return true;  
+    } else {
+      return false;
+    }
   }
 
   componentDidMount() {
@@ -36,93 +36,26 @@ class Courseware extends React.Component {
   }
 
   componentDidUpdate(){
-    if(this.props.courseware.name == "default"){
-      this.comeUp();
-    } 
-
+    let { courseware } = {...this.props};
+    switch (courseware.name) {
+      case "default":
+        this.props.goDefaultState();
+        this.comeUp();
+        break; 
+      default:
+        break;
+    }
   }
 
-  // 使默认封面熊猫动起来
-  comeUp(){
-  // 星球封面
-    // let scene = document.getElementById('scene');
-    // let parallax = new Parallax(scene);
-
-    // https://dribbble.com/shots/3084995-Fluent-Panda
-    const body = document.querySelector('#body'),
-      head = document.querySelector('#head'),
-      mouth = document.querySelector('#mouth'),
-      eye = document.querySelector('#eyeTop'),
-      ear = document.querySelector('#ear'),
-      zzz = document.querySelectorAll('#sleep polyline');
-      if(!body) return;
-      
-    window.TweenMax.set('svg', { visibility: 'visible' });
-    window.TweenMax.set(zzz, { opacity: 0 });
-    window.TweenMax.set(ear, { rotation: 3, transformOrigin: "bottom center" })
-
-    const breathe = () => {
-      const tl = new window.TimelineMax({});
-      tl.to(body, 1.28, { scaleY: 1.2, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
-        .to(body, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
-        .to(head, 1.28, { scaleY: 1.045, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
-        .to(head, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
-        .to(ear, 1, { rotation: 7, transformOrigin: "bottom center" }, 'in')
-        // Eyes 
-        .to(eye, 0.8, { y: 2 }, 'in+=0.32')
-        .to(eye, 0.8, { y: 0 }, 'in+=1.28')
-      return tl;
+  onDocumentComplete (pages){
+    if(pages > 0){
+      this.props.setTotalPage({totalPage:pages});
+      this.props.loadingSwitch({show:false});
     }
-
-    const earTwitch = () => {
-      const tl = new window.TimelineMax({});
-      // Ear twitch
-      tl.to(ear, 0.16, { y: 1.5, x: -2, ease: window.Power1.easeIn, transformOrigin: "bottom center", rotation: 15 })
-        .to(ear, 0.16, { y: 0, x: 0, ease: window.Power1.easeInOut, transformOrigin: "bottom center", rotation: 3 })
-      return tl;
-    }
-
-    const earTwitch2 = () => {
-      const tl = new window.TimelineMax({});
-      // Ear twitch2 
-      tl.to(ear, 0.12, { y: -0.5, transformOrigin: "bottom center", rotation: 5 })
-        .to(ear, 0.12, { y: 0.5, transformOrigin: "bottom center", rotation: 10 })
-        .to(ear, 0.12, { y: -0.5, transformOrigin: "bottom center", rotation: 5 })
-        .to(ear, 0.12, { y: 0.5, transformOrigin: "bottom center", rotation: 10 })
-        .to(ear, 0.24, { y: 0, transformOrigin: "bottom center", rotation: 7 })
-      return tl;
-    }
-
-    const zzzText = () => {
-      const tl = new window.TimelineMax({});
-      tl.staggerFromTo(zzz, 0.24, { opacity: 0 }, { opacity: 1 }, 0.16)
-        .staggerFromTo(zzz, 0.24, { opacity: 1, immediateRender: false }, { opacity: 0 }, 0.16)
-      return tl;
-    }
-
-    const mouthMove = () => {
-      const tl = new window.TimelineMax({});
-      tl.to(mouth, 0.72, { drawSVG: '0% 65%', y: -0.5, transformOrigin: "top center" })
-        .to(mouth, 0.72, { drawSVG: '0% 100%', y: 0, transformOrigin: "top center", ease: window.Power1.easeOut })
-      return tl;
-    }
-
-    const masterTl = new window.TimelineMax({ repeat: -1 });
-
-    masterTl
-      .add(breathe(), 'start')
-      .add(zzzText(), 'start+=1.60')
-      .add(earTwitch2(), 'start+=2.4')
-      .add(breathe(), 'start+=3.12')
-      .add(zzzText(), 'start+=4.72')
-      .add(mouthMove(), 'start+=5.82')
-      .add(breathe(), 'start+=6.12')
-      .add(zzzText(), 'start+=7.72')
-      .add(earTwitch(), 'start+=7.24')
-    //GSDevTools.create();
   }
 
-  pretab(courseware) {
+  pretab() {
+    let {courseware,switchBox} = {...this.props};
     switch (courseware.name) {
       case "html5":
         return <iframe id="coursewareIframe" className="coursewareIframe" title="课件iframe" name="coursewareIframe" allow="autoplay" frameBorder="0" scrolling="no" src={courseware.link}>
@@ -130,15 +63,15 @@ class Courseware extends React.Component {
         </iframe>
 
       case "pdf":
-          return  <div>
+          return  <div id="pdfBox" className="pdfBox">
               <PDF
-                file="http://res.miaocode.com/livePlatform/pdf/wxmg.pdf"
-                page={2}
+                file={courseware.link}
+                onDocumentComplete={this.onDocumentComplete.bind(this)}
+                page={switchBox.curPage}
                 scale={this.scale}
               />
             </div>
           
-
       case "default":
         // 默认原始封面
         // return <div>
@@ -229,9 +162,89 @@ class Courseware extends React.Component {
 
   render() {
     return <div id="courseware" className="courseware">
-      {this.pretab(this.props.courseware)}
+      {this.pretab()}
     </div >
   }
+  
+    // 使默认封面熊猫动起来
+    comeUp(){
+      // 星球封面
+        // let scene = document.getElementById('scene');
+        // let parallax = new Parallax(scene);
+    
+        // https://dribbble.com/shots/3084995-Fluent-Panda
+        const body = document.querySelector('#body'),
+          head = document.querySelector('#head'),
+          mouth = document.querySelector('#mouth'),
+          eye = document.querySelector('#eyeTop'),
+          ear = document.querySelector('#ear'),
+          zzz = document.querySelectorAll('#sleep polyline');
+          if(!body) return;
+          
+        window.TweenMax.set('svg', { visibility: 'visible' });
+        window.TweenMax.set(zzz, { opacity: 0 });
+        window.TweenMax.set(ear, { rotation: 3, transformOrigin: "bottom center" })
+    
+        const breathe = () => {
+          const tl = new window.TimelineMax({});
+          tl.to(body, 1.28, { scaleY: 1.2, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
+            .to(body, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
+            .to(head, 1.28, { scaleY: 1.045, transformOrigin: "bottom center", ease: window.Power1.easeOut }, 'in')
+            .to(head, 1.12, { scaleY: 1, ease: window.Linear.easeNone }, 'out')
+            .to(ear, 1, { rotation: 7, transformOrigin: "bottom center" }, 'in')
+            // Eyes 
+            .to(eye, 0.8, { y: 2 }, 'in+=0.32')
+            .to(eye, 0.8, { y: 0 }, 'in+=1.28')
+          return tl;
+        }
+    
+        const earTwitch = () => {
+          const tl = new window.TimelineMax({});
+          // Ear twitch
+          tl.to(ear, 0.16, { y: 1.5, x: -2, ease: window.Power1.easeIn, transformOrigin: "bottom center", rotation: 15 })
+            .to(ear, 0.16, { y: 0, x: 0, ease: window.Power1.easeInOut, transformOrigin: "bottom center", rotation: 3 })
+          return tl;
+        }
+    
+        const earTwitch2 = () => {
+          const tl = new window.TimelineMax({});
+          // Ear twitch2 
+          tl.to(ear, 0.12, { y: -0.5, transformOrigin: "bottom center", rotation: 5 })
+            .to(ear, 0.12, { y: 0.5, transformOrigin: "bottom center", rotation: 10 })
+            .to(ear, 0.12, { y: -0.5, transformOrigin: "bottom center", rotation: 5 })
+            .to(ear, 0.12, { y: 0.5, transformOrigin: "bottom center", rotation: 10 })
+            .to(ear, 0.24, { y: 0, transformOrigin: "bottom center", rotation: 7 })
+          return tl;
+        }
+    
+        const zzzText = () => {
+          const tl = new window.TimelineMax({});
+          tl.staggerFromTo(zzz, 0.24, { opacity: 0 }, { opacity: 1 }, 0.16)
+            .staggerFromTo(zzz, 0.24, { opacity: 1, immediateRender: false }, { opacity: 0 }, 0.16)
+          return tl;
+        }
+    
+        const mouthMove = () => {
+          const tl = new window.TimelineMax({});
+          tl.to(mouth, 0.72, { drawSVG: '0% 65%', y: -0.5, transformOrigin: "top center" })
+            .to(mouth, 0.72, { drawSVG: '0% 100%', y: 0, transformOrigin: "top center", ease: window.Power1.easeOut })
+          return tl;
+        }
+    
+        const masterTl = new window.TimelineMax({ repeat: -1 });
+    
+        masterTl
+          .add(breathe(), 'start')
+          .add(zzzText(), 'start+=1.60')
+          .add(earTwitch2(), 'start+=2.4')
+          .add(breathe(), 'start+=3.12')
+          .add(zzzText(), 'start+=4.72')
+          .add(mouthMove(), 'start+=5.82')
+          .add(breathe(), 'start+=6.12')
+          .add(zzzText(), 'start+=7.72')
+          .add(earTwitch(), 'start+=7.24')
+        //GSDevTools.create();
+      }
 }
 
 // const pretab = (courseware) => {

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-16 11:43:53
+ * @LastEditTime: 2019-09-18 15:43:55
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -111,25 +111,23 @@ class SwitchBox extends React.Component {
     }
   }
 
-  goHandleChange() { }
+  goHandleChange() {}
+
+  goHandleFocus(){
+    const { goHandleKeydown } = { ...this.props };
+    goHandleKeydown({
+      code: "Focus",
+    });
+  }
 
   // 上一页中间函数
   goPrevMiddle() {
-    const { switchBox, goPrevPage } = { ...this.props };
-    if (switchBox.curPage === 1) return;
-    goPrevPage({
-      page: switchBox.curPage,
-    })
+    this.props.goPrevPage()
   }
 
   // 下一页中间函数
   goNextMiddle() {
-    const { switchBox, goNextPage } = { ...this.props };
-    if (switchBox.curPage === switchBox.totalPage) return;
-    goNextPage({
-      page: switchBox.curPage,
-      totalPage: switchBox.totalPage
-    });
+    this.props.goNextPage();
   }
 
   render() {
@@ -141,7 +139,7 @@ class SwitchBox extends React.Component {
       </div>
 
       <div onKeyDown={this.goChooseDown.bind(this)}>
-        <input className='towardsPage' type='text' maxLength='2' value={switchBox.toPage} onChange={this.goHandleChange} />
+        <input className='towardsPage' type='text' maxLength='2' value={switchBox.toPage} onChange={this.goHandleChange} onFocus={this.goHandleFocus.bind(this)} />
       </div>
 
       <div className='totalPage'>/{switchBox.totalPage} </div>

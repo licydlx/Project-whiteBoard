@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-01 14:20:00
- * @LastEditTime: 2019-09-17 16:44:24
+ * @LastEditTime: 2019-09-18 11:17:30
  * @LastEditors: Please set LastEditors
  */
 // eslint-disable-next-line no-unused-vars
@@ -16,8 +16,6 @@ import { createStore, applyMiddleware } from 'redux';
 
 // eslint-disable-next-line no-unused-vars
 import App from './containers/App'
-// eslint-disable-next-line no-unused-vars
-import Sample from './components/pdf/index'
 
 import rootReducer from './reducers'
 import signalMessage from './depend/agoraSingal/signalMessage'
@@ -55,7 +53,6 @@ render(
   <ErrorBoundary>
     <Provider store={store}>
       <App />
-      {/* <Sample /> */}
     </Provider>
   </ErrorBoundary>,
   document.getElementById('root')

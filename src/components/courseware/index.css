@@ -16,6 +16,10 @@
     height: 100%
 }
 
+.pdfBox {
+  background-image: linear-gradient(to right , #17507d, #c03f3c);
+}
+
 /* 默认原始封面 */
 /* .default {
     display: flex;

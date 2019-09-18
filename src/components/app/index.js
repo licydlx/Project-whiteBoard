@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-17 18:25:47
+ * @LastEditTime: 2019-09-18 19:00:27
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -16,9 +16,11 @@ import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, goDefaultState } from '../../actions';
+import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, loadingSwitch } from '../../actions';
 import setZoom from '../../untils/setZoom';
 import isBrowser from '../../untils/isBrowser';
+
+import { clientMessageADP } from '../../untils/adapter';
 
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
 
@@ -34,6 +36,7 @@ class App extends React.Component {
     new vConsole();
 
     this.sigValue = false;
+    this.loading = false;
   }
 
   createInstance(data) {
@@ -238,46 +241,36 @@ class App extends React.Component {
       // 描述：客户端信令广播 -- 白板执行
       // 功能：1.白板：画板工具栏 显示与隐藏   2.白板：课件显示 配置
       // ----------------- 
-
-      if (msg.type) {
-        switch (msg.type) {
-          case "COURSEWARE_PDF":
+      if (msg.sigType) {
+        let action = clientMessageADP(msg);
+        switch (action.type) {
+          case "COURSEWARE_SHOW":
+            if (action.handleData.link) {
+              SignalData.coursewareLink = action.handleData.link;
+            }
+            
             SignalData.broadcast = false;
-            this.props.dispatch(switchType({ ...msg.handleData }));
+            this.props.dispatch(switchType({ ...action.handleData }));
             break;
 
+          case "BOARD_TOOLBAR":
+            if (SignalData.account == action.handleData.account && SignalData.role == 2) {
+              SignalData.broadcast = false;
+              action.handleData.show ? this.props.dispatch(showToolbar()) : this.props.dispatch(hideToolbar())
+            }
+            break;
           default:
             break;
         }
       }
 
-      if (msg.sigType) {
-        let name, link, uid;
-        switch (msg.sigType) {
-          /*课件*/
-          case 'showCourseware':
-            // 设置是否信令广播
-            SignalData.broadcast = false;
-            name = msg.sigValue.value ? "html5" : "default";
-            link = msg.sigValue.value ? msg.sigValue.link : '';
-
-            if (link) {
-              SignalData.coursewareLink = link;
-            } else {
-              this.props.dispatch(goDefaultState());
-            }
-
-            this.props.dispatch(switchType({ name, link }));
-
+      // 自定义
+      if (msg.type) {
+        switch (msg.type) {
+          case "LOADING_SWITCH":
+            this.props.dispatch(loadingSwitch({ ...msg.handleData }));
             break;
-
-          /*画板操作*/
-          case 'showBrush':
-            uid = msg.sigUid + 'A';
-            if (SignalData.account == uid && SignalData.role == 2) {
-              SignalData.broadcast = false;
-              msg.sigValue.value ? this.props.dispatch(showToolbar()) : this.props.dispatch(hideToolbar())
-            }
+          default:
             break;
         }
       }
@@ -395,22 +388,27 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://www.kunqu.tech/test/"
+        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
       },
     }));
   }
 
   showPDF() {
     window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      type: "COURSEWARE_PDF",
+      sigType: "showCourseware",
+      sigValue: {
+        value: true,
+        link: "https://res.miaocode.com/livePlatform/pdf/wxmg.pdf"
+      }
+    }));
+
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      type: "LOADING_SWITCH",
       handleData: {
-        name: "pdf",
-        ratio: 4 / 3,
-        link: "http://res.miaocode.com/livePlatform/pdf/wxmg.pdf"
+        show: true
       },
     }));
   }
-
 
   authorization() {
     this.sigValue = this.sigValue ? false : true;
@@ -429,6 +427,16 @@ class App extends React.Component {
     window.PAGE_database.clear();
   }
 
+  loadingSwitch() {
+    this.loading = this.loading ? false : true;
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      type: "LOADING_SWITCH",
+      handleData: {
+        show: this.loading
+      },
+    }));
+  }
+
   render() {
     return <div className="container">
       <WhiteBoard />
@@ -437,7 +445,8 @@ class App extends React.Component {
       <div className="test showPDF" onClick={() => this.showPDF()}>PDF课件</div>
       <div className="test authorization" onClick={() => this.authorization()}>授权</div>
       <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div>
-      <div> </div>
+
+      <div className="test loadingSwitch" onClick={() => this.loadingSwitch()}>loading切换</div>
     </div>
   }
 }

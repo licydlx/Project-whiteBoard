@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-09-17 17:57:05
+ * @LastEditTime: 2019-09-18 15:10:43
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -130,22 +130,19 @@ export const goDefaultState = () => ({
 
 
 // 去上一页
-export const goPrevPage = ({ page }) => ({
+export const goPrevPage = () => ({
   type: 'SWITCHBOX_GO_PREVPAGE',
   id: id++,
-  page
 })
 
 // 去下一页
-export const goNextPage = ({ page, totalPage }) => ({
+export const goNextPage = () => ({
   type: 'SWITCHBOX_GO_NEXTPAGE',
   id: id++,
-  page,
-  totalPage
 })
 
 // 进入指定页
-export const goHandleKeydown = ({ toPage,curPage,prevPage, totalPage, code }) => ({
+export const goHandleKeydown = ({ toPage, curPage, prevPage, totalPage, code }) => ({
   type: 'SWITCHBOX_GO_HANDLE_KEYDOWN',
   id: id++,
   toPage,
@@ -156,7 +153,7 @@ export const goHandleKeydown = ({ toPage,curPage,prevPage, totalPage, code }) =>
 })
 
 // 设置 总页数
-export const setTotalPage = ({totalPage}) => ({
+export const setTotalPage = ({ totalPage }) => ({
   type: 'SWITCHBOX_SET_TOTAL_PAGE',
   id: id++,
   totalPage
@@ -173,7 +170,7 @@ export const fullscreen = () => ({
 // =============
 
 // 切换不同类型的课件 
-export const switchType = ({ name, link , ratio}) => ({
+export const switchType = ({ name, link, ratio }) => ({
   type: 'COURSEWARE_SWITCH_TYPE',
   id: id++,
   name,
@@ -193,3 +190,13 @@ export const childMessageBox = ({ data }) => ({
 //   type: 'CONFIG_ALL',
 //   id: id++,
 // })
+
+
+// =============
+// 加载区
+// =============
+export const loadingSwitch = ({ show }) => ({
+  type: 'LOADING_SWITCH',
+  id: id++,
+  show,
+})

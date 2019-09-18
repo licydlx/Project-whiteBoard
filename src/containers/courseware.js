@@ -2,19 +2,23 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-08-26 18:00:38
+ * @LastEditTime: 2019-09-18 18:43:02
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
-import { switchType } from '../actions'
+import { switchType, setTotalPage, loadingSwitch, goDefaultState } from '../actions'
 import Courseware from '../components/courseware/index'
 
 const mapStateToProps = state => ({
-  courseware: state.courseware
+  courseware: state.courseware,
+  switchBox: state.switchBox
 })
 
 const mapDispatchToProps = dispatch => ({
-  switchType: (par) => dispatch(switchType(par))
+  switchType: (par) => dispatch(switchType(par)),
+  setTotalPage: (par) => dispatch(setTotalPage(par)),
+  loadingSwitch: (par) => dispatch(loadingSwitch(par)),
+  goDefaultState: () => dispatch(goDefaultState())
 })
 
 export default connect(

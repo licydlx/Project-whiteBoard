@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-16 18:29:38
+ * @LastEditTime: 2019-09-18 16:53:45
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -32,6 +32,7 @@ function signalMessage() {
                 case "SWITCHBOX_SET_TOTAL_PAGE":        // 设置课件总页数 
                 case "BOARD_REDUCE_TOOLBAR":
                 case "SWITCHBOX_GO_DEFAULT_VALUE":      // 初始化切换值
+                case "LOADING_SWITCH":                  // loading动图
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
                     if (Object.is(action.name, "html5") && action.link) {
@@ -64,6 +65,7 @@ function signalMessage() {
                 case "BOARD_SHOW_TOOLBAR":
                 case "BOARD_HIDE_TOOLBAR":
                 case "BOARD_REDUCE_TOOLBAR":
+                case "LOADING_SWITCH":
                     break;
                 default:
                     window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
