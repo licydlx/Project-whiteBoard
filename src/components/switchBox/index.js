@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-18 15:43:55
+ * @LastEditTime: 2019-09-19 15:35:20
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,10 +15,11 @@ class SwitchBox extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar,childMessageBox } = { ...this.props };
+    const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } = { ...this.props };
     if (this.props.switchBox == nextProps.switchBox) {
       return false;
     } else {
+
       if (this.props.switchBox.fullScreen !== nextProps.switchBox.fullScreen) {
         let data = this.props.switchBox.fullScreen ? 'miniWhiteboard' : 'maxWhiteboard';
         if (window !== window.parent) window.parent.postMessage(data, '*');
@@ -29,46 +30,47 @@ class SwitchBox extends React.Component {
         // 清空画板
         window.canvas.clear()
         reduceToolbar();
+
         window.coursewareCurPage = nextProps.switchBox.curPage;
-        window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: "SWITCHBOX_GO_HANDLE_KEYDOWN", handleData: { page:  window.coursewareCurPage } }));
+        window.whiteBoardMessage.sendMessage("child", JSON.stringify({ type: "SWITCHBOX_GO_HANDLE_KEYDOWN", handleData: { page: window.coursewareCurPage } }));
 
         // 切换页面缓存操作
-        if ( window.PAGE_database) {
+        if (window.PAGE_database) {
           window.BOARD_database.iterate(v => {
-            if (v.curPage ==  window.coursewareCurPage) {
+            if (v.curPage == window.coursewareCurPage) {
               SignalData.playback = true;
               switch (v.type) {
                 case "BOARD_SWITCH_TOOLBAR":
-                  switchToolbar({...v})
+                  switchToolbar({ ...v })
                   break;
                 case "BOARD_CHANGE_PENSIZE":
-                  changePenSize({...v})
+                  changePenSize({ ...v })
                   break;
                 case "BOARD_CHANGE_PENCOLOR":
-                  changePenColor({...v})
+                  changePenColor({ ...v })
                   break;
                 case "BOARD_CHANGE_TEXTSIZE":
-                  changeTextSize({...v})
+                  changeTextSize({ ...v })
                   break;
                 case "BOARD_CHANGE_PENSHAPE":
-                  changePenShape({...v})
+                  changePenShape({ ...v })
                   break;
                 case "BOARD_ADD_PATH":
-                  addPath({...v})
+                  addPath({ ...v })
                   break;
                 case "BOARD_ADD_GRAPH":
-                  addGraph({...v})
+                  addGraph({ ...v })
                   break;
                 case "BOARD_ADD_TEXT":
-                  addText({...v})
+                  addText({ ...v })
                   break;
                 case "BOARD_REMOVE_CREATED":
-                  removeCreated({...v})
+                  removeCreated({ ...v })
                   break;
                 case "CHILD_MESSAGE_BOX":
                   // 小游戏不回放
                   if (!v.data.type.includes("GAME_")) {
-                    childMessageBox({...v})
+                    childMessageBox({ ...v })
                   }
                   break;
                 default:
@@ -91,18 +93,15 @@ class SwitchBox extends React.Component {
       case eventObj.code.includes("Backspace"):
       case eventObj.code.includes("Enter"):
         goHandleKeydown({
-          toPage: switchBox.toPage,
-          curPage: switchBox.curPage,
-          prevPage: switchBox.prevPage,
-          totalPage: switchBox.totalPage,
+          ...switchBox,
+          toPage:switchBox.toPage,
           code: eventObj.code,
         });
         break;
       case eventObj.code.includes('Digit'):
         goHandleKeydown({
+          ...switchBox,
           toPage: switchBox.toPage + eventObj.code.slice(5, 6),
-          prevPage: switchBox.prevPage,
-          totalPage: switchBox.totalPage,
           code: eventObj.code,
         });
         break;
@@ -111,23 +110,42 @@ class SwitchBox extends React.Component {
     }
   }
 
-  goHandleChange() {}
+  goHandleChange() { }
 
-  goHandleFocus(){
-    const { goHandleKeydown } = { ...this.props };
+  goHandleFocus() {
+    const { switchBox, goHandleKeydown } = { ...this.props };
     goHandleKeydown({
+      ...switchBox,
       code: "Focus",
     });
   }
 
   // 上一页中间函数
   goPrevMiddle() {
-    this.props.goPrevPage()
+    const { switchBox, goHandleKeydown } = { ...this.props };
+
+    if (switchBox.curPage > 1) {
+      let newPage = switchBox.curPage - 1;
+      goHandleKeydown({
+        ...switchBox,
+        code: "left",
+        toPage: newPage + "" 
+      });
+    }
   }
 
   // 下一页中间函数
   goNextMiddle() {
-    this.props.goNextPage();
+    const { switchBox, goHandleKeydown } = { ...this.props };
+
+    if (switchBox.curPage < switchBox.totalPage) {
+      let newPage = switchBox.curPage + 1;
+      goHandleKeydown({
+        ...switchBox,
+        code: "right",
+        toPage: newPage + "" 
+      });
+    }
   }
 
   render() {

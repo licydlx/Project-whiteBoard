@@ -2,14 +2,14 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-09-18 15:38:43
+ * @LastEditTime: 2019-09-19 15:01:04
  * @LastEditors: Please set LastEditors
  */
 
 import defaultState from './switchBoxState'
+import SignalData from '../depend/agoraSingal/SignalData'
 
 const switchBox = (state = defaultState, action) => {
-  let newPage;
   switch (action.type) {
     // 切换显示状态
     case 'SWITCHBOX_SHOW_SWITCHBAR':
@@ -17,24 +17,21 @@ const switchBox = (state = defaultState, action) => {
 
     // 值初始化
     case 'SWITCHBOX_GO_DEFAULT_VALUE':
-      return { ...state, ...defaultState };
+      switch (SignalData.role) {
+        case 0:
+          return { ...state, ...defaultState, show: true };
+        case 2:
+          return { ...state, ...defaultState, show: false };
+      }
+      return state;
 
-    // 上一页
-    case 'SWITCHBOX_GO_PREVPAGE':
-      newPage = state.curPage > 1 ? state.curPage - 1 : state.curPage;
-      return { ...state, curPage: newPage, toPage: newPage + "" }
-
-    // 下一页
-    case 'SWITCHBOX_GO_NEXTPAGE':
-      newPage = state.curPage < state.totalPage ? state.curPage + 1 : state.curPage;
-      return { ...state, curPage: newPage, toPage: newPage + "" }
 
     // 键盘侠
     case 'SWITCHBOX_GO_HANDLE_KEYDOWN':
       switch (action.code) {
         case "Enter":
-          if (parseInt(state.toPage) < action.totalPage + 1 && parseInt(state.toPage) > 0) {
-            return { ...state, prevPage: state.curPage, curPage: parseInt(state.toPage) }
+          if (parseInt(action.toPage) < state.totalPage + 1 && parseInt(action.toPage) > 0) {
+            return { ...state, prevPage: state.curPage, curPage: parseInt(action.toPage), toPage: action.toPage }
           } else {
             return state;
           }
@@ -45,7 +42,16 @@ const switchBox = (state = defaultState, action) => {
 
         case "Focus":
           // focus 清空 
-          return { ...state, toPage: ""}
+          return { ...state, toPage: "" }
+
+        case "left":
+          // 上一页 
+          return { ...state, ...action, prevPage: state.curPage, curPage: parseInt(action.toPage) }
+
+        case "right":
+          // 下一页 
+          return { ...state, ...action, prevPage: state.curPage, curPage: parseInt(action.toPage) }
+
         default:
           return { ...state, toPage: action.toPage }
       }

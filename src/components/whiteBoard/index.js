@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-18 11:49:00
+ * @LastEditTime: 2019-09-19 17:34:25
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -18,8 +18,6 @@ import Loading from '../../containers/loading';
 import ratio from '../../untils/ratio';
 const { width, height} = { ...ratio(16/9) };
 
-console.log(width);
-console.log(height);
 const WhiteBoard = () => (
   <div id="whiteBoard" className="whiteBoard" style={{ width: `${width}`, height: `${height}` }}>
     <Courseware />

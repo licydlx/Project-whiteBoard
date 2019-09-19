@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-05-10 11:47:38
- * @LastEditTime: 2019-09-17 17:31:23
+ * @LastEditTime: 2019-09-19 13:18:19
  * @LastEditors: Please set LastEditors
  */
 import visualArea from './visualArea';
@@ -20,7 +20,7 @@ const ratio = (percent) => {
         height = windowHeight + 'px';
     } else {
         width = windowWidth + 'px';
-        height = windowWidth * percent + 'px';
+        height = windowWidth / percent + 'px';
     }
 
     // 手机端横屏

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-18 16:53:45
+ * @LastEditTime: 2019-09-19 17:18:36
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -12,7 +12,7 @@ function signalMessage() {
         console.log('⛈🌪🌫🌬🌚')
         console.log('白板 will dispatch', action)
         console.log('☔🐟🐒🐬☔')
-        
+
         if (SignalData.playback) {
             // 回放为真时 画板逻辑
             switch (action.type) {
@@ -23,7 +23,7 @@ function signalMessage() {
             }
         } else {
             // 不是回放 才存储
-            
+
             // localStorage 存储 actions
             switch (action.type) {
                 case "BOARD_SHOW_TOOLBAR":              // 老师显示画板工具栏
@@ -35,18 +35,29 @@ function signalMessage() {
                 case "LOADING_SWITCH":                  // loading动图
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
-                    if (Object.is(action.name, "html5") && action.link) {
-                        window.ACTIONS_database.length().then((numberOfKeys) => {
-                            if (numberOfKeys > 0) {
-                                window.ACTIONS_database.key(0).then(keyName => {
-                                    if (!keyName){
-                                        actionDataSave(action);
-                                    } 
-                                })
-                            } else {
-                                actionDataSave(action);
-                            }
-                        })
+                    switch (action.name) {
+                        case "html5":
+                        case "pdf":
+                            window.ACTIONS_database.length().then((numberOfKeys) => {
+                                if (numberOfKeys > 0) {
+                                    window.ACTIONS_database.key(0).then(keyName => {
+                                        window.ACTIONS_database.getItem(keyName).then(keyValue => {
+                                            if (action.name !== keyValue.name) {
+                                                window.ACTIONS_database.clear();
+                                                window.BOARD_database.clear();
+                                                window.PAGE_database.clear();
+
+                                                actionDataSave(action);
+                                            }
+                                        })
+                                    })
+                                } else {
+                                    actionDataSave(action);
+                                }
+                            })
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 default:
@@ -79,8 +90,8 @@ function signalMessage() {
             SignalData.playback = false;
         }
         // 调用 middleware 链中下一个 middleware 的 dispatch。
-        let returnValue = next(action)
-        return returnValue
+        let returnValue = next(action);
+        return returnValue;
     }
 }
 
@@ -99,10 +110,11 @@ const actionDataSave = (action) => {
             case "CHILD_MESSAGE_BOX":
                 window.BOARD_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { account: SignalData.account, curPage: window.coursewareCurPage }));
                 break;
-            case "SWITCHBOX_GO_PREVPAGE":
-            case "SWITCHBOX_GO_NEXTPAGE":
             case "SWITCHBOX_GO_HANDLE_KEYDOWN":
-                window.PAGE_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { curPage: window.coursewareCurPage }));
+                if (action.code == "Enter" || action.code == "left" || action.code == "right") {
+                    window.PAGE_database.setItem(JSON.stringify(+new Date()), Object.assign({}, action, { curPage: window.coursewareCurPage }));
+                }
+
                 break;
         }
     }).catch((err) => {

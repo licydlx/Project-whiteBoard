@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-09-18 15:10:43
+ * @LastEditTime: 2019-09-19 14:00:31
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -129,17 +129,17 @@ export const goDefaultState = () => ({
 })
 
 
-// 去上一页
-export const goPrevPage = () => ({
-  type: 'SWITCHBOX_GO_PREVPAGE',
-  id: id++,
-})
+// // 去上一页
+// export const goPrevPage = () => ({
+//   type: 'SWITCHBOX_GO_PREVPAGE',
+//   id: id++,
+// })
 
-// 去下一页
-export const goNextPage = () => ({
-  type: 'SWITCHBOX_GO_NEXTPAGE',
-  id: id++,
-})
+// // 去下一页
+// export const goNextPage = () => ({
+//   type: 'SWITCHBOX_GO_NEXTPAGE',
+//   id: id++,
+// })
 
 // 进入指定页
 export const goHandleKeydown = ({ toPage, curPage, prevPage, totalPage, code }) => ({

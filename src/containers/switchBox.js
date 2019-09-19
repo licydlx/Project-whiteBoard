@@ -2,11 +2,11 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:09
- * @LastEditTime: 2019-09-18 15:08:09
+ * @LastEditTime: 2019-09-19 13:52:57
  * @LastEditors: Please set LastEditors
  */
 import { connect } from 'react-redux'
-import { goPrevPage, goHandleKeydown, goNextPage, fullscreen, switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } from '../actions'
+import {goHandleKeydown, fullscreen, switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } from '../actions'
 
 
 import SwitchBox from '../components/switchBox/index'
@@ -16,8 +16,6 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  goPrevPage: () => dispatch(goPrevPage()),
-  goNextPage: () => dispatch(goNextPage()),
   goHandleKeydown: (par) => dispatch(goHandleKeydown(par)),
   fullscreen: () => dispatch(fullscreen()),
 

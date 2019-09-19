@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-18 18:44:21
+ * @LastEditTime: 2019-09-19 16:55:52
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -10,6 +10,7 @@ import './index.css';
 // eslint-disable-next-line no-unused-vars
 import PDF from 'react-pdf-js';
 import ratio from '../../untils/ratio';
+import SignalData from '../../depend/agoraSingal/SignalData';
 
 class Courseware extends React.Component {
   constructor(props) {
@@ -17,15 +18,23 @@ class Courseware extends React.Component {
   }
 
   shouldComponentUpdate(nextProps){
-    if (nextProps.courseware.name !== this.props.courseware.name || nextProps.courseware.link !== this.props.courseware.link
-      || nextProps.switchBox.curPage !== this.props.switchBox.curPage) {
-
+    if (nextProps.courseware.name !== this.props.courseware.name || nextProps.courseware.link !== this.props.courseware.link) {
+      SignalData.broadcast = false;
+      this.props.goDefaultState();
       switch (nextProps.courseware.name) {
         case "pdf":
           this.scale = parseFloat(ratio(4/3).width)/720;
+          
+          SignalData.broadcast = false;
+          this.props.loadingSwitch({
+            show: true
+          })
+
           break;
       }
       return true;  
+    } else if(nextProps.switchBox.curPage !== this.props.switchBox.curPage){
+      return true;
     } else {
       return false;
     }
@@ -39,9 +48,9 @@ class Courseware extends React.Component {
     let { courseware } = {...this.props};
     switch (courseware.name) {
       case "default":
-        this.props.goDefaultState();
         this.comeUp();
-        break; 
+        break;
+        
       default:
         break;
     }
@@ -51,6 +60,14 @@ class Courseware extends React.Component {
     if(pages > 0){
       this.props.setTotalPage({totalPage:pages});
       this.props.loadingSwitch({show:false});
+
+      window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+        type: "COURSEWARE_ONLOAD",
+        handleData: {
+          name:"pdf",
+          account: SignalData.account
+        },
+      }));
     }
   }
 

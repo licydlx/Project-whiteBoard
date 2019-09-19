@@ -17,7 +17,8 @@
 }
 
 .pdfBox {
-  background-image: linear-gradient(to right , #17507d, #c03f3c);
+  /* background-image: linear-gradient(to right , #17507d, #c03f3c); */
+  background-color: #17507d;
 }
 
 /* 默认原始封面 */

@@ -13,7 +13,8 @@ body {
     bottom: 0;
     z-index: 1;
 
-    background-image: linear-gradient(to right , #17507d, #c03f3c);
+    /* background-image: linear-gradient(to right , #17507d, #c03f3c); */
+    background-color: #17507d;
     display: flex;
     justify-content: center;
     align-content: center;

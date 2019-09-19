@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-18 19:00:27
+ * @LastEditTime: 2019-09-19 17:40:35
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -16,14 +16,13 @@ import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, loadingSwitch } from '../../actions';
+import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage } from '../../actions';
 import setZoom from '../../untils/setZoom';
-import isBrowser from '../../untils/isBrowser';
+// eslint-disable-next-line no-unused-vars
+//import isBrowser from '../../untils/isBrowser';
 
 import { clientMessageADP } from '../../untils/adapter';
-
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
-
 import vConsole from 'vconsole';
 
 class App extends React.Component {
@@ -97,7 +96,10 @@ class App extends React.Component {
               window.PAGE_database.clear();
               console.log('清空超过当前频道2小时的数据缓存！');
             } else {
-              if (SignalData.role === 0) this.props.dispatch(keyValue);
+              if (SignalData.role === 0){
+                SignalData.playback = true;
+                this.props.dispatch(keyValue);
+              }
             }
 
           })
@@ -127,33 +129,7 @@ class App extends React.Component {
             break;
 
           case "COURSEWARE_ONLOAD":
-            // 课件加载完成，有缓存，就跳到最近的
-            window.PAGE_database.length().then((numberOfKeys) => {
-              if (numberOfKeys > 0) {
-                window.PAGE_database.key(numberOfKeys - 1).then(keyName => {
-
-                  window.PAGE_database.getItem(keyName).then(keyValue => {
-                    SignalData.playback = true;
-                    this.props.dispatch(keyValue);
-
-                    window.BOARD_database.iterate(v => {
-                      if (v.curPage == keyValue.curPage) {
-                        SignalData.playback = true;
-                        this.props.dispatch(Object.assign({}, v, { account: "" }));
-                      }
-                    }).then(() => {
-                      console.log("回放完成！")
-                    })
-
-                  })
-                }).catch((err) => {
-                  console.log(err);
-                });
-
-              }
-            }).catch((err) => {
-              console.log(err);
-            });
+            this.coursewareOnload();
 
             break;
           default:
@@ -164,6 +140,38 @@ class App extends React.Component {
     }
   }
 
+  coursewareOnload(){
+    // 课件加载完成，有缓存，就跳到最近的
+    window.PAGE_database.length().then((numberOfKeys) => {
+      if (numberOfKeys > 0) {
+        window.PAGE_database.key(numberOfKeys - 1).then(keyName => {
+          window.PAGE_database.getItem(keyName).then(keyValue => {
+            // 针对 pdf 做的异步 跳页
+             let d = setTimeout(() => {
+              SignalData.playback = true;
+              this.props.dispatch(keyValue);
+              clearTimeout(d);
+            }, 800); 
+
+            window.BOARD_database.iterate(v => {
+              if (v.curPage == keyValue.curPage) {
+                SignalData.playback = true;
+                this.props.dispatch(Object.assign({}, v, { account: "" }));
+              }
+            }).then(() => {
+              console.log("回放完成！")
+            })
+
+          })
+        }).catch((err) => {
+          console.log(err);
+        });
+
+      }
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
   // ====================
   // signal 回调监听
   // ====================
@@ -221,6 +229,7 @@ class App extends React.Component {
 
         switch (msg.type) {
           case "SYCN_COURSEWARE_LINK":
+            SignalData.playback = true;
             this.props.dispatch(msg.data);
             break;
 
@@ -251,6 +260,7 @@ class App extends React.Component {
             
             SignalData.broadcast = false;
             this.props.dispatch(switchType({ ...action.handleData }));
+            
             break;
 
           case "BOARD_TOOLBAR":
@@ -267,8 +277,11 @@ class App extends React.Component {
       // 自定义
       if (msg.type) {
         switch (msg.type) {
-          case "LOADING_SWITCH":
-            this.props.dispatch(loadingSwitch({ ...msg.handleData }));
+          case "COURSEWARE_ONLOAD":
+            if(SignalData.account == msg.handleData.account){
+              this.coursewareOnload();
+            }
+            
             break;
           default:
             break;
@@ -341,23 +354,23 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    let ran;
-    if (isBrowser() == "Chrome") {
-      ran = 0;
-    } else {
-      ran = 2;
-    }
+    // let ran;
+    // if (isBrowser() == "Chrome") {
+    //   ran = 0;
+    // } else {
+    //   ran = 2;
+    // }
 
-    let data = {
-      // appId:"7344c75464964565a3515963ec9298ff",
-      role: ran,
-      uid: ran + "1",
-      channel: "123",
-      canDraw: true
-    }
+    // let data = {
+    //   // appId:"7344c75464964565a3515963ec9298ff",
+    //   role: ran,
+    //   uid: ran + "1",
+    //   channel: "123",
+    //   canDraw: true
+    // }
 
-    console.log(data)
-    this.joinChannel(data);
+    // console.log(data)
+    // this.joinChannel(data);
 
   }
 
