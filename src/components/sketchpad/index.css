@@ -6,49 +6,49 @@
     background-color: rgba(255, 255, 255, 0);
 }
 
-.drag {
+.brushBox {
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
     z-index: 99;
-    right: 30px;
-    top: 80px;
     width: 46px;
-    height: 264px;
-    /* height:336px; */
+    height: 266px;
+
     background: rgba(49, 61, 77, 0.9);
     box-shadow: 0px 0px 0px 0px rgba(255, 255, 255, 0.1);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-radius: 6px;
 }
 
-.drag>.tool {
+.brushBox>.tool {
     position: relative;
     cursor: pointer;
     overflow: hidden;
+    height: 36px;
+    width: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.drag>.tool.active {
+.brushBox>.tool:first-child{
+    height: 46px;
+}
+
+.brushBox>.tool.active {
     overflow: visible;
 }
 
-.drag>.tool>.icon {
+.brushBox>.tool>.icon {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.drag>.tool>.icon>img {
+.brushBox>.tool>.icon>img {
     display: block;
     width: auto;
     height: 20px;
 }
 
-.drag>.tool.active>.icon {
+.brushBox>.tool.active>.icon {
     width: 32px;
     height: 32px;
     background: rgba(80, 95, 115, 1);

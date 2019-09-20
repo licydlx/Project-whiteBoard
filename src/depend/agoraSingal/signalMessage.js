@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-19 17:18:36
+ * @LastEditTime: 2019-09-20 18:47:10
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -56,6 +56,11 @@ function signalMessage() {
                                 }
                             })
                             break;
+                        case "default":
+                            window.ACTIONS_database.clear();
+                            window.BOARD_database.clear();
+                            window.PAGE_database.clear();
+                            break;
                         default:
                             break;
                     }
@@ -99,6 +104,8 @@ const actionDataSave = (action) => {
     window.ACTIONS_database.setItem(JSON.stringify(+new Date()), action).then(() => {
         switch (action.type) {
             case "BOARD_SWITCH_TOOLBAR":
+            case "BOARD_TOGGLE_TOOLBAR":
+            case "BOARD_POSITION_TOOLBAR":
             case "BOARD_CHANGE_PENSIZE":
             case "BOARD_CHANGE_PENCOLOR":
             case "BOARD_CHANGE_TEXTSIZE":

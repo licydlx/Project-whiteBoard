@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:00
- * @LastEditTime: 2019-09-19 14:00:31
+ * @LastEditTime: 2019-09-20 17:25:57
  * @LastEditors: Please set LastEditors
  */
 let id = 0
@@ -32,6 +32,19 @@ export const switchToolbar = ({ name }) => ({
   type: 'BOARD_SWITCH_TOOLBAR',
   id: id++,
   name
+})
+
+export const toggleToolbar = () => ({
+  type: 'BOARD_TOGGLE_TOOLBAR',
+  id: id++,
+})
+
+// 改变toolbar位置
+export const changePositionToolbar = ({ top, right }) => ({
+  type: 'BOARD_POSITION_TOOLBAR',
+  id: id++,
+  top,
+  right
 })
 
 // 改变笔触大小
@@ -199,4 +212,14 @@ export const loadingSwitch = ({ show }) => ({
   type: 'LOADING_SWITCH',
   id: id++,
   show,
+})
+
+// =============
+// 画板回放问题
+// 1.通过改变z-index 控制渲染问题(画板渲染玩之后才展示出来)
+// =============
+export const changeBoardZindex = ({ zIndex }) => ({
+  type: 'BOARD_CHANGE_ZINDEX',
+  id: id++,
+  zIndex,
 })

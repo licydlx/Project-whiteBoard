@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-02 15:32:43
- * @LastEditTime: 2019-09-11 11:55:01
+ * @LastEditTime: 2019-09-20 18:04:51
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -22,7 +22,11 @@ class sketchpadBoard extends React.Component {
         if (nextProps.sketchpad == this.props) {
             return false;
         } else {
-            const { tools, boardData } = { ...nextProps };
+            const { zIndex, tools, boardData } = { ...nextProps };
+            if (zIndex !== this.props.zIndex) {
+                return true;
+            }
+
             if (tools !== this.props.tools) {
                 const tool = tools.filter(tool => tool.active === true);
                 switch (tool[0].name) {
@@ -64,20 +68,20 @@ class sketchpadBoard extends React.Component {
             }
 
             if (boardData !== this.props.boardData) {
-                if(boardData.account !== SignalData.account){
+                if (boardData.account !== SignalData.account) {
                     switch (boardData.type) {
                         case "BOARD_ADD_PATH":
                             window.canvas.addPath({ path: boardData.path, pathConfig: boardData.pathConfig })
                             break;
-    
+
                         case "BOARD_ADD_TEXT":
                             window.canvas.addText({ mouseFrom: boardData.mouseFrom, textContent: boardData.textContent })
                             break;
-    
+
                         case "BOARD_ADD_GRAPH":
                             window.canvas.addGraph({ mouseFrom: boardData.mouseFrom, mouseTo: boardData.mouseTo })
                             break;
-    
+
                         case "BOARD_REMOVE_CREATED":
                             window.canvas.removeCreated({ created: boardData.created })
                             break;
@@ -90,7 +94,7 @@ class sketchpadBoard extends React.Component {
     }
 
     render() {
-        return <div id="canvasBox" className="canvasBox" style={{ visibility: `${this.props.tools[0].active ? "hidden" : "visible"}` }} >
+        return <div id="canvasBox" className="canvasBox" style={{ visibility: `${this.props.tools[1].active ? "hidden" : "visible"}`, zIndex: this.props.zIndex }} >
             <canvas id="sketchpadBoard" width={this.config.width} height={this.config.height}>请使用支持HTML5的浏览器</canvas>
         </div>
     }

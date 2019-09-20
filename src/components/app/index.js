@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-19 17:40:35
+ * @LastEditTime: 2019-09-20 18:49:16
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -16,10 +16,10 @@ import messageEngine from '../../depend/postMessage/messageEngine';
 import signalEngine from '../../depend/agoraSingal/signalEngine';
 
 import SignalData from '../../depend/agoraSingal/SignalData';
-import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage } from '../../actions';
+import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, changeBoardZindex } from '../../actions';
 import setZoom from '../../untils/setZoom';
 // eslint-disable-next-line no-unused-vars
-//import isBrowser from '../../untils/isBrowser';
+import isBrowser from '../../untils/isBrowser';
 
 import { clientMessageADP } from '../../untils/adapter';
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
@@ -96,7 +96,7 @@ class App extends React.Component {
               window.PAGE_database.clear();
               console.log('清空超过当前频道2小时的数据缓存！');
             } else {
-              if (SignalData.role === 0){
+              if (SignalData.role === 0) {
                 SignalData.playback = true;
                 this.props.dispatch(keyValue);
               }
@@ -140,28 +140,35 @@ class App extends React.Component {
     }
   }
 
-  coursewareOnload(){
+  coursewareOnload() {
     // 课件加载完成，有缓存，就跳到最近的
     window.PAGE_database.length().then((numberOfKeys) => {
       if (numberOfKeys > 0) {
         window.PAGE_database.key(numberOfKeys - 1).then(keyName => {
           window.PAGE_database.getItem(keyName).then(keyValue => {
+
+            if (keyValue.curPage == 1) {
+              SignalData.playback = true;
+              this.props.dispatch(changeBoardZindex({ zIndex: 0 }));
+
+              window.BOARD_database.iterate(v => {
+                if (v.curPage == keyValue.curPage) {
+                  SignalData.playback = true;
+                  this.props.dispatch(Object.assign({}, v, { account: "" }));
+                }
+              }).then(() => {
+                SignalData.playback = true;
+                this.props.dispatch(changeBoardZindex({ zIndex: 3 }));
+                console.log("回放完成！")
+              })
+            }
+
             // 针对 pdf 做的异步 跳页
-             let d = setTimeout(() => {
+            let d = setTimeout(() => {
               SignalData.playback = true;
               this.props.dispatch(keyValue);
               clearTimeout(d);
-            }, 800); 
-
-            window.BOARD_database.iterate(v => {
-              if (v.curPage == keyValue.curPage) {
-                SignalData.playback = true;
-                this.props.dispatch(Object.assign({}, v, { account: "" }));
-              }
-            }).then(() => {
-              console.log("回放完成！")
-            })
-
+            }, 800);
           })
         }).catch((err) => {
           console.log(err);
@@ -257,10 +264,10 @@ class App extends React.Component {
             if (action.handleData.link) {
               SignalData.coursewareLink = action.handleData.link;
             }
-            
+
             SignalData.broadcast = false;
             this.props.dispatch(switchType({ ...action.handleData }));
-            
+
             break;
 
           case "BOARD_TOOLBAR":
@@ -278,10 +285,10 @@ class App extends React.Component {
       if (msg.type) {
         switch (msg.type) {
           case "COURSEWARE_ONLOAD":
-            if(SignalData.account == msg.handleData.account){
+            if (SignalData.account == msg.handleData.account) {
               this.coursewareOnload();
             }
-            
+
             break;
           default:
             break;
@@ -440,15 +447,15 @@ class App extends React.Component {
     window.PAGE_database.clear();
   }
 
-  loadingSwitch() {
-    this.loading = this.loading ? false : true;
-    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-      type: "LOADING_SWITCH",
-      handleData: {
-        show: this.loading
-      },
-    }));
-  }
+  // loadingSwitch() {
+  //   this.loading = this.loading ? false : true;
+  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+  //     type: "LOADING_SWITCH",
+  //     handleData: {
+  //       show: this.loading
+  //     },
+  //   }));
+  // }
 
   render() {
     return <div className="container">
@@ -459,7 +466,7 @@ class App extends React.Component {
       <div className="test authorization" onClick={() => this.authorization()}>授权</div>
       <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div>
 
-      <div className="test loadingSwitch" onClick={() => this.loadingSwitch()}>loading切换</div>
+      {/* <div className="test loadingSwitch" onClick={() => this.loadingSwitch()}>loading切换</div> */}
     </div>
   }
 }

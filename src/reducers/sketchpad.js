@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:30:21
- * @LastEditTime: 2019-09-03 14:48:02
+ * @LastEditTime: 2019-09-20 17:28:57
  * @LastEditors: Please set LastEditors
  */
 
@@ -22,6 +22,13 @@ const sketchpad = (state = defaultState, action) => {
         ...state, show: false
       }
 
+    // 画板工具栏 改变位置
+    case 'BOARD_POSITION_TOOLBAR':
+      return {
+        ...state, position: { right: action.right, top: action.top }
+      }
+
+    // switch 工具
     case 'BOARD_SWITCH_TOOLBAR':
       return {
         ...state, tools: state.tools.map(tool => {
@@ -29,6 +36,17 @@ const sketchpad = (state = defaultState, action) => {
         })
       }
 
+    // toggle 工具栏
+    case 'BOARD_TOGGLE_TOOLBAR':
+      return {
+        ...state, toggle: state.toggle ? false : true
+      }
+
+    // 改变 board zindex
+    case 'BOARD_CHANGE_ZINDEX':
+      return {
+        ...state, zIndex: action.zIndex
+      }
 
     case 'BOARD_CHANGE_PENSIZE':
       return {
@@ -84,8 +102,8 @@ const sketchpad = (state = defaultState, action) => {
     case "BOARD_ADD_PATH":
       return {
         ...state, boardData: {
-          account:action.account,
-          curPage:action.curPage,
+          account: action.account,
+          curPage: action.curPage,
           type: action.type,
           path: action.path,
           pathConfig: action.pathConfig
@@ -95,8 +113,8 @@ const sketchpad = (state = defaultState, action) => {
     case "BOARD_ADD_TEXT":
       return {
         ...state, boardData: {
-          account:action.account,
-          curPage:action.curPage,
+          account: action.account,
+          curPage: action.curPage,
           type: action.type,
           textContent: action.textContent,
           mouseFrom: action.mouseFrom
@@ -106,8 +124,8 @@ const sketchpad = (state = defaultState, action) => {
     case "BOARD_ADD_GRAPH":
       return {
         ...state, boardData: {
-          account:action.account,
-          curPage:action.curPage,
+          account: action.account,
+          curPage: action.curPage,
           type: action.type,
           mouseFrom: action.mouseFrom,
           mouseTo: action.mouseTo
@@ -117,8 +135,8 @@ const sketchpad = (state = defaultState, action) => {
     case "BOARD_REMOVE_CREATED":
       return {
         ...state, boardData: {
-          account:action.account,
-          curPage:action.curPage,
+          account: action.account,
+          curPage: action.curPage,
           type: action.type,
           created: action.created
         }

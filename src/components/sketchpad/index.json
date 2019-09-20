@@ -1,4 +1,8 @@
 ﻿{
+    "toggle": {
+        "name": "toggle",
+        "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/01double.png"
+    },
     "board": {
         "name": "board",
         "imgLink": "https://res.miaocode.com/livePlatform/soundNetwork/images/02double.png"

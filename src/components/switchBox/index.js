@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-19 15:35:20
+ * @LastEditTime: 2019-09-20 18:31:50
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,7 +15,7 @@ class SwitchBox extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { switchToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } = { ...this.props };
+    const { switchToolbar,toggleToolbar,changeBoardZindex,changePositionToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } = { ...this.props };
     if (this.props.switchBox == nextProps.switchBox) {
       return false;
     } else {
@@ -36,12 +36,21 @@ class SwitchBox extends React.Component {
 
         // 切换页面缓存操作
         if (window.PAGE_database) {
+          SignalData.playback = true;
+          changeBoardZindex({ zIndex: 0 });
+
           window.BOARD_database.iterate(v => {
             if (v.curPage == window.coursewareCurPage) {
               SignalData.playback = true;
               switch (v.type) {
                 case "BOARD_SWITCH_TOOLBAR":
                   switchToolbar({ ...v })
+                  break;
+                case "BOARD_TOGGLE_TOOLBAR":
+                  toggleToolbar();
+                  break;
+                case "BOARD_POSITION_TOOLBAR":
+                  changePositionToolbar({ ...v });
                   break;
                 case "BOARD_CHANGE_PENSIZE":
                   changePenSize({ ...v })
@@ -77,7 +86,10 @@ class SwitchBox extends React.Component {
                   break;
               }
             }
-          }).then(() => { })
+          }).then(() => {
+            SignalData.playback = true;
+            changeBoardZindex({zIndex:3});
+          })
         }
 
       }
@@ -149,7 +161,7 @@ class SwitchBox extends React.Component {
   }
 
   render() {
-    const { switchBox, fullscreen } = { ...this.props };
+    const { switchBox } = { ...this.props };
     return <div id="switchBox" className='switchBox' style={{ display: `${switchBox.show ? 'flex' : 'none'}` }}>
 
       <div onClick={() => this.goPrevMiddle()}>
@@ -166,9 +178,9 @@ class SwitchBox extends React.Component {
         <img className="rightIcon" key='rightIcon' src='https://res.miaocode.com/livePlatform/soundNetwork/images/11double.png' />
       </div>
 
-      <div onClick={() => fullscreen()}>
+      {/* <div onClick={() => fullscreen()}>
         <img className="fullscreen" src={`https://res.miaocode.com/livePlatform/soundNetwork/images/${switchBox.fullScreen ? '09' : '08'}double.png`} />
-      </div>
+      </div> */}
 
     </div>
   }
