@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-20 18:31:50
+ * @LastEditTime: 2019-09-23 15:06:38
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -15,7 +15,7 @@ class SwitchBox extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const { switchToolbar,toggleToolbar,changeBoardZindex,changePositionToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } = { ...this.props };
+    const { switchToolbar, toggleToolbar, changeBoardZindex, changePositionToolbar, changePenSize, changePenColor, changeTextSize, changePenShape, addPath, addText, addGraph, removeCreated, reduceToolbar, childMessageBox } = { ...this.props };
     if (this.props.switchBox == nextProps.switchBox) {
       return false;
     } else {
@@ -26,7 +26,7 @@ class SwitchBox extends React.Component {
         if (window.webkit) window.webkit.messageHandlers[data].postMessage(data);
       }
 
-      if (this.props.switchBox.curPage !== nextProps.switchBox.curPage) {
+      if (this.props.switchBox.curPage !== nextProps.switchBox.curPage || this.props.switchBox.totalPage !== nextProps.switchBox.totalPage) {
         // 清空画板
         window.canvas.clear()
         reduceToolbar();
@@ -88,7 +88,7 @@ class SwitchBox extends React.Component {
             }
           }).then(() => {
             SignalData.playback = true;
-            changeBoardZindex({zIndex:3});
+            changeBoardZindex({ zIndex: 3 });
           })
         }
 
@@ -104,13 +104,19 @@ class SwitchBox extends React.Component {
     switch (true) {
       case eventObj.code.includes("Backspace"):
       case eventObj.code.includes("Enter"):
+        if (switchBox.totalPage == 1) {
+          return;
+        }
         goHandleKeydown({
           ...switchBox,
-          toPage:switchBox.toPage,
+          toPage: switchBox.toPage,
           code: eventObj.code,
         });
         break;
       case eventObj.code.includes('Digit'):
+        if (switchBox.totalPage == 1) {
+          return;
+        }
         goHandleKeydown({
           ...switchBox,
           toPage: switchBox.toPage + eventObj.code.slice(5, 6),
@@ -126,6 +132,9 @@ class SwitchBox extends React.Component {
 
   goHandleFocus() {
     const { switchBox, goHandleKeydown } = { ...this.props };
+    if (switchBox.totalPage == 1) {
+      return;
+    }
     goHandleKeydown({
       ...switchBox,
       code: "Focus",
@@ -141,7 +150,7 @@ class SwitchBox extends React.Component {
       goHandleKeydown({
         ...switchBox,
         code: "left",
-        toPage: newPage + "" 
+        toPage: newPage + ""
       });
     }
   }
@@ -155,7 +164,7 @@ class SwitchBox extends React.Component {
       goHandleKeydown({
         ...switchBox,
         code: "right",
-        toPage: newPage + "" 
+        toPage: newPage + ""
       });
     }
   }

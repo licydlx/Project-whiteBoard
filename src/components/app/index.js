@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-20 18:49:16
+ * @LastEditTime: 2019-09-23 18:04:38
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -361,23 +361,23 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    // let ran;
-    // if (isBrowser() == "Chrome") {
-    //   ran = 0;
-    // } else {
-    //   ran = 2;
-    // }
+    let ran;
+    if (isBrowser() == "Chrome") {
+      ran = 0;
+    } else {
+      ran = 2;
+    }
 
-    // let data = {
-    //   // appId:"7344c75464964565a3515963ec9298ff",
-    //   role: ran,
-    //   uid: ran + "1",
-    //   channel: "123",
-    //   canDraw: true
-    // }
+    let data = {
+      // appId:"7344c75464964565a3515963ec9298ff",
+      role: ran,
+      uid: ran + "1",
+      channel: "123",
+      canDraw: true
+    }
 
-    // console.log(data)
-    // this.joinChannel(data);
+    console.log(data)
+    this.joinChannel(data);
 
   }
 
@@ -408,7 +408,8 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+        link: "https://www.kunqu.tech/test/index.html"
+        // link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
       },
     }));
   }

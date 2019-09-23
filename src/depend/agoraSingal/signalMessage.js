@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-20 18:47:10
+ * @LastEditTime: 2019-09-23 11:45:00
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -33,6 +33,7 @@ function signalMessage() {
                 case "BOARD_REDUCE_TOOLBAR":
                 case "SWITCHBOX_GO_DEFAULT_VALUE":      // 初始化切换值
                 case "LOADING_SWITCH":                  // loading动图
+                case "CHILD_MESSAGE_BOX":               // 课件状态不保存
                     break;
                 case "COURSEWARE_SWITCH_TYPE":
                     switch (action.name) {
