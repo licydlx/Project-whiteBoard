@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-23 18:04:38
+ * @LastEditTime: 2019-09-24 18:48:20
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -195,25 +195,20 @@ class App extends React.Component {
             window.ACTIONS_database.key(0).then(keyName => {
               window.ACTIONS_database.getItem(keyName).then(keyValue => {
                 window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_LINK", data: keyValue }));
-
-                // PAGE_database.length().then((numberOfKeys) => {
-                //   if (numberOfKeys > 0) {
-                //     PAGE_database.key(numberOfKeys - 1).then(keyName => {
-                //       PAGE_database.getItem(keyName).then(keyValue => {
-                //         window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_PAGE", data: keyValue }));
-                //         let boards = [];
-                //         BOARD_database.iterate(v => {
-                //           if (v.curPage == coursewareCurPage) boards.push(v);
-                //         }).then(() => {
-                //           console.log(boards)
-                //         })
-                //       })
-                //     })
-                //   }
-                // })
-
               })
             })
+
+            window.PAGE_database.length().then((nk) => {
+              if (nk > 0) {
+                window.PAGE_database.key(nk - 1).then(keyName => {
+                  window.PAGE_database.getItem(keyName).then(keyValue => {
+                      keyValue.code = "Enter";
+                      window.whiteBoardSignal.session.messageInstantSend(e.data.account, JSON.stringify({ type: "SYCN_COURSEWARE_PAGE", data: keyValue }));
+                  })
+                })
+              }
+            })
+
           }
         }).catch((err) => {
           console.log(err);
@@ -241,8 +236,7 @@ class App extends React.Component {
             break;
 
           case "SYCN_COURSEWARE_PAGE":
-            // console.log(msg.data);
-            // this.props.dispatch(msg.data);
+            this.props.dispatch(msg.data);
             break;
           default:
             break;
@@ -361,23 +355,23 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    let ran;
-    if (isBrowser() == "Chrome") {
-      ran = 0;
-    } else {
-      ran = 2;
-    }
+    // let ran;
+    // if (isBrowser() == "Chrome") {
+    //   ran = 0;
+    // } else {
+    //   ran = 2;
+    // }
 
-    let data = {
-      // appId:"7344c75464964565a3515963ec9298ff",
-      role: ran,
-      uid: ran + "1",
-      channel: "123",
-      canDraw: true
-    }
+    // let data = {
+    //   // appId:"7344c75464964565a3515963ec9298ff",
+    //   role: ran,
+    //   uid: ran + "1",
+    //   channel: "123",
+    //   canDraw: true
+    // }
 
-    console.log(data)
-    this.joinChannel(data);
+    // console.log(data)
+    // this.joinChannel(data);
 
   }
 
@@ -462,10 +456,10 @@ class App extends React.Component {
     return <div className="container">
       <WhiteBoard />
       <div className="test showDefault" onClick={() => this.showDefault()}>默认白板</div>
-      <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
+      {/* <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
       <div className="test showPDF" onClick={() => this.showPDF()}>PDF课件</div>
-      <div className="test authorization" onClick={() => this.authorization()}>授权</div>
-      <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div>
+      <div className="test authorization" onClick={() => this.authorization()}>授权</div> */}
+      <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div> 
 
       {/* <div className="test loadingSwitch" onClick={() => this.loadingSwitch()}>loading切换</div> */}
     </div>

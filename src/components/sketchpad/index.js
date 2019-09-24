@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-20 17:44:32
+ * @LastEditTime: 2019-09-24 10:13:49
  * @LastEditors: Please set LastEditors
  */
 
@@ -80,7 +80,7 @@ class Sketchpad extends React.Component {
 
       <div id="brushBox" className='brushBox' style={{
         visibility: `${sketchpad.show ? "visible" : "hidden"}`, right: sketchpad.position.right, top: sketchpad.position.top,
-        height: sketchpad.toggle ? "266px" : "46px", overflow: sketchpad.toggle ? "visible" : "hidden"
+        height: sketchpad.toggle ? "266px" : "46px", overflow: sketchpad.toggle ? "visible" : "hidden",zIndex:sketchpad.zIndex + 1
       }}
         draggable="true" onDrag={this.handleDrag.bind(this)} onDragStart={this.handleDragStart.bind(this)} onDragOver={this.handleDragOver.bind(this)}
         onDragEnd={this.handleDragEnd.bind(this)} onDrop={this.handleDrop.bind(this)} onDragEnter={this.handleDragEnter.bind(this)} onDragLeave={this.handleDragLeave.bind(this)}>

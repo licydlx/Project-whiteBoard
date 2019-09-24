@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-23 11:45:00
+ * @LastEditTime: 2019-09-24 17:00:16
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -102,6 +102,9 @@ function signalMessage() {
 }
 
 const actionDataSave = (action) => {
+    if(action.type == "BOARD_ADD_TEXT"){
+        console.log(action)
+    }
     window.ACTIONS_database.setItem(JSON.stringify(+new Date()), action).then(() => {
         switch (action.type) {
             case "BOARD_SWITCH_TOOLBAR":

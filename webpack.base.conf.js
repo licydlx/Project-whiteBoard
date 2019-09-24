@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-04-01 14:19:46
- * @LastEditTime: 2019-09-17 16:32:50
+ * @LastEditTime: 2019-09-24 16:18:53
  * @LastEditors: Please set LastEditors
  */
 const path = require('path');
@@ -20,7 +20,7 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader", "postcss-loader"]
       },
       {
         test: /\.m?js$/,

@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 13:33:26
- * @LastEditTime: 2019-09-20 17:48:22
+ * @LastEditTime: 2019-09-24 15:15:30
  * @LastEditors: Please set LastEditors
  */
 import visualArea from '../untils/visualArea'
@@ -35,21 +35,21 @@ export default {
       name: "pen",
       active: false,
       penSize: 2,
-      penColor: '#fff',
+      penColor: '#fd2c0a',
       title: "笔"
     },
     {
       name: "text",
       active: false,
       textSize: 14,
-      penColor: '#fff',
+      penColor: '#fd2c0a',
       title: "文本"
     },
     {
       name: "graph",
       active: false,
       penShape: "line",
-      penColor: "#fff",
+      penColor: "#fd2c0a",
       penSize: 2,
       title: "图形"
     },

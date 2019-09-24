@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 14:02:49
- * @LastEditTime: 2019-09-16 14:39:35
+ * @LastEditTime: 2019-09-24 15:14:15
  * @LastEditors: Please set LastEditors
  */
 // eslint-disable-next-line no-unused-vars
@@ -14,7 +14,7 @@ const penConfig = {
   },
   penColor: {
     name: 'penColor',
-    value: ['#fff', '#9b9b9b', '#2e3038', '#000', '#fd2c0a', '#ff6e00', '#ffd400', '#98cd46', '#00d7d1', '#0097f0', '#8b6dc2', '#ff9b9e'],
+    value: ['#fd2c0a', '#ff6e00', '#ffd400', '#98cd46', '#00d7d1', '#0097f0', '#8b6dc2', '#ff9b9e','#fff', '#9b9b9b', '#2e3038', '#000'],
   },
   textSize: {
     name: 'textSize',

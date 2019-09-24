@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 17:44:09
- * @LastEditTime: 2019-09-12 09:30:04
+ * @LastEditTime: 2019-09-24 17:20:11
  * @LastEditors: Please set LastEditors
  */
 
@@ -10,7 +10,7 @@ import { addPath, addText, addGraph, removeCreated } from '../../actions'
 
 window.drawConfig = {
     penShape: "",
-    penColor: "#fff",
+    penColor: "#fd2c0a",
     penSize: "2",
     textSize: "14"
 }
@@ -25,6 +25,8 @@ let mouseFrom = {},
     doDrawing = false,
     textContent = "",
     textInput = null;
+
+let preMouseFrom = "";
 
 const sketchpadEngine = function (domName, callback) {
     let canvas = new window.fabric.Canvas(domName, {
@@ -44,13 +46,18 @@ const sketchpadEngine = function (domName, callback) {
     canvas.on("mouse:down", function (options) {
         // 如果为文本编辑状态，则退出
         if (textInput) {
-            if (callback) callback({
-                action: addText({mouseFrom, textContent:textInput.text})
-            })
+            if(textInput.text){
+                preMouseFrom = JSON.stringify(mouseFrom);
+                if (callback){
+                    callback({
+                        action: addText({mouseFrom:JSON.parse(preMouseFrom), textContent:textInput.text})
+                    })
+                }
+            }
             textInput.exitEditing();
             textInput = null;
         }
-        console.log(options);
+        
         let xy = transformMouse(options.pointer.x, options.pointer.y);
         mouseFrom.x = xy.x;
         mouseFrom.y = xy.y;
