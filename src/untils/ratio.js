@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-05-10 11:47:38
- * @LastEditTime: 2019-09-19 13:18:19
+ * @LastEditTime: 2019-09-27 11:32:03
  * @LastEditors: Please set LastEditors
  */
 import visualArea from './visualArea';
@@ -16,11 +16,11 @@ const ratio = (percent) => {
         height = 0,
         rate = windowWidth / windowHeight;   
     if (rate > percent) {
-        width = windowHeight * percent + 'px';
-        height = windowHeight + 'px';
+        width = windowHeight * percent;
+        height = windowHeight;
     } else {
-        width = windowWidth + 'px';
-        height = windowWidth / percent + 'px';
+        width = windowWidth;
+        height = windowWidth / percent;
     }
 
     // 手机端横屏
@@ -38,8 +38,8 @@ const ratio = (percent) => {
     // } else {}
 
     return {
-        width: width,
-        height: height
+        width:Math.floor(width),
+        height: Math.floor(height)
     }
 }
 

@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-19 17:34:25
+ * @LastEditTime: 2019-09-27 11:30:59
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -19,7 +19,7 @@ import ratio from '../../untils/ratio';
 const { width, height} = { ...ratio(16/9) };
 
 const WhiteBoard = () => (
-  <div id="whiteBoard" className="whiteBoard" style={{ width: `${width}`, height: `${height}` }}>
+  <div id="whiteBoard" className="whiteBoard" style={{ width: `${width}px`, height: `${height}px` }}>
     <Courseware />
     <Sketchpad />
     <SwitchBox />

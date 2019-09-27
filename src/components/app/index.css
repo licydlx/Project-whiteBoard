@@ -14,10 +14,16 @@ body {
     z-index: 1;
 
     /* background-image: linear-gradient(to right , #17507d, #c03f3c); */
-    background-color: #c43739;
+    background-color:#009e89;
+    background-image: url("../../res/images/splash.png");
+    background-size: 130px auto;
+    background-origin: content-box;
+    background-position: 0,0;
+
     display: flex;
     justify-content: center;
     align-content: center;
+    align-items: center;
 }
 
 .test {
@@ -46,6 +52,11 @@ body {
 /* 显示html5课件 */
 .showHtml5 {
     left: 320px;
+}
+
+.showHtml52 {
+    top: 150px;
+    left: 320px; 
 }
 
 /* 显示PDF课件 */

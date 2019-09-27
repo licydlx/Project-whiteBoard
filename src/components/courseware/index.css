@@ -19,7 +19,14 @@
 
 .pdfBox {
   /* background-image: linear-gradient(to right , #17507d, #c03f3c); */
-  background-color: #c43739;
+  display: flex;
+  justify-content: center;
+
+  background-color:#009e89;
+  background-image: url("../../res/images/splash.png");
+  background-size: 130px auto;
+  background-origin: content-box;
+  background-position: 0,0;
 }
 
 /* 默认原始封面 */

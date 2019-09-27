@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-12 13:33:26
- * @LastEditTime: 2019-09-24 15:15:30
+ * @LastEditTime: 2019-09-25 11:39:39
  * @LastEditors: Please set LastEditors
  */
 import visualArea from '../untils/visualArea'
@@ -24,7 +24,7 @@ export default {
     {
       name: "toggle",
       active: false,
-      title: "可长可短"
+      title: "工具栏"
     },
     {
       name: "board",

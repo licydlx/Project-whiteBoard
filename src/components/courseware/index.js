@@ -3,7 +3,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-08 10:03:58
- * @LastEditTime: 2019-09-24 15:13:09
+ * @LastEditTime: 2019-09-27 11:43:36
  * @LastEditors: Please set LastEditors
  */
 import React from 'react'
@@ -23,8 +23,8 @@ class Courseware extends React.Component {
       this.props.goDefaultState();
       switch (nextProps.courseware.name) {
         case "pdf":
-          this.scale = parseFloat(ratio(4/3).width)/720;
-          
+          // 消除白板与pdf容器的 计算高度1px差异
+          this.scale = (ratio(16/9).height + .5)/540;
           SignalData.broadcast = false;
           this.props.loadingSwitch({
             show: true

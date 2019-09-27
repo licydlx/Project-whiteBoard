@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-21 11:01:55
- * @LastEditTime: 2019-09-24 17:00:16
+ * @LastEditTime: 2019-09-27 12:27:19
  * @LastEditors: Please set LastEditors
  */
 import SignalData from './SignalData';
@@ -43,7 +43,7 @@ function signalMessage() {
                                 if (numberOfKeys > 0) {
                                     window.ACTIONS_database.key(0).then(keyName => {
                                         window.ACTIONS_database.getItem(keyName).then(keyValue => {
-                                            if (action.name !== keyValue.name) {
+                                            if (action.link !== keyValue.link) {
                                                 window.ACTIONS_database.clear();
                                                 window.BOARD_database.clear();
                                                 window.PAGE_database.clear();
@@ -56,6 +56,7 @@ function signalMessage() {
                                     actionDataSave(action);
                                 }
                             })
+
                             break;
                         case "default":
                             window.ACTIONS_database.clear();

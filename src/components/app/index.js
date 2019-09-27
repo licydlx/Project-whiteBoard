@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-08-07 18:29:50
- * @LastEditTime: 2019-09-24 18:48:20
+ * @LastEditTime: 2019-09-27 19:15:51
  * @LastEditors: Please set LastEditors
  */
 import React from 'react';
@@ -18,12 +18,11 @@ import signalEngine from '../../depend/agoraSingal/signalEngine';
 import SignalData from '../../depend/agoraSingal/SignalData';
 import { showToolbar, hideToolbar, showSwitchBar, childMessageBox, switchType, setTotalPage, changeBoardZindex } from '../../actions';
 import setZoom from '../../untils/setZoom';
-// eslint-disable-next-line no-unused-vars
-import isBrowser from '../../untils/isBrowser';
-
 import { clientMessageADP } from '../../untils/adapter';
 import sketchpadEngine from '../../depend/sketchpadEngine/sketchpadEngine';
-import vConsole from 'vconsole';
+
+import isBrowser from '../../untils/isBrowser';
+// import vConsole from 'vconsole';
 
 class App extends React.Component {
   constructor(props) {
@@ -32,7 +31,7 @@ class App extends React.Component {
     window.whiteBoardSignal = null;
     window.coursewareCurPage = 1;
 
-    new vConsole();
+    // new vConsole();
 
     this.sigValue = false;
     this.loading = false;
@@ -355,23 +354,23 @@ class App extends React.Component {
     // 以老师进入默认频道
     // ====================
 
-    // let ran;
-    // if (isBrowser() == "Chrome") {
-    //   ran = 0;
-    // } else {
-    //   ran = 2;
-    // }
+    let ran;
+    if (isBrowser() == "Chrome") {
+      ran = 0;
+    } else {
+      ran = 2;
+    }
 
-    // let data = {
-    //   // appId:"7344c75464964565a3515963ec9298ff",
-    //   role: ran,
-    //   uid: ran + "1",
-    //   channel: "123",
-    //   canDraw: true
-    // }
+    let data = {
+      // appId:"7344c75464964565a3515963ec9298ff",
+      role: ran,
+      uid: ran + "1",
+      channel: "123",
+      canDraw: true
+    }
 
-    // console.log(data)
-    // this.joinChannel(data);
+    console.log(data)
+    this.joinChannel(data);
 
   }
 
@@ -402,8 +401,19 @@ class App extends React.Component {
       sigType: "showCourseware",
       sigValue: {
         value: true,
-        link: "https://www.kunqu.tech/test/index.html"
+        link: "https://res.miaocode.com/livePlatform/courseware/oceanAdventure/low1.0/index.html"
         // link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+      },
+    }));
+  }
+
+  showHtml52() {
+    window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
+      sigType: "showCourseware",
+      sigValue: {
+        value: true,
+        // link: "https://res.miaocode.com/livePlatform/courseware/demo03/index.html"
+        link: "https://www.kunqu.tech/test/index.html"
       },
     }));
   }
@@ -442,26 +452,17 @@ class App extends React.Component {
     window.PAGE_database.clear();
   }
 
-  // loadingSwitch() {
-  //   this.loading = this.loading ? false : true;
-  //   window.whiteBoardSignal.channel.messageChannelSend(JSON.stringify({
-  //     type: "LOADING_SWITCH",
-  //     handleData: {
-  //       show: this.loading
-  //     },
-  //   }));
-  // }
-
   render() {
     return <div className="container">
       <WhiteBoard />
-      <div className="test showDefault" onClick={() => this.showDefault()}>默认白板</div>
-      {/* <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
-      <div className="test showPDF" onClick={() => this.showPDF()}>PDF课件</div>
-      <div className="test authorization" onClick={() => this.authorization()}>授权</div> */}
-      <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div> 
 
-      {/* <div className="test loadingSwitch" onClick={() => this.loadingSwitch()}>loading切换</div> */}
+      <div className="test showDefault" onClick={() => this.showDefault()}>默认白板</div>
+      <div className="test showHtml5" onClick={() => this.showHtml5()}>HTML5课件</div>
+      <div className="test showHtml52" onClick={() => this.showHtml52()}>HTML52课件</div>
+      <div className="test showPDF" onClick={() => this.showPDF()}>PDF课件</div>
+      <div className="test authorization" onClick={() => this.authorization()}>授权</div>
+      <div className="test clearCache" onClick={() => this.clearCache()}>清空缓存</div> 
+      
     </div>
   }
 }
